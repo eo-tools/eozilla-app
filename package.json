@@ -1,0 +1,50 @@
+{
+  "name": "eozilla",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "test": "vitest",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit",
+    "format": "prettier -w src",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "dev-server": "pixi run --manifest-path ../eozilla/pyproject.toml wraptile run -- wraptile.services.local.testing:service"
+  },
+  "dependencies": {
+    "@mantine/core": "^9.2.1",
+    "@mantine/hooks": "^9.2.1",
+    "@mantine/notifications": "^9.2.2",
+    "@tabler/icons-react": "^3.44.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-markdown": "^10.1.0",
+    "react-resizable-panels": "^4.11.2",
+    "swr": "^2.4.1",
+    "zustand": "^5.0.13"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react-swc": "^4.2.2",
+    "@vitest/browser-playwright": "^4.0.18",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "postcss": "^8.5.6",
+    "postcss-preset-mantine": "^1.18.0",
+    "postcss-simple-vars": "^7.0.1",
+    "prettier": "3.8.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "^7.2.4",
+    "vitest": "^4.0.17"
+  }
+}

@@ -1,0 +1,42 @@
+:root {
+  --panel-surface: var(--mantine-color-gray-1);
+  --panel-border: var(--mantine-color-gray-3);
+  --panel-divider: var(--mantine-color-gray-3);
+  --panel-header: var(--mantine-color-gray-2);
+}
+
+[data-mantine-color-scheme="dark"] {
+  --panel-surface: var(--mantine-color-dark-8);
+  --panel-border: var(--mantine-color-dark-6);
+  --panel-divider: var(--mantine-color-dark-7);
+  --panel-header: var(--mantine-color-dark-9);
+}
+
+.mantine-AppShell-main {
+  /* subtract header height */
+  height: calc(100vh - var(--app-shell-header-height, 40px));
+  background: var(--mantine-color-body);
+}
+
+[data-separator] {
+  min-width: 5px !important;
+  min-height: 5px !important;
+  transition: background-color 150ms ease;
+  background-color: transparent;
+  box-shadow: none !important;
+  opacity: 0.1;
+}
+
+[data-separator]:hover,
+[data-separator][data-active] {
+  opacity: 1;
+  background-color: var(--mantine-color-blue-filled);
+}
+
+.horizontal-group > [data-separator] {
+  cursor: col-resize;
+}
+
+.vertical-group > [data-separator] {
+  cursor: row-resize;
+}
