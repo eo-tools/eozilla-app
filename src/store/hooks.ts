@@ -3,7 +3,12 @@ import useSWR from "swr";
 
 import { swrKeys } from "@/service/swr";
 import { getAppState, getAppStore } from "@/store/store";
-import type { AppState, DialogId, ProcessInputs } from "@/state/types";
+import type {
+  AppState,
+  DialogId,
+  ProcessInputs,
+  ProcessOutputs,
+} from "@/state/types";
 import {
   getServiceProvider,
   getServiceProviders,
@@ -24,6 +29,7 @@ const selectServiceProviderId = (state: AppState) => state.serviceProviderId;
 const selectService = (state: AppState) => state.service;
 const selectProcessId = (state: AppState) => state.processId;
 const selectProcessesInputs = (state: AppState) => state.processesInputs;
+const selectProcessesOutputs = (state: AppState) => state.processesOutputs;
 const selectProcessExecution = (state: AppState) => state.processExecution;
 const selectJobId = (state: AppState) => state.jobId;
 const selectConfirmation = (state: AppState) => state.confirmation;
@@ -113,6 +119,23 @@ export function useActiveProcessInputs(): ProcessInputs | null {
     }
     return getInitialProcessInputs(processDescription);
   }, [processesInputs, processDescription]);
+}
+
+export function useActiveProcessOutputs(): ProcessOutputs | null {
+  const activeProcessState = useActiveProcessDescription();
+  const processesOutputs = useAppState(selectProcessesOutputs);
+  const processDescription = activeProcessState.processDescription;
+  return useMemo(() => {
+    if (!processDescription) {
+      return null;
+    }
+    const processId = processDescription.id;
+    const processOutputs = processesOutputs[processId];
+    if (processOutputs) {
+      return processOutputs;
+    }
+    return {};
+  }, [processesOutputs, processDescription]);
 }
 
 export function useActiveJobId() {

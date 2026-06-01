@@ -10,6 +10,7 @@ import {
   getServiceProvider,
   type ServiceOptions,
   type ServiceOptionsInput,
+  type Output,
   type ProcessDescription,
   type Service,
 } from "@/service";
@@ -132,11 +133,17 @@ export function activateProcess(processId: Optional<string>) {
 }
 
 export function executeActiveProcess() {
-  const { service, processId, processesInputs } = getAppState();
+  const { service, processId, processesInputs, processesOutputs } =
+    getAppState();
   if (!service || !processId || !processesInputs[processId]) {
     return;
   }
-  const processRequest = { inputs: processesInputs[processId] };
+  const processOutputs = processesOutputs[processId] || {};
+  const processRequest = {
+    inputs: processesInputs[processId],
+    outputs:
+      Object.keys(processOutputs).length > 0 ? processOutputs : undefined,
+  };
   const processExecution = { processId, processRequest, submitting: true };
   setAppState({ processExecution });
   service
@@ -198,6 +205,43 @@ export function setProcessInputs(
     processesInputs: {
       ...processesInputs,
       [processId]: processInputs,
+    },
+  });
+}
+
+export function setActiveProcessOutput(
+  outputName: string,
+  output?: Output,
+) {
+  const state = getAppState();
+  const activeProcessId = state.processId;
+  if (!activeProcessId) {
+    return;
+  }
+  const processOutputs = state.processesOutputs[activeProcessId] || {};
+  if (output) {
+    setProcessOutputs(activeProcessId, {
+      ...processOutputs,
+      [outputName]: output,
+    });
+    return;
+  }
+
+  const nextProcessOutputs = { ...processOutputs };
+  delete nextProcessOutputs[outputName];
+  setProcessOutputs(activeProcessId, nextProcessOutputs);
+}
+
+export function setProcessOutputs(
+  processId: string,
+  processOutputs: Record<string, Output>,
+) {
+  const state = getAppState();
+  const processesOutputs = state.processesOutputs;
+  setAppState({
+    processesOutputs: {
+      ...processesOutputs,
+      [processId]: processOutputs,
     },
   });
 }

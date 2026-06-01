@@ -1,7 +1,7 @@
 # Features
 
 - [ ] Add real UI-generator from schemas.
-- [ ] Add OUTPUTS section to `ProcessPanel`.
+- [x] Add OUTPUTS section to `ProcessPanel`.
 - [ ] Validate incoming data, see TODOs in `src/service/services/url.ts`.
   Currently, we use JSON-inputs for any schema.
 - [ ] Show notification on job termination (success, failed, dismissed)

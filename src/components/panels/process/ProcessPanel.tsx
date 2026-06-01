@@ -3,6 +3,7 @@ import { IconMathFunction, IconPlayerPlayFilled } from "@tabler/icons-react";
 
 import {
   useActiveProcessInputs,
+  useActiveProcessOutputs,
   useActiveProcessDescription,
   useProcessExecution,
   useActiveProcessId,
@@ -12,13 +13,19 @@ import { Panel } from "@/components/common/Panel";
 import { ResourceView } from "@/components/common/ResourceView";
 import ProcessDescriptionView from "@/components/panels/process/ProcessDescriptionView";
 import ProcessInputsView from "@/components/panels/process/ProcessInputsView";
-import { executeActiveProcess, setActiveProcessInput } from "@/store/actions";
+import ProcessOutputsView from "@/components/panels/process/ProcessOutputsView";
+import {
+  executeActiveProcess,
+  setActiveProcessInput,
+  setActiveProcessOutput,
+} from "@/store/actions";
 import styles from "@/components/common/styles";
 
 export default function ProcessPanel() {
   const processesState = useActiveProcessDescription();
   const { processDescription } = processesState;
   const activeProcessInputs = useActiveProcessInputs();
+  const activeProcessOutputs = useActiveProcessOutputs();
   const processId = useActiveProcessId();
   const processExecution = useProcessExecution();
   const isSubmitting =
@@ -63,6 +70,14 @@ export default function ProcessPanel() {
                 processDescription={processDescription}
                 processInputs={activeProcessInputs || {}}
                 setProcessInput={setActiveProcessInput}
+              />
+              <Text fw={600} size={"sm"}>
+                OUTPUTS
+              </Text>
+              <ProcessOutputsView
+                processDescription={processDescription}
+                processOutputs={activeProcessOutputs || {}}
+                setProcessOutput={setActiveProcessOutput}
               />
             </Stack>
           )}
