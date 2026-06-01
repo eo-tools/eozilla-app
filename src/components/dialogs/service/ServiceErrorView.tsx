@@ -14,14 +14,17 @@ export function ServiceErrorView({
   onChooseAnother,
 }: ServiceErrorViewProps) {
   return (
-    <Stack gap="xs">
-      <Text fw={600}>
-        {providerTitle
-          ? `Failed to sign in with ${providerTitle}`
-          : "Failed to sign in"}
-      </Text>
-      <Text c="red">{message}</Text>
-      <Group>
+    <Stack h="100%" justify="space-between" gap="md">
+      <Stack gap="xs">
+        <Text fw={600}>
+          {providerTitle
+            ? `Failed to sign in with ${providerTitle}`
+            : "Failed to sign in"}
+        </Text>
+        <Text c="red">{message}</Text>
+      </Stack>
+
+      <Group justify="flex-end">
         <Button onClick={onBack}>Back</Button>
         <Button onClick={onChooseAnother} variant="default">
           Choose another service
