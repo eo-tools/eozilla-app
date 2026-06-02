@@ -7,7 +7,10 @@
 - [ ] Validate incoming data, see TODOs in `src/service/services/url.ts`.
   Currently, we use JSON-inputs for any schema.
 - [ ] Implement OAuth flows for the service provider auth types != `"none"`.
-- [ ] Show notification on job termination (success, failed, dismissed)
+- [ ] Show notification on job termination (success, failed, dismissed).
+- [ ] Import/export process requests JSON files.
+- [ ] Copy process request to clipboard. 
+- [ ] Edit current process request as JSON code.
 - [x] Make use of the Mantine `Stepper` component to represent the subsequent 
   steps in our `ServiceDialog`. 
   - [x] Set the `loading` state while creating the service.
