@@ -11,16 +11,16 @@ A simple frontend for web services compliant with the
 - src/
   |- components/   # React components
   |- service/      # OGC API - Processes
-  |- state/        # State types + storage
+  |- state/        # State types and local storage
   |- store/        # Zustand state store (store, actions, hooks)  
   |- utils/        # General utilites
-  \- main.tsx/     # Entry point modules
+  \- main.tsx      # Entry point module
 ```
 
 
 ## Development
 
-Setup Eozilla for the wraptile dev server:
+Setup eozilla so we can use wraptile as dev server:
 
 ```bash
 cd projects
@@ -30,7 +30,7 @@ pixi install
 cd ..
 ```
 
-Run Eozilla App:
+Setup eozilla-app:
 
 ```bash
 cd projects
@@ -39,7 +39,7 @@ cd eozilla-app
 npm install
 ```
 
-Run the app with dev server enabled:
+Run eozilla-app with dev server (select option "Dev Service" on startup):
 
 ```bash
 npm run dev-server
