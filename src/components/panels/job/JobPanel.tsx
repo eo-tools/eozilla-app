@@ -23,7 +23,7 @@ import JobInfoView from "./JobInfoView";
 import JobResultsView from "./JobResultsView";
 
 export default function JobPanel() {
-  const [accordionValues, setAccordionValues] = useState(["results", "info"]);
+  const [openedSubPanels, setOpenedSubPanels] = useState(["results", "info"]);
   const activeJobId = useActiveJobId();
   const activeJobInfoState = useActiveJobInfo();
   const activeJobResultsState = useActiveJobResults();
@@ -38,8 +38,8 @@ export default function JobPanel() {
       />
       <Panel.Section grow scroll>
         <SubPanel
-          values={accordionValues}
-          setValues={setAccordionValues}
+          values={openedSubPanels}
+          setValues={setOpenedSubPanels}
           containerProps={containerProps}
         >
           <SubPanel.Item

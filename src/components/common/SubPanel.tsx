@@ -27,6 +27,7 @@ export const SubPanel = ({
         label: { padding: "4px 0 4px 0" },
         content: { padding: "4px 0 8px 0" },
         chevron: { margin: "0 8px 0 0" },
+        item: { border: "none", margin: "0 0 8px 0" },
       }}
       value={values}
       onChange={(v) => void setValues(v)}
