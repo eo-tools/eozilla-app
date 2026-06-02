@@ -5,11 +5,13 @@ import {
   type DialogId,
   createInitialAppState,
   type ProcessInputs,
+  type ProcessOutputs,
 } from "@/state/types";
 import {
   getServiceProvider,
   type ServiceOptions,
   type ServiceOptionsInput,
+  type Output,
   type ProcessDescription,
   type Service,
 } from "@/service";
@@ -132,11 +134,17 @@ export function activateProcess(processId: Optional<string>) {
 }
 
 export function executeActiveProcess() {
-  const { service, processId, processesInputs } = getAppState();
+  const { service, processId, processesInputs, processesOutputs } =
+    getAppState();
   if (!service || !processId || !processesInputs[processId]) {
     return;
   }
-  const processRequest = { inputs: processesInputs[processId] };
+  const processOutputs = processesOutputs[processId] || {};
+  const processRequest = {
+    inputs: processesInputs[processId],
+    outputs:
+      Object.keys(processOutputs).length > 0 ? processOutputs : undefined,
+  };
   const processExecution = { processId, processRequest, submitting: true };
   setAppState({ processExecution });
   service
@@ -202,6 +210,40 @@ export function setProcessInputs(
   });
 }
 
+export function setActiveProcessOutput(
+  outputName: string,
+  output?: Output,
+) {
+  const state = getAppState();
+  const activeProcessId = state.processId;
+  if (!activeProcessId) {
+    return;
+  }
+  const processOutputs = state.processesOutputs[activeProcessId] || {};
+  if (output) {
+    setProcessOutputs(activeProcessId, {
+      ...processOutputs,
+      [outputName]: output,
+    });
+    return;
+  }
+
+  const nextProcessOutputs = { ...processOutputs };
+  delete nextProcessOutputs[outputName];
+  setProcessOutputs(activeProcessId, nextProcessOutputs);
+}
+
+export function setProcessOutputs(processId: string, processOutputs: ProcessOutputs) {
+  const state = getAppState();
+  const processesOutputs = state.processesOutputs;
+  setAppState({
+    processesOutputs: {
+      ...processesOutputs,
+      [processId]: processOutputs,
+    },
+  });
+}
+
 export function setInitialProcessInputs(
   processDescription: ProcessDescription,
 ) {
@@ -210,6 +252,19 @@ export function setInitialProcessInputs(
     getSchemaFromProcessDescriptionInputs(processDescription);
   const processInputs = createJsonValueForSchema(objectSchema) as ProcessInputs;
   setProcessInputs(processId, processInputs);
+}
+
+export function setInitialProcessOutputs(
+  processDescription: ProcessDescription,
+) {
+  const processId = processDescription.id;
+  const processOutputs: ProcessOutputs = {};
+  Object.keys(processDescription.outputs || {}).forEach((outputName) => {
+    processOutputs[outputName] = {
+      transmissionMode: processDescription?.outputTransmission?.length ? processDescription?.outputTransmission[0] : undefined,
+    }
+  })
+  setProcessOutputs(processId, processOutputs);
 }
 
 ////////////////////////////////////////

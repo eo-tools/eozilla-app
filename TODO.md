@@ -5,6 +5,8 @@
 - [ ] Equip the JOBS and PROCESSES panels with search, sort, and filter features.
 - [ ] Make the app GDPR compliant.
 - [ ] Implement OAuth flows for the service provider auth types != `"none"`.
+- [ ] Show notification on job termination (success, failed, dismissed)
+- [x] Add OUTPUTS section to `ProcessPanel`.
 - [ ] Show notification on job termination (success, failed, dismissed).
 - [ ] Import/export process requests JSON files.
 - [ ] Copy process request to clipboard. 

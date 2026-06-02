@@ -1,5 +1,6 @@
 import {
   isServiceProviderId,
+  type Output,
   type JobInfo,
   type ProcessRequest,
   type Service,
@@ -26,6 +27,8 @@ export interface InformationData {
 
 export type ProcessInputs = Record<string, JsonValue>;
 export type ProcessesInputs = Record<string, ProcessInputs>;
+export type ProcessOutputs = Record<string, Output>;
+export type ProcessesOutputs = Record<string, ProcessOutputs>;
 
 export interface ProcessExecution {
   processId: string;
@@ -47,6 +50,7 @@ export interface AppState {
   confirmation?: ConfirmationData;
   information?: InformationData;
   processesInputs: ProcessesInputs;
+  processesOutputs: ProcessesOutputs;
   processExecution?: ProcessExecution;
 }
 
@@ -61,6 +65,7 @@ export function createInitialAppState(): AppState {
     service: null,
     dialogId: !serviceProviderId ? "service" : null,
     processesInputs: {},
+    processesOutputs: {},
     processId: undefined,
     jobId: undefined,
   };
