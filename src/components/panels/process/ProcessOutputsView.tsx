@@ -41,7 +41,7 @@ export default function ProcessOutputsView({
         {outputNames.map((outputName) => {
           const outputDescription = processDescription.outputs[outputName]!;
           const output = processOutputs[outputName];
-          const isEnabled = Boolean(output);
+          const isRequested = Boolean(output);
           const requestedTransmissionMode =
             output?.transmissionMode || defaultTransmissionMode;
 
@@ -56,8 +56,8 @@ export default function ProcessOutputsView({
               <Table.Td>
                 <Stack gap="xs">
                   <Switch
-                    checked={isEnabled}
-                    label="Request output"
+                    checked={isRequested}
+                    label="Requested"
                     onChange={(event) => {
                       if (!event.currentTarget.checked) {
                         setProcessOutput(outputName, undefined);
@@ -72,7 +72,7 @@ export default function ProcessOutputsView({
                     }}
                   />
 
-                  {isEnabled ? (
+                  {isRequested ? (
                     hasTransmissionModeSelection ? (
                       <Select
                         label="Transmission mode"

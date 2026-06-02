@@ -63,16 +63,16 @@ export default function ProcessPanel() {
           {(processDescription: ProcessDescription) => (
             <Stack>
               <ProcessDescriptionView processDescription={processDescription} />
-              <Text fw={600} size={"sm"}>
-                INPUTS
+              <Text fw={600} tt={"capitalize"} size={"sm"}>
+                Inputs
               </Text>
               <ProcessInputsView
                 processDescription={processDescription}
                 processInputs={activeProcessInputs || {}}
                 setProcessInput={setActiveProcessInput}
               />
-              <Text fw={600} size={"sm"}>
-                OUTPUTS
+              <Text fw={600} tt={"capitalize"} size={"sm"}>
+                Outputs
               </Text>
               <ProcessOutputsView
                 processDescription={processDescription}

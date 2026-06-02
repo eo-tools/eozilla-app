@@ -5,6 +5,7 @@ import {
   type DialogId,
   createInitialAppState,
   type ProcessInputs,
+  type ProcessOutputs,
 } from "@/state/types";
 import {
   getServiceProvider,
@@ -232,10 +233,7 @@ export function setActiveProcessOutput(
   setProcessOutputs(activeProcessId, nextProcessOutputs);
 }
 
-export function setProcessOutputs(
-  processId: string,
-  processOutputs: Record<string, Output>,
-) {
+export function setProcessOutputs(processId: string, processOutputs: ProcessOutputs) {
   const state = getAppState();
   const processesOutputs = state.processesOutputs;
   setAppState({
@@ -254,6 +252,19 @@ export function setInitialProcessInputs(
     getSchemaFromProcessDescriptionInputs(processDescription);
   const processInputs = createJsonValueForSchema(objectSchema) as ProcessInputs;
   setProcessInputs(processId, processInputs);
+}
+
+export function setInitialProcessOutputs(
+  processDescription: ProcessDescription,
+) {
+  const processId = processDescription.id;
+  const processOutputs: ProcessOutputs = {};
+  Object.keys(processDescription.outputs || {}).forEach((outputName) => {
+    processOutputs[outputName] = {
+      transmissionMode: processDescription?.outputTransmission?.length ? processDescription?.outputTransmission[0] : undefined,
+    }
+  })
+  setProcessOutputs(processId, processOutputs);
 }
 
 ////////////////////////////////////////

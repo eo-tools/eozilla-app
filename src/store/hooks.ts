@@ -21,6 +21,7 @@ import {
   activateProcess,
   openDialog,
   setInitialProcessInputs,
+  setInitialProcessOutputs,
   setService,
 } from "@/store/actions";
 import { storage } from "@/state/storage";
@@ -142,10 +143,12 @@ export function useActiveJobId() {
   return useAppState(selectJobId);
 }
 
+// do not delete, we need it later
 export function useConfirmation() {
   return useAppState(selectConfirmation);
 }
 
+// do not delete, we need it later
 export function useInformation() {
   return useAppState(selectInformation);
 }
@@ -180,6 +183,7 @@ export function useActiveProcessDescription() {
   useEffect(() => {
     if (processDescription) {
       setInitialProcessInputs(processDescription);
+      setInitialProcessOutputs(processDescription);
     }
   }, [processDescription]);
   return {

@@ -4,11 +4,11 @@
 - [ ] Add OUTPUTS section to `ProcessPanel`.
 - [ ] Equip the JOBS and PROCESSES panels with search, sort, and filter features.
 - [ ] Make the app GDPR compliant.
-- [x] Add OUTPUTS section to `ProcessPanel`.
 - [ ] Validate incoming data, see TODOs in `src/service/services/url.ts`.
   Currently, we use JSON-inputs for any schema.
 - [ ] Implement OAuth flows for the service provider auth types != `"none"`.
 - [ ] Show notification on job termination (success, failed, dismissed)
+- [x] Add OUTPUTS section to `ProcessPanel`.
 - [x] Make use of the Mantine `Stepper` component to represent the subsequent 
   steps in our `ServiceDialog`. 
   - [x] Set the `loading` state while creating the service.
