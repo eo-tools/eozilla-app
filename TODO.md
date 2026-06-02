@@ -4,8 +4,6 @@
 - [ ] Add OUTPUTS section to `ProcessPanel`.
 - [ ] Equip the JOBS and PROCESSES panels with search, sort, and filter features.
 - [ ] Make the app GDPR compliant.
-- [ ] Validate incoming data, see TODOs in `src/service/services/url.ts`.
-  Currently, we use JSON-inputs for any schema.
 - [ ] Implement OAuth flows for the service provider auth types != `"none"`.
 - [ ] Show notification on job termination (success, failed, dismissed).
 - [ ] Import/export process requests JSON files.
@@ -31,8 +29,12 @@
   Currently, we can only register optionless, inbuilt providers.
 
 
-# Styling
+# UX, Layout, and Style
 
+- [ ] "Results" and "Info" in the `JobsPanel` as well as "Inputs" and "Outputs"
+  in the `ProcessPanel` should use a new common `SubPanel` component that uses
+  Mantine's `Collapse` component. No longer use `Accordion` in `JobsPanel`
+  for this purpose. SubPanel opened states should be part of the app state.
 - [x] Combine panels "Job Results" and "Job Info" into one "Job" panel
   That displays job info and job results (one available). Maybe use 
   `Accordion` component.
@@ -40,8 +42,19 @@
   rounded panels with darker (dark mode) or lighter (light mode) background.
 
 
-# Design
+# Architecture & Design
 
+- [ ] Split components into three categories
+  1. primary: connected to app state via hooks and actions
+  2. secondary: used by primary, but configured by props only
+  3. common: used by any other components, configured by props only
 - [x] Move `actions.ts`, `hooks.ts`, `store.ts` from `state` into `store`.
   Module `store.ts` should depend on `state.ts` but not the other way round.
-  
+
+
+# Robustness, Maturity
+
+- [ ] Validate incoming data, see TODOs in `src/service/services/url.ts`.
+  Currently, we use JSON-inputs for any schema.
+
+
