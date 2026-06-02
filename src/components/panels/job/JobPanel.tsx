@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Accordion, ActionIcon, Flex, Text } from "@mantine/core";
-import { IconCopy, IconStackPush } from "@tabler/icons-react";
+import { IconCopy, IconRun } from "@tabler/icons-react";
 
 import {
   useActiveJobId,
@@ -33,7 +33,7 @@ export default function JobPanel() {
         title="Job"
         id={activeJobId}
         idStyle={"id3"}
-        icon={<IconStackPush {...styles.panel.header.icon} />}
+        icon={<IconRun {...styles.panel.header.icon} />}
       />
       <Panel.Section grow scroll>
         <Accordion
@@ -41,8 +41,9 @@ export default function JobPanel() {
           chevronPosition="left"
           order={4}
           styles={{
-            label: { paddingTop: 4, paddingBottom: 4 },
+            label: { padding: "4px 0 4px 0" },
             content: { padding: "4px 0 8px 0" },
+            chevron: { margin: "0 8px 0 0" },
           }}
           value={accordionValues}
           onChange={setAccordionValues}
@@ -51,7 +52,7 @@ export default function JobPanel() {
           <Accordion.Item value="results">
             <Accordion.Control>
               <Flex justify={"space-between"} align={"flex-start"}>
-                <Text tt="capitalize">Results</Text>
+                <Text {...styles.text.title2}>Results</Text>
                 <ActionIcon
                   {...styles.actionIcon.sm}
                   style={revealStyle}
@@ -82,7 +83,7 @@ export default function JobPanel() {
           <Accordion.Item value="info">
             <Accordion.Control>
               <Flex justify={"space-between"} align={"flex-start"}>
-                <Text tt="capitalize">Info</Text>
+                <Text {...styles.text.title2}>Info</Text>
                 <ActionIcon
                   {...styles.actionIcon.sm}
                   style={revealStyle}

@@ -47,7 +47,7 @@ export function PanelHeader({
           {icon}
           <Stack gap={0}>
             <Group gap="sm">
-              {styleText(title, styles.panel.header.title)}
+              {styleText(title, styles.text.title1)}
               {styleText(id, styles.text[idStyle || "id1"])}
             </Group>
           </Stack>
