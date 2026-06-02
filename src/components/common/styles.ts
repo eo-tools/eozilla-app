@@ -17,9 +17,6 @@ interface PanelHeaderStyles {
   readonly py: StyleProp<MantineSpacing>;
   readonly style: CSSProperties;
   readonly icon: IconProps;
-  readonly title: TextProps;
-  readonly id: TextProps;
-  readonly description: TextProps;
 }
 
 interface PanelSectionStyles {
@@ -54,6 +51,8 @@ interface TextStyles {
   id3: TextProps;
   unavailable: TextProps;
   error: TextProps;
+  title1: TextProps;
+  title2: TextProps;
 }
 
 interface ActionIconStyles {
@@ -85,8 +84,12 @@ const iconStyle: IconProps = {
   stroke: 1,
 };
 
-const idStyle: TextProps = {
+const idTextStyle: TextProps = {
   ff: "monospace",
+};
+
+const titleTextStyle: TextProps = {
+  tt: "uppercase",
 };
 
 const styles: Styles = {
@@ -113,10 +116,7 @@ const styles: Styles = {
         borderBottom: "1px solid var(--panel-divider)",
         backgroundColor: "var(--panel-header)",
       },
-      icon: { size: 24, stroke: 1.5 },
-      title: { size: "md", fw: 600, tt: "uppercase" },
-      id: { ...idStyle, size: "md", fw: 400, c: "green" },
-      description: { size: "sm", fw: 200 },
+      icon: { ...iconStyle, size: 24 },
     },
     section: {
       px: 0,
@@ -133,11 +133,13 @@ const styles: Styles = {
     },
   },
   text: {
-    id1: { ...idStyle, c: "green" },
-    id2: { ...idStyle, c: "blue" },
-    id3: { ...idStyle, c: "yellow" },
+    id1: { ...idTextStyle, c: "green" },
+    id2: { ...idTextStyle, c: "blue" },
+    id3: { ...idTextStyle, c: "yellow" },
     unavailable: { fs: "italic", c: "dimmed" },
     error: {},
+    title1: { ...titleTextStyle, fw: 600, size: "md" },
+    title2: { ...titleTextStyle, fw: 500, size: "sm" },
   },
   icon: {
     sm: { ...iconStyle, size: 16 },

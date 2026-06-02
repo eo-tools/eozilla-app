@@ -37,14 +37,13 @@ export default function Main() {
           style={{ width: "100%", height: "100%" }}
           className="vertical-group"
         >
-          <RPanel id="job" defaultSize="50%" minSize="10%" collapsible>
-            <JobPanel />
-          </RPanel>
-          <RSeparator />
-          <RPanel id="job-list" minSize="10%" collapsible>
+          <RPanel id="job-list" defaultSize="30%" minSize="10%" collapsible>
             <JobListPanel />
           </RPanel>
           <RSeparator />
+          <RPanel id="job" minSize="10%" collapsible>
+            <JobPanel />
+          </RPanel>
         </RGroup>
       </RPanel>
     </RGroup>

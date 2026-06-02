@@ -1,4 +1,4 @@
-import { ActionIcon, Stack, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Stack, Tooltip } from "@mantine/core";
 import { IconMathFunction, IconPlayerPlayFilled } from "@tabler/icons-react";
 
 import {
@@ -20,6 +20,8 @@ import {
   setActiveProcessOutput,
 } from "@/store/actions";
 import styles from "@/components/common/styles";
+import { SubPanel } from "@/components/common/SubPanel";
+import { useState } from "react";
 
 export default function ProcessPanel() {
   const processesState = useActiveProcessDescription();
@@ -28,6 +30,7 @@ export default function ProcessPanel() {
   const activeProcessOutputs = useActiveProcessOutputs();
   const processId = useActiveProcessId();
   const processExecution = useProcessExecution();
+  const [openedSubPanels, setOpenedSubPanels] = useState(["inputs", "outputs"]);
   const isSubmitting =
     processExecution &&
     processExecution.processId === processId &&
@@ -63,22 +66,22 @@ export default function ProcessPanel() {
           {(processDescription: ProcessDescription) => (
             <Stack>
               <ProcessDescriptionView processDescription={processDescription} />
-              <Text fw={600} tt={"capitalize"} size={"sm"}>
-                Inputs
-              </Text>
-              <ProcessInputsView
-                processDescription={processDescription}
-                processInputs={activeProcessInputs || {}}
-                setProcessInput={setActiveProcessInput}
-              />
-              <Text fw={600} tt={"capitalize"} size={"sm"}>
-                Outputs
-              </Text>
-              <ProcessOutputsView
-                processDescription={processDescription}
-                processOutputs={activeProcessOutputs || {}}
-                setProcessOutput={setActiveProcessOutput}
-              />
+              <SubPanel values={openedSubPanels} setValues={setOpenedSubPanels}>
+                <SubPanel.Item value={"inputs"} title={"Inputs"}>
+                  <ProcessInputsView
+                    processDescription={processDescription}
+                    processInputs={activeProcessInputs || {}}
+                    setProcessInput={setActiveProcessInput}
+                  />
+                </SubPanel.Item>
+                <SubPanel.Item value={"outputs"} title={"Outputs"}>
+                  <ProcessOutputsView
+                    processDescription={processDescription}
+                    processOutputs={activeProcessOutputs || {}}
+                    setProcessOutput={setActiveProcessOutput}
+                  />
+                </SubPanel.Item>
+              </SubPanel>
             </Stack>
           )}
         </ResourceView>
