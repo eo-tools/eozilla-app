@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Accordion, ActionIcon, Flex, Text } from "@mantine/core";
+import { ActionIcon } from "@mantine/core";
 import { IconCopy, IconStackPush } from "@tabler/icons-react";
 
 import {
@@ -20,9 +20,11 @@ import { Panel } from "@/components/common/Panel";
 
 import JobInfoView from "./JobInfoView";
 import JobResultsView from "./JobResultsView";
+import { SubPanel } from "@/components/common/SubPanel";
 
 export default function JobPanel() {
-  const [accordionValues, setAccordionValues] = useState(["results", "info"]);
+  const [resultsOpened, setResultsOpened] = useState(true);
+  const [infoOpened, setInfoOpened] = useState(true);
   const activeJobId = useActiveJobId();
   const activeJobInfoState = useActiveJobInfo();
   const activeJobResultsState = useActiveJobResults();
@@ -36,80 +38,68 @@ export default function JobPanel() {
         icon={<IconStackPush {...styles.panel.header.icon} />}
       />
       <Panel.Section grow scroll>
-        <Accordion
-          multiple
-          chevronPosition="left"
-          order={4}
-          styles={{
-            label: { paddingTop: 4, paddingBottom: 4 },
-            content: { padding: "4px 0 8px 0" },
-          }}
-          value={accordionValues}
-          onChange={setAccordionValues}
-          {...containerProps}
+        <SubPanel
+          title={"Results"}
+          opened={resultsOpened}
+          onChange={setResultsOpened}
+          actions={
+            <ActionIcon
+              {...styles.actionIcon.sm}
+              style={revealStyle}
+              disabled={!activeJobResultsState.jobResults}
+              onClick={() => {
+                copyJsonToClipboard(activeJobResultsState.jobResults);
+              }}
+            >
+              <IconCopy {...styles.icon.sm} />
+            </ActionIcon>
+          }
+          containerProps={containerProps}
         >
-          <Accordion.Item value="results">
-            <Accordion.Control>
-              <Flex justify={"space-between"} align={"flex-start"}>
-                <Text tt="capitalize">Results</Text>
-                <ActionIcon
-                  {...styles.actionIcon.sm}
-                  style={revealStyle}
-                  disabled={!activeJobResultsState.jobResults}
-                  onClick={() => {
-                    copyJsonToClipboard(activeJobResultsState.jobResults);
-                  }}
-                >
-                  <IconCopy {...styles.icon.sm} />
-                </ActionIcon>
-              </Flex>
-            </Accordion.Control>
-            <Accordion.Panel keepMounted={false}>
-              <ResourceView
-                {...activeJobResultsState}
-                nullText="No successful job selected."
-              >
-                {(jobResults: JobResults) => (
-                  <JobResultsView
-                    jobResults={jobResults}
-                    copyJsonToClipboard={copyJsonToClipboard}
-                    openDialog={openDialog}
-                  />
-                )}
-              </ResourceView>
-            </Accordion.Panel>
-          </Accordion.Item>
-          <Accordion.Item value="info">
-            <Accordion.Control>
-              <Flex justify={"space-between"} align={"flex-start"}>
-                <Text tt="capitalize">Info</Text>
-                <ActionIcon
-                  {...styles.actionIcon.sm}
-                  style={revealStyle}
-                  disabled={!activeJobInfoState.jobInfo}
-                  onClick={() => {
-                    copyJsonToClipboard(activeJobInfoState.jobInfo);
-                  }}
-                >
-                  <IconCopy {...styles.icon.sm} />
-                </ActionIcon>
-              </Flex>
-            </Accordion.Control>
-            <Accordion.Panel keepMounted={false}>
-              <ResourceView {...activeJobInfoState} nullText="No job selected.">
-                {(jobInfo: JobInfo) => (
-                  <JobInfoView
-                    jobInfo={jobInfo}
-                    copyTraceback={copyTextToClipboard}
-                    viewTraceback={(traceback) =>
-                      void openDialog("traceback", traceback)
-                    }
-                  />
-                )}
-              </ResourceView>
-            </Accordion.Panel>
-          </Accordion.Item>
-        </Accordion>
+          <ResourceView
+            {...activeJobResultsState}
+            nullText="No successful job selected."
+          >
+            {(jobResults: JobResults) => (
+              <JobResultsView
+                jobResults={jobResults}
+                copyJsonToClipboard={copyJsonToClipboard}
+                openDialog={openDialog}
+              />
+            )}
+          </ResourceView>
+        </SubPanel>
+
+        <SubPanel
+          title={"Info"}
+          opened={infoOpened}
+          onChange={setInfoOpened}
+          actions={
+            <ActionIcon
+              {...styles.actionIcon.sm}
+              style={revealStyle}
+              disabled={!activeJobInfoState.jobInfo}
+              onClick={() => {
+                copyJsonToClipboard(activeJobInfoState.jobInfo);
+              }}
+            >
+              <IconCopy {...styles.icon.sm} />
+            </ActionIcon>
+          }
+          containerProps={containerProps}
+        >
+          <ResourceView {...activeJobInfoState} nullText="No job selected.">
+            {(jobInfo: JobInfo) => (
+              <JobInfoView
+                jobInfo={jobInfo}
+                copyTraceback={copyTextToClipboard}
+                viewTraceback={(traceback) =>
+                  void openDialog("traceback", traceback)
+                }
+              />
+            )}
+          </ResourceView>
+        </SubPanel>
       </Panel.Section>
     </Panel>
   );

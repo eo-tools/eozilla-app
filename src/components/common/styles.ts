@@ -36,6 +36,15 @@ interface PanelStyles {
   readonly style: CSSProperties;
 }
 
+interface SubPanelStyles {
+  readonly px: StyleProp<MantineSpacing>;
+  readonly py: StyleProp<MantineSpacing>;
+  readonly gap: MantineSpacing;
+  //readonly header: PanelHeaderStyles;
+  //readonly content: PanelSectionStyles;
+  readonly style: CSSProperties;
+}
+
 interface ListItemStyles {
   readonly px: StyleProp<MantineSpacing>;
   readonly py: StyleProp<MantineSpacing>;
@@ -71,6 +80,7 @@ interface IconStyles {
 export interface Styles {
   readonly shell: ShellStyles;
   readonly panel: PanelStyles;
+  readonly subPanel: SubPanelStyles;
   readonly list: ListStyles;
   readonly text: TextStyles;
   readonly icon: IconStyles;
@@ -122,6 +132,12 @@ const styles: Styles = {
       px: 0,
       py: 0,
     },
+  },
+  subPanel: {
+    px: 4,
+    py: 4,
+    gap: 4,
+    style: {},
   },
   list: {
     px: 2,
