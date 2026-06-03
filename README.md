@@ -1,5 +1,7 @@
 # Eozilla App
 
+[![CI](https://github.com/eo-tools/eozilla-app/actions/workflows/ci.yml/badge.svg)](https://github.com/eo-tools/eozilla-app/actions/workflows/ci.yml)
+
 A simple frontend for web services compliant with the
 [OGC API - Processes](https://github.com/opengeospatial/ogcapi-processes).
 

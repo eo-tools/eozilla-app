@@ -65,4 +65,4 @@
   This should exclude `src/store` and `src/components` for time being.
 - [ ] Add unit tests also for `src/store` and `src/components` after having decided how
   to do (a) app store, (b) hooks, (c) component testing. 
-- [ ] Setup GitHub CI which includes typecheck, lint, and (later) testing. 
+- [x] Setup GitHub CI which includes typecheck, lint, and testing. 
