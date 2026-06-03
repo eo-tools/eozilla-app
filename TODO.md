@@ -9,6 +9,7 @@
 - [ ] Import/export process requests JSON files.
 - [ ] Copy process request to clipboard. 
 - [ ] Edit current process request as JSON code.
+- [ ] Only show the jobs that have been submitted by the authenticated user.
 - [x] Add OUTPUTS section to `ProcessPanel`.
 - [x] Make use of the Mantine `Stepper` component to represent the subsequent 
   steps in our `ServiceDialog`. 
@@ -43,6 +44,11 @@
 
 # Architecture & Design
 
+- [ ] Process request submission should include the ID of the user
+  who submitted it. Accordingly, the shown jobs should be the jobs of that 
+  user. Currently, we have no means to reflect this in the app also because 
+  the model does not represent user information neither `ProcessRequest` nor 
+  in `JobInfo`.
 - [ ] `SubPanel` opened states in `ProcessPanel` and `JobsPanel`
   should be part of the app state.
 - [ ] Split components into three categories
