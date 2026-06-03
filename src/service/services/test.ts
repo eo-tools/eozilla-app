@@ -197,13 +197,15 @@ async function runJob(
   const delay = duration / 10;
   return await new Promise<JobInfo>((resolve, reject) => {
     job.status = "running";
-    let interval: ReturnType<typeof setInterval> | undefined;
+    const intervalHandle: {
+      current: ReturnType<typeof setInterval> | undefined;
+    } = { current: undefined };
     const stop = () => {
-      if (typeof interval !== "undefined") {
-        clearInterval(interval);
+      if (typeof intervalHandle.current !== "undefined") {
+        clearInterval(intervalHandle.current);
       }
     };
-    interval = setInterval(() => {
+    intervalHandle.current = setInterval(() => {
       if (job.status === "dismissed") {
         job.finished = new Date().toUTCString();
         stop();

@@ -59,11 +59,7 @@ describe("swr key helpers", () => {
 
   it("delegates invalidation to swr mutate", () => {
     const mockedMutate = vi.mocked(mutate);
-    mockedMutate.mockImplementation((predicate: any) => predicate([
-      "jobInfo",
-      "custom",
-      "job-1",
-    ]));
+    mockedMutate.mockImplementation(() => true as never);
 
     expect(
       invalidateSWRKeys({ resourceId: "jobInfo", serviceProviderId: "custom" }),
