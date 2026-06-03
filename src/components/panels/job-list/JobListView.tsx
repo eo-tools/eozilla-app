@@ -2,6 +2,7 @@ import { useMemo } from "react";
 
 import type { JobInfo, JobList } from "@/service";
 import type { Optional } from "@/utils/common";
+import { UnavailableHint } from "@/components/common/UnavailableHint";
 import { JobItemView } from "./JobItemView";
 
 export interface JobListViewProps {
@@ -21,6 +22,9 @@ export default function JobListView({
     () => [...jobList.jobs].sort(sortByCreationDate),
     [jobList],
   );
+  if (jobs.length === 0) {
+    return <UnavailableHint message="The list of jobs is empty." />;
+  }
   return jobs.map((jobInfo) => (
     <JobItemView
       key={jobInfo.jobID}

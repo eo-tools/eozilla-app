@@ -136,7 +136,7 @@ const styles: Styles = {
     id1: { ...idTextStyle, c: "green" },
     id2: { ...idTextStyle, c: "blue" },
     id3: { ...idTextStyle, c: "yellow" },
-    unavailable: { fs: "italic", c: "dimmed" },
+    unavailable: { fs: "italic", c: "dimmed", size: "sm" },
     error: {},
     title1: { ...titleTextStyle, fw: 600, size: "md" },
     title2: { ...titleTextStyle, fw: 500, size: "sm" },

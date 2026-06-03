@@ -7,6 +7,8 @@ import { getFieldFromProcessDescriptionInputs } from "@/utils/field";
 import type { ProcessInputs } from "@/state/types";
 import InputLabel from "./InputLabel";
 import InputField from "./InputField";
+import { UnavailableHint } from "@/components/common/UnavailableHint";
+import { isEmptyObject } from "@/utils/common";
 
 interface ProcessInputsViewProps {
   processDescription: ProcessDescription;
@@ -23,6 +25,9 @@ export default function ProcessInputsView({
     () => getFieldFromProcessDescriptionInputs(processDescription),
     [processDescription],
   );
+  if (isEmptyObject(processInputs)) {
+    return <UnavailableHint message="No inputs available." />;
+  }
   return (
     <Table variant="vertical" layout="fixed" withTableBorder>
       <Table.Tbody>
