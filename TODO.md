@@ -33,6 +33,8 @@
 
 # UX, Layout, and Style
 
+- [ ] Invent an app icon and use it in `index.html` instead of 
+  `<link rel="icon" type="image/svg+xml" href="/vite.svg" />`.
 - [x] "Results" and "Info" in the `JobsPanel` as well as "Inputs" and "Outputs"
   in the `ProcessPanel` should use a new common `SubPanel` component.
 - [x] Combine panels "Job Results" and "Job Info" into one "Job" panel
