@@ -102,7 +102,7 @@ export function validateJsonValue(
             value[propertyName],
             propertySchema,
           );
-        } else if (propertyName in (schema.required || [])) {
+        } else if ((schema.required || []).includes(propertyName)) {
           throw new SchemaValidationError(
             `${name} is missing required property '${propertyName}'`,
           );
