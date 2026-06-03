@@ -58,3 +58,8 @@
   Currently, we use JSON-inputs for any schema.
 
 
+# Project maintenance
+
+- [ ] Add unit tests for all `*.ts` files.
+- [ ] Add unit (smoke) tests for components in `*.tsx` files.
+- [ ] Setup GitHub CI which includes typecheck, lint, and (later) testing 
