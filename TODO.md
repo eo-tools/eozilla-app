@@ -3,7 +3,7 @@
 - [ ] Add real UI-generator that generates a UI for a given input schemas. 
   We currently use `JSONInput` for all input schemas.
 - [ ] Equip the JOBS and PROCESSES panels with search, sort, and filter features.
-- [ ] Make the app GDPR-compliant.
+- [x] Make the app GDPR-compliant. Just the bare minimum.
 - [ ] Implement OAuth flows for the service provider auth types != `"none"`.
 - [ ] Show notification on job termination (success, failed, dismissed)
 - [ ] Import/export process requests JSON files.

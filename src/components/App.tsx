@@ -1,6 +1,7 @@
 import { AppShell } from "@mantine/core";
 
 import "./App.css";
+import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Main from "@/components/Main";
 import styles from "@/components/common/styles";
@@ -10,7 +11,7 @@ export default function App() {
     <AppShell
       withBorder={false}
       header={{ height: 40 }}
-      // footer={{ height: 40 }}
+      footer={{ height: 28 }}
     >
       <AppShell.Header px={styles.shell.px}>
         <Header />
@@ -20,7 +21,9 @@ export default function App() {
         <Main />
       </AppShell.Main>
 
-      {/*<AppShell.Footer p="sm">Footer</AppShell.Footer>*/}
+      <AppShell.Footer px={styles.shell.px}>
+        <Footer />
+      </AppShell.Footer>
     </AppShell>
   );
 }
