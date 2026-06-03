@@ -1,8 +1,9 @@
 # Features
 
-- [ ] Add real UI-generator from schemas.
+- [ ] Add real UI-generator that generates a UI for a given input schemas. 
+  We currently use `JSONInput` for all input schemas.
 - [ ] Equip the JOBS and PROCESSES panels with search, sort, and filter features.
-- [ ] Make the app GDPR compliant.
+- [ ] Make the app GDPR-compliant.
 - [ ] Implement OAuth flows for the service provider auth types != `"none"`.
 - [ ] Show notification on job termination (success, failed, dismissed)
 - [ ] Import/export process requests JSON files.
@@ -60,6 +61,8 @@
 
 # Project maintenance
 
-- [ ] Add unit tests for all `*.ts` files.
-- [ ] Add unit (smoke) tests for components in `*.tsx` files.
-- [ ] Setup GitHub CI which includes typecheck, lint, and (later) testing 
+- [x] Add unit tests for all `*.ts` files including plain functions and classes.
+  This should exclude `src/store` and `src/components` for time being.
+- [ ] Add unit tests also for `src/store` and `src/components` after having decided how
+  to do (a) app store, (b) hooks, (c) component testing. 
+- [ ] Setup GitHub CI which includes typecheck, lint, and (later) testing. 

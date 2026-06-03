@@ -53,7 +53,7 @@ const PROCESSES: Process[] = [
 const PROCESS_MAP = new Map(PROCESSES.map((p) => [p.id, p]));
 
 function ensureValidProcessId(processId: string) {
-  if (!(processId in PROCESS_MAP)) {
+  if (!PROCESS_MAP.has(processId)) {
     throw new ServiceError({
       type: "Not Found",
       status: 404,
@@ -63,7 +63,7 @@ function ensureValidProcessId(processId: string) {
 }
 
 function assertValidJobId(jobId: string) {
-  if (!(jobId in JOB_MAP)) {
+  if (!JOB_MAP.has(jobId)) {
     throw new ServiceError({
       type: "Not Found",
       status: 404,
@@ -197,10 +197,18 @@ async function runJob(
   const delay = duration / 10;
   return await new Promise<JobInfo>((resolve, reject) => {
     job.status = "running";
-    setInterval(() => {
+    let interval: ReturnType<typeof setInterval> | undefined;
+    const stop = () => {
+      if (typeof interval !== "undefined") {
+        clearInterval(interval);
+      }
+    };
+    interval = setInterval(() => {
       if (job.status === "dismissed") {
         job.finished = new Date().toUTCString();
-        reject(`Jab ${job.jobID} has been dismissed`);
+        stop();
+        reject(`Job ${job.jobID} has been dismissed`);
+        return;
       }
       i += 1;
       job.updated = new Date().toUTCString();
@@ -208,6 +216,7 @@ async function runJob(
         job.status = "successful";
         job.result = fn(inputs);
         job.finished = new Date().toUTCString();
+        stop();
         const { result: _r, ...jobInfo } = job;
         resolve(jobInfo);
       }
