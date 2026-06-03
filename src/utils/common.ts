@@ -26,6 +26,15 @@ export function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+export function isEmptyObject(
+  obj: Record<string, unknown>,
+): obj is Record<string, never> {
+  for (const _ in obj) {
+    return false;
+  }
+  return true;
+}
+
 export function createId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }

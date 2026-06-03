@@ -10,6 +10,7 @@ import {
 
 import { getErrorMessage } from "@/utils/common";
 import styles from "@/components/common/styles";
+import { UnavailableHint } from "@/components/common/UnavailableHint";
 
 export interface ResourceViewProps<T> {
   data?: T | undefined;
@@ -38,46 +39,42 @@ export function ResourceView<T>({
   loaderProps,
   children,
 }: ResourceViewProps<T>) {
-  textProps = { ...styles.text.unavailable, size: "sm", ...textProps };
-  loaderProps = { size: "sm", ...loaderProps };
   return (
     <>
       {typeof data !== "undefined" && children && children(data)}
       {error && (
         <Center>
           <Stack>
-            {errorText && <Text {...textProps}>{errorText}</Text>}
-            {
-              <Text {...textProps} fw={200} c={"red"} size="xs">
-                {getErrorMessage(error)}
-              </Text>
-            }
+            <UnavailableHint textProps={textProps} message={errorText} />
+            <Text
+              {...styles.text.unavailable}
+              fw={200}
+              c="red"
+              size="xs"
+              {...textProps}
+            >
+              {getErrorMessage(error)}
+            </Text>
           </Stack>
         </Center>
       )}
-      {typeof data === "undefined" &&
-        !error &&
-        !isLoading &&
-        !isValidating &&
-        nullText && (
-          <Center py="sm">
-            <Text {...textProps} fs="italic">
-              {nullText}
-            </Text>
-          </Center>
-        )}
+      {typeof data === "undefined" && !error && !isLoading && !isValidating && (
+        <UnavailableHint textProps={textProps} message={nullText} />
+      )}
       {isLoading && (
         <Center>
           <Stack>
-            {loadingText && <Text {...textProps}>{loadingText}</Text>}
-            <Loader {...loaderProps} />
+            {loadingText && (
+              <Text {...styles.text.unavailable} {...textProps}>
+                {loadingText}
+              </Text>
+            )}
+            <Loader size="sm" {...loaderProps} />
           </Stack>
         </Center>
       )}
-      {isValidating && validatingText && (
-        <Center>
-          <Text {...textProps}>{validatingText}</Text>
-        </Center>
+      {isValidating && (
+        <UnavailableHint textProps={textProps} message={validatingText} />
       )}
     </>
   );

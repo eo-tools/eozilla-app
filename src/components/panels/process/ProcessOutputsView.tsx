@@ -4,6 +4,8 @@ import type { Output, ProcessDescription, TransmissionMode } from "@/service";
 import type { ProcessOutputs } from "@/state/types";
 import styles from "@/components/common/styles";
 import OutputLabel from "./OutputLabel";
+import { isEmptyObject } from "@/utils/common";
+import { UnavailableHint } from "@/components/common/UnavailableHint";
 
 interface ProcessOutputsViewProps {
   processDescription: ProcessDescription;
@@ -27,12 +29,8 @@ export default function ProcessOutputsView({
   const hasTransmissionModeSelection = transmissionModes.length > 1;
   const defaultTransmissionMode = getDefaultTransmissionMode(transmissionModes);
 
-  if (!outputNames.length) {
-    return (
-      <Text {...styles.text.unavailable} size="sm">
-        No outputs defined.
-      </Text>
-    );
+  if (isEmptyObject(processOutputs)) {
+    return <UnavailableHint message="No inputs available." />;
   }
 
   return (
