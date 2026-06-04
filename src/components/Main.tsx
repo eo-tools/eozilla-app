@@ -11,6 +11,7 @@ import { ServiceDialog } from "@/components/dialogs/service/ServiceDialog";
 import { TracebackDialog } from "@/components/dialogs/traceback/TracebackDialog";
 import { JobResultDialog } from "@/components/dialogs/job-result/JobResultDialog";
 import JobPanel from "@/components/panels/job/JobPanel";
+import PrivacyDialog from "@/components/dialogs/privacy/PrivacyDialog";
 
 export default function Main() {
   return (
@@ -22,6 +23,7 @@ export default function Main() {
       <ServiceDialog />
       <TracebackDialog />
       <JobResultDialog />
+      <PrivacyDialog />
 
       <RPanel id="process-list" defaultSize="25%" minSize="10%" collapsible>
         <ProcessesPanel />
