@@ -82,7 +82,7 @@ export async function signIn(
 ) {
   const provider = getServiceProvider(serviceProviderId);
   storage.serviceProviderSelection.set({
-    providerId: serviceProviderId,
+    id: serviceProviderId,
     options,
   });
   try {

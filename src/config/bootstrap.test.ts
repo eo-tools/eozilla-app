@@ -30,7 +30,7 @@ describe("parseAppBootstrapConfig", () => {
       parseAppBootstrapConfig(`?compact=1&config=${encodedConfig}`),
     ).toEqual({
       compact: true,
-      serializedConfig: {
+      config: {
         serviceProviderId: "notebook",
         serviceProviderMeta: {
           type: "system",
@@ -52,7 +52,7 @@ describe("parseAppBootstrapConfig", () => {
 
     expect(parseAppBootstrapConfig("?compact&config=not-json")).toEqual({
       compact: true,
-      serializedConfig: null,
+      config: null,
     });
 
     warn.mockRestore();
@@ -68,7 +68,7 @@ describe("parseAppBootstrapConfig", () => {
 
     expect(parseAppBootstrapConfig(`?config=${encodedConfig}`)).toEqual({
       compact: false,
-      serializedConfig: null,
+      config: null,
     });
   });
 });

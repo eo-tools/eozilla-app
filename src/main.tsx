@@ -37,7 +37,7 @@ initAppStore(() => {
       }),
     );
     storage.serviceProviderSelection.set({
-      providerId: appConfig.serviceProviderId,
+      id: appConfig.serviceProviderId,
       options: appConfig.serviceProviderOptions,
     });
   }

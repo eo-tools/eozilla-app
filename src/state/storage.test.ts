@@ -32,7 +32,7 @@ describe("storage", () => {
 
   it("round-trips json values through localStorage", () => {
     const selection = {
-      providerId: "custom",
+      id: "custom",
       options: { apiUrl: "https://example.com" },
     };
 
@@ -51,7 +51,7 @@ describe("storage", () => {
 
   it("deletes values from localStorage", () => {
     storageModule.storage.serviceProviderSelection.set({
-      providerId: "test",
+      id: "test",
       options: {},
     });
     storageModule.storage.serviceProviderSelection.delete();
