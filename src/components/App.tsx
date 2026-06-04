@@ -6,24 +6,33 @@ import Header from "@/components/Header";
 import Main from "@/components/Main";
 import styles from "@/components/common/styles";
 
-export default function App() {
+interface AppProps {
+  compact?: boolean;
+}
+
+export default function App({ compact = false }: AppProps) {
   return (
     <AppShell
       withBorder={false}
-      header={{ height: 40 }}
-      footer={{ height: 28 }}
+      header={compact ? undefined : { height: 40 }}
+      footer={compact ? undefined : { height: 28 }}
+      className={compact ? "app-shell-compact" : undefined}
     >
-      <AppShell.Header px={styles.shell.px}>
-        <Header />
-      </AppShell.Header>
+      {!compact && (
+        <AppShell.Header px={styles.shell.px} pb={0}>
+          <Header />
+        </AppShell.Header>
+      )}
 
-      <AppShell.Main px={styles.shell.px} pb={styles.shell.py}>
+      <AppShell.Main px={styles.shell.px} py={styles.shell.py}>
         <Main />
       </AppShell.Main>
 
-      <AppShell.Footer px={styles.shell.px}>
-        <Footer />
-      </AppShell.Footer>
+      {!compact && (
+        <AppShell.Footer px={styles.shell.px}>
+          <Footer />
+        </AppShell.Footer>
+      )}
     </AppShell>
   );
 }

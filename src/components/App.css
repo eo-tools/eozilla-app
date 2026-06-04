@@ -15,10 +15,14 @@
 .mantine-AppShell-main {
   /* subtract header and footer height */
   height: calc(
-    100vh - var(--app-shell-header-height, 40px) -
+    100vh - var(--app-shell-header-height, 0px) -
       var(--app-shell-footer-height, 0px)
   );
   background: var(--mantine-color-body);
+}
+
+.app-shell-compact .mantine-AppShell-main {
+  height: 100vh;
 }
 
 [data-separator] {
