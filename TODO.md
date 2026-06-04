@@ -1,15 +1,32 @@
 # Features
 
+- [ ] Allow running the app in an iframe in Jupyter notebooks. 
+  - Derived app requirements:
+    - [ ] Accept query parameters that configure the app to use the same service data as the
+      cuiman Python client.
+    - [ ] Allow for compact-mode, that is, e.g., no header, no footer.
+    - [ ] Allow accessing the reactive state for the process requests in cuiman.
+  - Derived cuiman requiremts:
+    - [ ] Bundle the app build with cuiman.
+    - [ ] Allow `client.show()` to open the app instead of the panel UI. 
+    - [ ] Hold the reactive state for the process requests shown in the app.
+- [ ] Implement OAuth flows for the service provider auth types != `"none"`.
+- [ ] Only show the jobs that have been submitted by the authenticated user.
+  See also related to-do in the design section below.
+- [ ] Allow for some basic branding of the app. The branding configuration 
+  should comprise:
+  - the default service provider with its default configuration
+  - the app title and icon and URL, which could all be included in
+    service provider metadata
 - [ ] Add real UI-generator that generates a UI for a given input schemas. 
   We currently use `JSONInput` for all input schemas.
 - [ ] Equip the JOBS and PROCESSES panels with search, sort, and filter features.
-- [x] Make the app GDPR-compliant. Just the bare minimum.
-- [ ] Implement OAuth flows for the service provider auth types != `"none"`.
 - [ ] Show notification on job termination (success, failed, dismissed)
 - [ ] Import/export process requests JSON files.
 - [ ] Copy process request to clipboard. 
 - [ ] Edit current process request as JSON code.
-- [ ] Only show the jobs that have been submitted by the authenticated user.
+- [ ] Use colored syntax highlighting when showing raw JSON values.
+- [x] Make the app GDPR-compliant. Just the bare minimum.
 - [x] Add OUTPUTS section to `ProcessPanel`.
 - [x] Make use of the Mantine `Stepper` component to represent the subsequent 
   steps in our `ServiceDialog`. 
