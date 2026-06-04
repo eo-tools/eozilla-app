@@ -38,7 +38,7 @@ export interface ProcessExecution {
   error?: unknown;
 }
 
-export type DialogId = "service" | "traceback" | "job-result";
+export type DialogId = "service" | "traceback" | "job-result" | "privacy";
 
 export interface AppState {
   serviceProviderId: string | null;
