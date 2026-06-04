@@ -27,9 +27,10 @@ describe("parseAppBootstrapConfig", () => {
     });
 
     expect(
-      parseAppBootstrapConfig(`?compact=1&config=${encodedConfig}`),
+      parseAppBootstrapConfig(`?compact=1&scheme=dark&config=${encodedConfig}`),
     ).toEqual({
       compact: true,
+      scheme: "dark",
       config: {
         serviceProviderId: "notebook",
         serviceProviderMeta: {
@@ -50,12 +51,23 @@ describe("parseAppBootstrapConfig", () => {
   it("ignores invalid serialized config values", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
-    expect(parseAppBootstrapConfig("?compact&config=not-json")).toEqual({
+    expect(
+      parseAppBootstrapConfig("?compact&scheme=dark&config=not-json"),
+    ).toEqual({
       compact: true,
+      scheme: "dark",
       config: null,
     });
 
     warn.mockRestore();
+  });
+
+  it("ignores invalid color scheme values", () => {
+    expect(parseAppBootstrapConfig("?scheme=auto")).toEqual({
+      compact: false,
+      scheme: undefined,
+      config: null,
+    });
   });
 
   it("requires service provider metadata", () => {
@@ -68,6 +80,7 @@ describe("parseAppBootstrapConfig", () => {
 
     expect(parseAppBootstrapConfig(`?config=${encodedConfig}`)).toEqual({
       compact: false,
+      scheme: undefined,
       config: null,
     });
   });

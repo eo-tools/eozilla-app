@@ -6,7 +6,10 @@ import type {
 import { isObject } from "@/utils/common";
 
 const CONFIG_QUERY_PARAM = "config";
+const SCHEME_QUERY_PARAM = "scheme";
 const COMPACT_QUERY_PARAM = "compact";
+
+export type AppColorScheme = "dark" | "light";
 
 export interface SerializedAppConfig {
   serviceProviderId: string;
@@ -16,11 +19,16 @@ export interface SerializedAppConfig {
 
 export interface AppBootstrapConfig {
   compact: boolean;
+  scheme?: AppColorScheme;
   config: SerializedAppConfig | null;
 }
 
 function parseBooleanParam(value: string | null): boolean {
   return value === "1" || value === "true" || value === "";
+}
+
+function parseSchemeParam(value: string | null): AppColorScheme | undefined {
+  return value === "dark" || value === "light" ? value : undefined;
 }
 
 function decodeBase64UrlJson(value: string): unknown {
@@ -112,17 +120,19 @@ export function parseAppBootstrapConfig(
 ): AppBootstrapConfig {
   const params = new URLSearchParams(search);
   const compact = parseBooleanParam(params.get(COMPACT_QUERY_PARAM));
+  const scheme = parseSchemeParam(params.get(SCHEME_QUERY_PARAM));
   const encodedConfig = params.get(CONFIG_QUERY_PARAM);
   if (!encodedConfig) {
-    return { compact, config: null };
+    return { compact, scheme, config: null };
   }
   try {
     return {
       compact,
+      scheme,
       config: parseSerializedAppConfig(decodeBase64UrlJson(encodedConfig)),
     };
   } catch (error) {
     console.warn("Failed to parse app bootstrap config.", error);
-    return { compact, config: null };
+    return { compact, scheme, config: null };
   }
 }

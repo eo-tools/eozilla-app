@@ -47,7 +47,7 @@ initAppStore(() => {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <MantineProvider>
+    <MantineProvider forceColorScheme={bootstrapConfig.scheme}>
       <Notifications />
       <App compact={bootstrapConfig.compact} />
     </MantineProvider>
