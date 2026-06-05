@@ -1,5 +1,6 @@
-import { JsonInput, Table, Text, type TableProps } from "@mantine/core";
+import { Table, Text, type TableProps } from "@mantine/core";
 
+import { JsonCode } from "@/components/common/JsonCode";
 import {
   isInlineValue,
   isLink,
@@ -74,11 +75,7 @@ export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
           <Table.Tr>
             <Table.Th w={80}>Value</Table.Th>
             <Table.Td>
-              <JsonInput
-                value={JSON.stringify(jobResult.value, null, 2)}
-                maxRows={5}
-                autosize
-              />
+              <JsonCode value={jobResult.value} maxHeight="8rem" />
             </Table.Td>
           </Table.Tr>
 
@@ -96,11 +93,7 @@ export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
             <Table.Th>Schema</Table.Th>
             <Table.Td>
               {jobResult.schema ? (
-                <JsonInput
-                  value={JSON.stringify(jobResult.schema, null, 2)}
-                  maxRows={5}
-                  autosize
-                />
+                <JsonCode value={jobResult.schema} maxHeight="8rem" />
               ) : (
                 "-"
               )}
@@ -112,7 +105,7 @@ export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
   }
 
   if (isInlineValue(jobResult)) {
-    return <JsonInput value={JSON.stringify(jobResult, null, 2)} autosize />;
+    return <JsonCode value={jobResult} />;
   }
 
   return (
