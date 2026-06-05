@@ -1,7 +1,6 @@
 import {
   Badge,
   Button,
-  Code,
   Group,
   Paper,
   Stack,
@@ -9,6 +8,7 @@ import {
   Title,
 } from "@mantine/core";
 
+import { JsonCode } from "@/components/common/JsonCode";
 import styles from "@/components/common/styles";
 import type { Service } from "@/service";
 import { isObject } from "@/utils/common";
@@ -88,7 +88,7 @@ function renderCapabilities(capabilities: unknown) {
   }
 
   if (isObject(capabilities) && Object.keys(capabilities).length > 0) {
-    return <Code block>{JSON.stringify(capabilities, null, 2)}</Code>;
+    return <JsonCode value={capabilities} />;
   }
 
   if (typeof capabilities === "string" && capabilities.trim()) {

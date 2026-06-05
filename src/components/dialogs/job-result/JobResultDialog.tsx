@@ -1,7 +1,6 @@
 import {
   Badge,
   Box,
-  Code,
   Group,
   Image,
   Modal,
@@ -13,6 +12,8 @@ import {
 import { IconFileDescription } from "@tabler/icons-react";
 import ReactMarkdown from "react-markdown";
 
+import { JsonCode } from "@/components/common/JsonCode";
+import { SyntaxCode } from "@/components/common/SyntaxCode";
 import styles from "@/components/common/styles";
 import { closeDialog } from "@/store/actions";
 import { useAppState, useDialogOpened } from "@/store/hooks";
@@ -236,22 +237,9 @@ function renderPreview(jobResult: JobResult, mimeType?: string) {
 }
 
 function renderJsonPreview(value: unknown) {
-  return <Code block>{formatPrettyJson(value)}</Code>;
+  return <JsonCode value={value} />;
 }
 
 function renderTextCodeBlock(text: string) {
-  return <Code block>{text}</Code>;
-}
-
-function formatPrettyJson(value: unknown) {
-  if (isString(value)) {
-    try {
-      const parsed = JSON.parse(value) as unknown;
-      return JSON.stringify(parsed, null, 2);
-    } catch {
-      return value;
-    }
-  }
-
-  return JSON.stringify(value, null, 2);
+  return <SyntaxCode code={text} language="text" />;
 }

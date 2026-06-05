@@ -30,7 +30,7 @@ export default function ProcessOutputsView({
   const defaultTransmissionMode = getDefaultTransmissionMode(transmissionModes);
 
   if (isEmptyObject(processOutputs)) {
-    return <UnavailableHint message="No inputs available." />;
+    return <UnavailableHint message="No outputs available." />;
   }
 
   return (
