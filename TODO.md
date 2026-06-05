@@ -25,7 +25,7 @@
 - [ ] Import/export process requests JSON files.
 - [ ] Copy process request to clipboard. 
 - [ ] Edit current process request as JSON code.
-- [ ] Use colored syntax highlighting when showing raw JSON values.
+- [x] Use colored syntax highlighting when showing raw JSON values.
 - [x] Make the app GDPR-compliant. Just the bare minimum.
 - [x] Add OUTPUTS section to `ProcessPanel`.
 - [x] Make use of the Mantine `Stepper` component to represent the subsequent 
