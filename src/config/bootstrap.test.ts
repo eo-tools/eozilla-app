@@ -75,6 +75,19 @@ describe("parseAppBootstrapConfig", () => {
     });
   });
 
+  it("parses explicit compact mode false values", () => {
+    expect(parseAppBootstrapConfig("?compact=0")).toEqual({
+      compact: false,
+      scheme: undefined,
+      config: null,
+    });
+    expect(parseAppBootstrapConfig("?compact=false")).toEqual({
+      compact: false,
+      scheme: undefined,
+      config: null,
+    });
+  });
+
   it("requires service provider metadata", () => {
     const encodedConfig = encodeBase64Url({
       serviceProviderId: "notebook",

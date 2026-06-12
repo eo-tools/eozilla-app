@@ -14,6 +14,7 @@ export default function App({ compact = false }: AppProps) {
   return (
     <AppShell
       withBorder={false}
+      padding={styles.shell.py}
       header={compact ? undefined : { height: 40 }}
       footer={compact ? undefined : { height: 28 }}
       className={compact ? "app-shell-compact" : undefined}
@@ -24,7 +25,7 @@ export default function App({ compact = false }: AppProps) {
         </AppShell.Header>
       )}
 
-      <AppShell.Main px={styles.shell.px} py={styles.shell.py}>
+      <AppShell.Main>
         <Main />
       </AppShell.Main>
 
