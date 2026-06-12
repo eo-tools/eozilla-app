@@ -15,7 +15,7 @@ export interface CustomServiceProviderConfig {
 
 const DEFAULT_CUSTOM_SERVICE_PROVIDER_META: ServiceProviderMeta = {
   type: "custom",
-  title: "Processing Service",
+  title: "Custom Service",
 };
 
 export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions> {

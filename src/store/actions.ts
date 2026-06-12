@@ -1,21 +1,19 @@
 import { notifications } from "@mantine/notifications";
 
 import { getAppState, setAppState } from "@/store/store";
-import {
-  type DialogId,
-  createInitialAppState,
-  type ProcessInputs,
-  type ProcessOutputs,
-} from "@/state/types";
+import { type DialogId, createInitialAppState } from "@/state/types";
 import {
   getServiceProvider,
   type ServiceOptions,
   type ServiceOptionsInput,
+  type Input,
   type Output,
   type ProcessDescription,
   type Service,
+  type ProcessInputs,
+  type ProcessOutputs,
 } from "@/service";
-import { createJsonValueForSchema, type JsonValue } from "@/utils/json";
+import { createJsonValueForSchema } from "@/utils/json";
 import { invalidateSWRKeys } from "@/service/swr";
 import { assert, getErrorMessage, type Optional } from "@/utils/common";
 import { getSchemaFromProcessDescriptionInputs } from "@/utils/field";
@@ -134,16 +132,13 @@ export function activateProcess(processId: Optional<string>) {
 }
 
 export function executeActiveProcess() {
-  const { service, processId, processesInputs, processesOutputs } =
-    getAppState();
-  if (!service || !processId || !processesInputs[processId]) {
+  const { service, processId, processRequests } = getAppState();
+  if (!service || !processId || !processRequests[processId]) {
     return;
   }
-  const processOutputs = processesOutputs[processId] || {};
   const processRequest = {
-    inputs: processesInputs[processId],
-    outputs:
-      Object.keys(processOutputs).length > 0 ? processOutputs : undefined,
+    inputs: processRequests[processId].inputs,
+    outputs: processRequests[processId].outputs,
   };
   const processExecution = {
     request: { processId, ...processRequest },
@@ -176,16 +171,14 @@ export function executeActiveProcess() {
 //   setAppState({ information });
 // }
 
-export function setActiveProcessInput(
-  inputName: string,
-  inputValue: JsonValue,
-) {
+export function setActiveProcessInput(inputName: string, inputValue: Input) {
   const state = getAppState();
   const activeProcessId = state.processId;
   if (!activeProcessId) {
     return;
   }
-  const processInputs = state.processesInputs[activeProcessId];
+  const processRequest = state.processRequests[activeProcessId];
+  const processInputs = processRequest?.inputs;
   assert(
     !!processInputs,
     () => `no inputs found for process ${activeProcessId}`,
@@ -204,26 +197,31 @@ export function setProcessInputs(
   processInputs: ProcessInputs,
 ) {
   const state = getAppState();
-  const processesInputs = state.processesInputs;
   setAppState({
-    processesInputs: {
-      ...processesInputs,
-      [processId]: processInputs,
+    processRequests: {
+      ...state.processRequests,
+      [processId]: {
+        ...state.processRequests[processId],
+        inputs: processInputs,
+      },
     },
   });
 }
 
-export function setActiveProcessOutput(outputName: string, output?: Output) {
+export function setActiveProcessOutput(
+  outputName: string,
+  outputValue?: Output,
+) {
   const state = getAppState();
   const activeProcessId = state.processId;
   if (!activeProcessId) {
     return;
   }
-  const processOutputs = state.processesOutputs[activeProcessId] || {};
-  if (output) {
+  const processOutputs = state.processRequests[activeProcessId]?.outputs || {};
+  if (outputValue) {
     setProcessOutputs(activeProcessId, {
       ...processOutputs,
-      [outputName]: output,
+      [outputName]: outputValue,
     });
     return;
   }
@@ -238,11 +236,13 @@ export function setProcessOutputs(
   processOutputs: ProcessOutputs,
 ) {
   const state = getAppState();
-  const processesOutputs = state.processesOutputs;
   setAppState({
-    processesOutputs: {
-      ...processesOutputs,
-      [processId]: processOutputs,
+    processRequests: {
+      ...state.processRequests,
+      [processId]: {
+        ...state.processRequests[processId],
+        outputs: processOutputs,
+      },
     },
   });
 }
