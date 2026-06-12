@@ -28,17 +28,17 @@ initAppStore(() => {
     new TestServiceProvider(),
   ];
 
-  const appConfig = bootstrapConfig.config;
-  if (appConfig) {
+  const serviceProvider = bootstrapConfig.service;
+  if (serviceProvider) {
     providers.push(
       new CustomServiceProvider({
-        id: appConfig.serviceProviderId,
-        meta: appConfig.serviceProviderMeta,
+        id: serviceProvider.id,
+        meta: serviceProvider.meta,
       }),
     );
     storage.serviceProviderSelection.set({
-      id: appConfig.serviceProviderId,
-      options: appConfig.serviceProviderOptions,
+      id: serviceProvider.id,
+      options: serviceProvider.options,
     });
   }
 

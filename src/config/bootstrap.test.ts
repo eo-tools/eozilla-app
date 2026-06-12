@@ -15,16 +15,16 @@ function encodeBase64Url(value: unknown): string {
 }
 
 describe("parseAppBootstrapConfig", () => {
-  it("parses compact mode and the serialized app config", () => {
-    const encodedConfig = encodeBase64Url({
-      serviceProviderId: "notebook",
-      serviceProviderMeta: {
+  it("parses compact mode and the serialized service provider", () => {
+    const encodedService = encodeBase64Url({
+      id: "notebook",
+      meta: {
         type: "system",
         title: "Notebook Service",
         description: "Configured by Jupyter",
         hidden: true,
       },
-      serviceProviderOptions: {
+      options: {
         apiUrl: "https://example.test/ogcapi",
         authType: "none",
         ignoredObject: { value: "not supported" },
@@ -32,20 +32,22 @@ describe("parseAppBootstrapConfig", () => {
     });
 
     expect(
-      parseAppBootstrapConfig(`?compact=1&scheme=dark&config=${encodedConfig}`),
+      parseAppBootstrapConfig(
+        `?compact=1&scheme=dark&service=${encodedService}`,
+      ),
     ).toEqual({
       compact: true,
       scheme: "dark",
-      config: {
-        serviceProviderId: "notebook",
-        serviceProviderMeta: {
+      service: {
+        id: "notebook",
+        meta: {
           type: "system",
           title: "Notebook Service",
           description: "Configured by Jupyter",
           disabled: undefined,
           hidden: true,
         },
-        serviceProviderOptions: {
+        options: {
           apiUrl: "https://example.test/ogcapi",
           authType: "none",
         },
@@ -53,15 +55,15 @@ describe("parseAppBootstrapConfig", () => {
     });
   });
 
-  it("ignores invalid serialized config values", () => {
+  it("ignores invalid serialized service provider values", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
     expect(
-      parseAppBootstrapConfig("?compact&scheme=dark&config=not-json"),
+      parseAppBootstrapConfig("?compact&scheme=dark&service=not-json"),
     ).toEqual({
       compact: true,
       scheme: "dark",
-      config: null,
+      service: null,
     });
 
     warn.mockRestore();
@@ -71,7 +73,7 @@ describe("parseAppBootstrapConfig", () => {
     expect(parseAppBootstrapConfig("?scheme=auto")).toEqual({
       compact: false,
       scheme: undefined,
-      config: null,
+      service: null,
     });
   });
 
@@ -79,27 +81,27 @@ describe("parseAppBootstrapConfig", () => {
     expect(parseAppBootstrapConfig("?compact=0")).toEqual({
       compact: false,
       scheme: undefined,
-      config: null,
+      service: null,
     });
     expect(parseAppBootstrapConfig("?compact=false")).toEqual({
       compact: false,
       scheme: undefined,
-      config: null,
+      service: null,
     });
   });
 
   it("requires service provider metadata", () => {
-    const encodedConfig = encodeBase64Url({
-      serviceProviderId: "notebook",
-      serviceProviderOptions: {
+    const encodedService = encodeBase64Url({
+      id: "notebook",
+      options: {
         apiUrl: "https://example.test/ogcapi",
       },
     });
 
-    expect(parseAppBootstrapConfig(`?config=${encodedConfig}`)).toEqual({
+    expect(parseAppBootstrapConfig(`?service=${encodedService}`)).toEqual({
       compact: false,
       scheme: undefined,
-      config: null,
+      service: null,
     });
   });
 });

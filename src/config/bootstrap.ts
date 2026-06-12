@@ -5,22 +5,22 @@ import type {
 } from "@/service";
 import { isObject } from "@/utils/common";
 
-const CONFIG_QUERY_PARAM = "config";
+const SERVICE_QUERY_PARAM = "service";
 const SCHEME_QUERY_PARAM = "scheme";
 const COMPACT_QUERY_PARAM = "compact";
 
 export type AppColorScheme = "dark" | "light";
 
-export interface SerializedAppConfig {
-  serviceProviderId: string;
-  serviceProviderMeta: ServiceProviderMeta;
-  serviceProviderOptions: ServiceOptionsInput<ServiceOptions>;
+export interface SerializedServiceProvider {
+  id: string;
+  meta: ServiceProviderMeta;
+  options: ServiceOptionsInput<ServiceOptions>;
 }
 
 export interface AppBootstrapConfig {
   compact: boolean;
   scheme?: AppColorScheme;
-  config: SerializedAppConfig | null;
+  service: SerializedServiceProvider | null;
 }
 
 function parseBooleanParam(value: string | null): boolean {
@@ -87,19 +87,15 @@ function parseServiceProviderOptions(
   return options;
 }
 
-export function parseSerializedAppConfig(
+export function parseSerializedServiceProvider(
   value: unknown,
-): SerializedAppConfig | null {
+): SerializedServiceProvider | null {
   if (!isObject(value)) {
     return null;
   }
-  const serviceProviderId = value.serviceProviderId;
-  const serviceProviderMeta = parseServiceProviderMeta(
-    value.serviceProviderMeta,
-  );
-  const serviceProviderOptions = parseServiceProviderOptions(
-    value.serviceProviderOptions,
-  );
+  const serviceProviderId = value.id;
+  const serviceProviderMeta = parseServiceProviderMeta(value.meta);
+  const serviceProviderOptions = parseServiceProviderOptions(value.options);
   if (
     typeof serviceProviderId !== "string" ||
     !serviceProviderId ||
@@ -109,9 +105,9 @@ export function parseSerializedAppConfig(
     return null;
   }
   return {
-    serviceProviderId,
-    serviceProviderMeta,
-    serviceProviderOptions,
+    id: serviceProviderId,
+    meta: serviceProviderMeta,
+    options: serviceProviderOptions,
   };
 }
 
@@ -121,18 +117,20 @@ export function parseAppBootstrapConfig(
   const params = new URLSearchParams(search);
   const compact = parseBooleanParam(params.get(COMPACT_QUERY_PARAM));
   const scheme = parseSchemeParam(params.get(SCHEME_QUERY_PARAM));
-  const encodedConfig = params.get(CONFIG_QUERY_PARAM);
-  if (!encodedConfig) {
-    return { compact, scheme, config: null };
+  const encodedService = params.get(SERVICE_QUERY_PARAM);
+  if (!encodedService) {
+    return { compact, scheme, service: null };
   }
   try {
     return {
       compact,
       scheme,
-      config: parseSerializedAppConfig(decodeBase64UrlJson(encodedConfig)),
+      service: parseSerializedServiceProvider(
+        decodeBase64UrlJson(encodedService),
+      ),
     };
   } catch (error) {
-    console.warn("Failed to parse app bootstrap config.", error);
-    return { compact, scheme, config: null };
+    console.warn("Failed to parse app bootstrap service.", error);
+    return { compact, scheme, service: null };
   }
 }
