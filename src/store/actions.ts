@@ -145,7 +145,10 @@ export function executeActiveProcess() {
     outputs:
       Object.keys(processOutputs).length > 0 ? processOutputs : undefined,
   };
-  const processExecution = { processId, processRequest, submitting: true };
+  const processExecution = {
+    request: { processId, ...processRequest },
+    submitting: true,
+  };
   setAppState({ processExecution });
   service
     .executeProcess(processId, processRequest)
@@ -210,10 +213,7 @@ export function setProcessInputs(
   });
 }
 
-export function setActiveProcessOutput(
-  outputName: string,
-  output?: Output,
-) {
+export function setActiveProcessOutput(outputName: string, output?: Output) {
   const state = getAppState();
   const activeProcessId = state.processId;
   if (!activeProcessId) {
@@ -233,7 +233,10 @@ export function setActiveProcessOutput(
   setProcessOutputs(activeProcessId, nextProcessOutputs);
 }
 
-export function setProcessOutputs(processId: string, processOutputs: ProcessOutputs) {
+export function setProcessOutputs(
+  processId: string,
+  processOutputs: ProcessOutputs,
+) {
   const state = getAppState();
   const processesOutputs = state.processesOutputs;
   setAppState({
@@ -261,9 +264,11 @@ export function setInitialProcessOutputs(
   const processOutputs: ProcessOutputs = {};
   Object.keys(processDescription.outputs || {}).forEach((outputName) => {
     processOutputs[outputName] = {
-      transmissionMode: processDescription?.outputTransmission?.length ? processDescription?.outputTransmission[0] : undefined,
-    }
-  })
+      transmissionMode: processDescription?.outputTransmission?.length
+        ? processDescription?.outputTransmission[0]
+        : undefined,
+    };
+  });
   setProcessOutputs(processId, processOutputs);
 }
 

@@ -2,8 +2,8 @@ import {
   isServiceProviderId,
   type Output,
   type JobInfo,
-  type ProcessRequest,
   type Service,
+  type ProcessRequest,
 } from "@/service";
 import { type JsonValue } from "@/utils/json";
 import { storage } from "@/state/storage";
@@ -30,9 +30,16 @@ export type ProcessesInputs = Record<string, ProcessInputs>;
 export type ProcessOutputs = Record<string, Output>;
 export type ProcessesOutputs = Record<string, ProcessOutputs>;
 
-export interface ProcessExecution {
+/**
+ * A request for a process execution for a known process.
+ */
+export interface ExecutionRequest extends ProcessRequest {
+  /** The process ID.*/
   processId: string;
-  processRequest: ProcessRequest;
+}
+
+export interface ProcessExecution {
+  request: ExecutionRequest;
   jobInfo?: JobInfo;
   submitting?: boolean;
   error?: unknown;

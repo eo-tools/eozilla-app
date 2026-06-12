@@ -100,7 +100,12 @@ export interface Subscriber {
   failedUri?: string;
 }
 
-/**A request for a process execution.*/
+/** Expected process execution result type. */
+export type ResponseType = "raw" | "document";
+
+/**
+ * A request for a process execution.
+ */
 export interface ProcessRequest {
   /**
    * Optional process inputs given as key-value mapping.
@@ -111,16 +116,14 @@ export interface ProcessRequest {
 
   /**
    * Optional process outputs given as key-value mapping.
-   * Values are of type [Output][gavicore.models.Output]
-   * supported by the given process.
+   * Values are of type ``Output`` supported by the given process.
    */
   outputs?: Record<string, Output>;
 
   /**
-   * Optional subscriber of type
-   * [Subscriber][gavicore.models.Subscriber] comprising callback
-   * URLs that are informed about process status changes
-   * while the processing takes place.
+   * Optional subscriber of type ``Subscriber`` comprising callback URLs
+   * that are informed about process status changes while the
+   * processing takes place.
    */
   subscriber?: Subscriber;
 
