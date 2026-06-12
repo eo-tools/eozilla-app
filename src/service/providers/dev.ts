@@ -26,10 +26,15 @@ export class DevServiceProvider implements ServiceProvider {
     const apiUrl = `http://localhost:8008`;
     return loadServiceRootMetadata(apiUrl).then(
       (root) =>
-        new UrlService("dev", apiUrl, {
-          id: "unknown",
-          displayName: "anonymous User",
-        }, root),
+        new UrlService(
+          "dev",
+          apiUrl,
+          {
+            id: "unknown",
+            displayName: "anonymous User",
+          },
+          root,
+        ),
     );
   }
 }

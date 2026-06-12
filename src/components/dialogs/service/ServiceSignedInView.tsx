@@ -1,12 +1,4 @@
-import {
-  Badge,
-  Button,
-  Group,
-  Paper,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
+import { Badge, Button, Group, Paper, Stack, Text, Title } from "@mantine/core";
 
 import { JsonCode } from "@/components/common/JsonCode";
 import styles from "@/components/common/styles";

@@ -5,8 +5,13 @@ import { parseAppBootstrapConfig } from "./bootstrap";
 function encodeBase64Url(value: unknown): string {
   const json = JSON.stringify(value);
   const bytes = new TextEncoder().encode(json);
-  const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join("");
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join(
+    "",
+  );
+  return btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 }
 
 describe("parseAppBootstrapConfig", () => {

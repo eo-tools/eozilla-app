@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  SchemaValidationError,
-  validateJsonValue,
-} from "./validateJsonValue";
+import { SchemaValidationError, validateJsonValue } from "./validateJsonValue";
 import type { JsonSchema } from "./schema";
 
 describe("SchemaValidationError", () => {

@@ -18,7 +18,10 @@ describe("TestService", () => {
 
     const processes = await service.getProcesses();
 
-    expect(processes.processes.map((process) => process.id)).toEqual(["p1", "p2"]);
+    expect(processes.processes.map((process) => process.id)).toEqual([
+      "p1",
+      "p2",
+    ]);
 
     const process = await service.getProcess("p1");
 

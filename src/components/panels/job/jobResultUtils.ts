@@ -26,8 +26,7 @@ export function isVideoMimeType(mimeType?: string) {
 
 export function isIframeMimeType(mimeType?: string) {
   return (
-    !!mimeType &&
-    (mimeType === "application/pdf" || mimeType === "text/html")
+    !!mimeType && (mimeType === "application/pdf" || mimeType === "text/html")
   );
 }
 
@@ -36,10 +35,7 @@ export function isMarkdownMimeType(mimeType?: string) {
 }
 
 export function isJsonMimeType(mimeType?: string) {
-  return (
-    mimeType === "application/json" ||
-    !!mimeType?.endsWith("+json")
-  );
+  return mimeType === "application/json" || !!mimeType?.endsWith("+json");
 }
 
 export function isTextMimeType(mimeType?: string) {
@@ -61,7 +57,11 @@ export function createPreviewSource(
     return undefined;
   }
 
-  if (value.startsWith("data:") || value.startsWith("http://") || value.startsWith("https://")) {
+  if (
+    value.startsWith("data:") ||
+    value.startsWith("http://") ||
+    value.startsWith("https://")
+  ) {
     return value;
   }
 
