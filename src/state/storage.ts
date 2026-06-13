@@ -30,7 +30,7 @@ class JsonProperty<T> {
 }
 
 export interface ServiceProviderSelection {
-  providerId: string;
+  id: string;
   options: ServiceOptionsInput<ServiceOptions>;
 }
 

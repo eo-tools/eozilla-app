@@ -1,10 +1,13 @@
 import { Switch, Select, Stack, Table, Text } from "@mantine/core";
 
-import type { Output, ProcessDescription, TransmissionMode } from "@/service";
-import type { ProcessOutputs } from "@/state/types";
+import type {
+  Output,
+  ProcessDescription,
+  TransmissionMode,
+  ProcessOutputs,
+} from "@/service";
 import styles from "@/components/common/styles";
 import OutputLabel from "./OutputLabel";
-import { isEmptyObject } from "@/utils/common";
 import { UnavailableHint } from "@/components/common/UnavailableHint";
 
 interface ProcessOutputsViewProps {
@@ -29,7 +32,7 @@ export default function ProcessOutputsView({
   const hasTransmissionModeSelection = transmissionModes.length > 1;
   const defaultTransmissionMode = getDefaultTransmissionMode(transmissionModes);
 
-  if (isEmptyObject(processOutputs)) {
+  if (outputNames.length === 0) {
     return <UnavailableHint message="No outputs available." />;
   }
 
@@ -57,16 +60,14 @@ export default function ProcessOutputsView({
                     checked={isRequested}
                     label="Requested"
                     onChange={(event) => {
-                      if (!event.currentTarget.checked) {
-                        setProcessOutput(outputName, undefined);
-                        return;
-                      }
-                      setProcessOutput(
-                        outputName,
-                        defaultTransmissionMode
+                      const outputWanted = event.currentTarget.checked;
+                      let outputValue: Output | undefined = undefined;
+                      if (outputWanted) {
+                        outputValue = defaultTransmissionMode
                           ? { transmissionMode: defaultTransmissionMode }
-                          : {},
-                      );
+                          : {};
+                      }
+                      setProcessOutput(outputName, outputValue);
                     }}
                   />
 

@@ -27,7 +27,10 @@ export interface ServiceMetadata extends Description {
   links?: Link[];
 }
 
-/**Expected output of a process execution.*/
+/** Provided input of a process execution.*/
+export type Input = JsonValue;
+
+/** Expected output of a process execution. */
 export interface Output {
   /**Desired format.*/
   format?: Format;
@@ -100,27 +103,36 @@ export interface Subscriber {
   failedUri?: string;
 }
 
-/**A request for a process execution.*/
+/** Expected process execution result type. */
+export type ResponseType = "raw" | "document";
+
+/** Inputs of a process request. */
+export type ProcessInputs = Record<string, Input>;
+
+/** Outputs of a process request. */
+export type ProcessOutputs = Record<string, Output>;
+
+/**
+ * A request for a process execution.
+ */
 export interface ProcessRequest {
   /**
    * Optional process inputs given as key-value mapping.
    * Values may be of any JSON-serializable type accepted by
    * the given process.
    */
-  inputs?: Record<string, unknown>;
+  inputs?: ProcessInputs;
 
   /**
    * Optional process outputs given as key-value mapping.
-   * Values are of type [Output][gavicore.models.Output]
-   * supported by the given process.
+   * Values are of type ``Output`` supported by the given process.
    */
-  outputs?: Record<string, Output>;
+  outputs?: ProcessOutputs;
 
   /**
-   * Optional subscriber of type
-   * [Subscriber][gavicore.models.Subscriber] comprising callback
-   * URLs that are informed about process status changes
-   * while the processing takes place.
+   * Optional subscriber of type ``Subscriber`` comprising callback URLs
+   * that are informed about process status changes while the
+   * processing takes place.
    */
   subscriber?: Subscriber;
 

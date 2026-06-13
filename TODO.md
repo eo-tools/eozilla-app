@@ -2,9 +2,9 @@
 
 - [ ] Allow running the app in an iframe in Jupyter notebooks. 
   - Derived app requirements:
-    - [ ] Accept query parameters that configure the app to use the same service data as the
+    - [x] Accept query parameters that configure the app to use the same service data as the
       cuiman Python client.
-    - [ ] Allow for compact-mode, that is, e.g., no header, no footer.
+    - [x] Allow for compact-mode, that is, e.g., no header, no footer.
     - [ ] Allow accessing the reactive state for the process requests in cuiman.
   - Derived cuiman requiremts:
     - [ ] Bundle the app build with cuiman.

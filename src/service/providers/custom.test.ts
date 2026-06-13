@@ -19,6 +19,24 @@ import { UrlService } from "@/service/services/url";
 import { CustomServiceProvider } from "./custom";
 
 describe("CustomServiceProvider", () => {
+  it("uses custom provider identity and metadata when configured", () => {
+    const provider = new CustomServiceProvider({
+      id: "notebook",
+      meta: {
+        type: "system",
+        title: "Notebook Service",
+        description: "Configured by Jupyter",
+      },
+    });
+
+    expect(provider.id).toBe("notebook");
+    expect(provider.meta).toEqual({
+      type: "system",
+      title: "Notebook Service",
+      description: "Configured by Jupyter",
+    });
+  });
+
   it("uses the url service schema and custom api url", async () => {
     const provider = new CustomServiceProvider();
 

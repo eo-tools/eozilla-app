@@ -13,12 +13,13 @@
 }
 
 .mantine-AppShell-main {
-  /* subtract header and footer height */
-  height: calc(
-    100vh - var(--app-shell-header-height, 40px) -
-      var(--app-shell-footer-height, 0px)
-  );
+  box-sizing: border-box;
+  height: 100dvh;
   background: var(--mantine-color-body);
+}
+
+.app-shell-compact .mantine-AppShell-main {
+  height: 100dvh;
 }
 
 [data-separator] {

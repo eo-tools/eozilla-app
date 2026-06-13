@@ -8,13 +8,25 @@ import type {
 } from "@/service";
 import { loadServiceRootMetadata } from "@/service/services/url";
 
+export interface CustomServiceProviderConfig {
+  id?: string;
+  meta?: ServiceProviderMeta;
+}
+
+const DEFAULT_CUSTOM_SERVICE_PROVIDER_META: ServiceProviderMeta = {
+  type: "custom",
+  title: "Custom Service",
+};
+
 export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions> {
-  readonly id: string = "custom";
-  readonly meta: ServiceProviderMeta = {
-    type: "custom",
-    title: "Processing Service",
-  };
+  readonly id: string;
+  readonly meta: ServiceProviderMeta;
   readonly optionsSchema = URL_SERVICE_OPTIONS_SCHEMA;
+
+  constructor(config: CustomServiceProviderConfig = {}) {
+    this.id = config.id ?? "custom";
+    this.meta = config.meta ?? DEFAULT_CUSTOM_SERVICE_PROVIDER_META;
+  }
 
   signIn(_options: ServiceOptionsInput<UrlServiceOptions>): Promise<void> {
     return Promise.resolve(undefined);
@@ -24,7 +36,9 @@ export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions>
     return Promise.resolve(undefined);
   }
 
-  createService(options: ServiceOptionsInput<UrlServiceOptions>) {
+  createService(
+    options: ServiceOptionsInput<UrlServiceOptions>,
+  ): Promise<UrlService> {
     // TODO: load user
     const user: UserIdentity = { id: "unknown", displayName: "anonymous User" };
     const apiUrl =

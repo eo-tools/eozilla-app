@@ -5,7 +5,10 @@ import type { JsonSchema } from "./schema";
 describe("createJsonValueForSchema", () => {
   it("prefers explicit defaults and enum values", () => {
     expect(
-      createJsonValueForSchema({ type: "string", default: "hello" } as JsonSchema),
+      createJsonValueForSchema({
+        type: "string",
+        default: "hello",
+      } as JsonSchema),
     ).toBe("hello");
     expect(
       createJsonValueForSchema({
@@ -21,7 +24,9 @@ describe("createJsonValueForSchema", () => {
     );
     expect(createJsonValueForSchema({ type: "number" } as JsonSchema)).toBe(0);
     expect(createJsonValueForSchema({ type: "string" } as JsonSchema)).toBe("");
-    expect(createJsonValueForSchema({ nullable: true } as JsonSchema)).toBeNull();
+    expect(
+      createJsonValueForSchema({ nullable: true } as JsonSchema),
+    ).toBeNull();
   });
 
   it("creates nested array and object values", () => {

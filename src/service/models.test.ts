@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  isInlineValue,
-  isLink,
-  isQualifiedValue,
-} from "./models";
+import { isInlineValue, isLink, isQualifiedValue } from "./models";
 
 describe("service model helpers", () => {
   it("detects link, qualified, and inline job results", () => {

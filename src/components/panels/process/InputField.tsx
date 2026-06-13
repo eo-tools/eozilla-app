@@ -3,17 +3,14 @@ import { JsonInput, Typography } from "@mantine/core";
 import ReactMarkdown from "react-markdown";
 
 import type { Field } from "@/utils/field";
-import {
-  type JsonValue,
-  SchemaValidationError,
-  validateJsonValue,
-} from "@/utils/json";
+import { SchemaValidationError, validateJsonValue } from "@/utils/json";
+import type { Input } from "@/service";
 
 export interface InputFieldProps {
   inputName: string;
   inputField: Field;
-  inputValue: JsonValue;
-  setInputValue: (name: string, value: JsonValue) => void;
+  inputValue: Input;
+  setInputValue: (name: string, value: Input) => void;
 }
 
 export default function InputField({
@@ -28,7 +25,7 @@ export default function InputField({
   );
   const [errorText, setErrorText] = useState<string>();
   const validateInputValue = useCallback(
-    (inputValue: JsonValue) => {
+    (inputValue: Input) => {
       try {
         validateJsonValue(inputName, inputValue, inputSchema);
       } catch (error) {

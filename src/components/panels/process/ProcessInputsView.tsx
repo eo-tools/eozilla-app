@@ -1,19 +1,16 @@
 import { useMemo } from "react";
 import { Table } from "@mantine/core";
 
-import type { ProcessDescription } from "@/service";
-import type { JsonValue } from "@/utils/json";
+import type { Input, ProcessDescription, ProcessInputs } from "@/service";
 import { getFieldFromProcessDescriptionInputs } from "@/utils/field";
-import type { ProcessInputs } from "@/state/types";
 import InputLabel from "./InputLabel";
 import InputField from "./InputField";
 import { UnavailableHint } from "@/components/common/UnavailableHint";
-import { isEmptyObject } from "@/utils/common";
 
 interface ProcessInputsViewProps {
   processDescription: ProcessDescription;
   processInputs: ProcessInputs;
-  setProcessInput: (name: string, value: JsonValue) => void;
+  setProcessInput: (name: string, value: Input) => void;
 }
 
 export default function ProcessInputsView({
@@ -25,13 +22,14 @@ export default function ProcessInputsView({
     () => getFieldFromProcessDescriptionInputs(processDescription),
     [processDescription],
   );
-  if (isEmptyObject(processInputs)) {
+  const inputNames = Object.keys(objectField.properties);
+  if (inputNames.length === 0) {
     return <UnavailableHint message="No inputs available." />;
   }
   return (
     <Table variant="vertical" layout="fixed" withTableBorder>
       <Table.Tbody>
-        {Object.keys(objectField.properties)
+        {inputNames
           .map((inputName) => ({
             name: inputName,
             description: (processDescription.inputs || {})[inputName]!,

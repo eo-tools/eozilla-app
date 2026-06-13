@@ -31,7 +31,9 @@ describe("swr key helpers", () => {
       "custom",
       "job-1",
     ]);
-    expect(swrKeys.jobResults(service, { ...jobInfo, status: "running" })).toBeNull();
+    expect(
+      swrKeys.jobResults(service, { ...jobInfo, status: "running" }),
+    ).toBeNull();
   });
 
   it("matches keys by the requested selector", () => {

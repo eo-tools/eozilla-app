@@ -44,7 +44,9 @@ describe("UrlService", () => {
   it("loads root metadata from the API root", async () => {
     fetchMock.mockResolvedValueOnce(createJsonResponse(root));
 
-    await expect(loadServiceRootMetadata("https://example.com/api/")).resolves.toEqual(root);
+    await expect(
+      loadServiceRootMetadata("https://example.com/api/"),
+    ).resolves.toEqual(root);
     expect(fetchMock).toHaveBeenCalledWith("https://example.com/api/", {
       method: undefined,
       headers: undefined,
@@ -133,8 +135,8 @@ describe("UrlService", () => {
       ),
     );
 
-    await expect(loadServiceRootMetadata("https://example.com/api/")).rejects.toBeInstanceOf(
-      ServiceError,
-    );
+    await expect(
+      loadServiceRootMetadata("https://example.com/api/"),
+    ).rejects.toBeInstanceOf(ServiceError);
   });
 });
