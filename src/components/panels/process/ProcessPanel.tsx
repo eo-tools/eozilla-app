@@ -33,12 +33,12 @@ export default function ProcessPanel() {
   const [openedSubPanels, setOpenedSubPanels] = useState(["inputs", "outputs"]);
   const isSubmitting =
     processExecution &&
-    processExecution.request.processId === processId &&
+    processExecution.processId === processId &&
     processExecution.submitting;
   const canExecute =
     processId &&
     (!processExecution ||
-      processExecution.request.processId !== processId ||
+      processExecution.processId !== processId ||
       !processExecution.submitting);
   return (
     <Panel>

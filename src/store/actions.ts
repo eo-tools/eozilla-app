@@ -141,7 +141,8 @@ export function executeActiveProcess() {
     outputs: processRequests[processId].outputs,
   };
   const processExecution = {
-    request: { processId, ...processRequest },
+    processId,
+    processRequest,
     submitting: true,
   };
   setAppState({ processExecution });

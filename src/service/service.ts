@@ -14,7 +14,10 @@ export interface Service {
   root: ServiceMetadata;
   getProcesses(): Promise<ProcessList>;
   getProcess(processId: string): Promise<ProcessDescription>;
-  executeProcess(processId: string, request: ProcessRequest): Promise<JobInfo>;
+  executeProcess(
+    processId: string,
+    processRequest: ProcessRequest,
+  ): Promise<JobInfo>;
   getJobs(): Promise<JobList>;
   getJob(jobId: string): Promise<JobInfo>;
   getJobResults(jobId: string): Promise<JobResults>;

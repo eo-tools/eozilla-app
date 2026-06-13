@@ -23,16 +23,9 @@ export interface InformationData {
   error?: unknown;
 }
 
-/**
- * A request for a process execution for a known process.
- */
-export interface ExecutionRequest extends ProcessRequest {
-  /** The process ID.*/
-  processId: string;
-}
-
 export interface ProcessExecution {
-  request: ExecutionRequest;
+  processId: string;
+  processRequest: ProcessRequest;
   jobInfo?: JobInfo;
   submitting?: boolean;
   error?: unknown;
