@@ -1,8 +1,10 @@
 import {
   isServiceProviderId,
+  type Input,
   type JobInfo,
-  type Service,
+  type Output,
   type ProcessRequest,
+  type Service,
 } from "@/service";
 import { storage } from "@/state/storage";
 
@@ -60,4 +62,23 @@ export function createInitialAppState(): AppState {
     processRequests: {},
     jobId: undefined,
   };
+}
+
+// TODO: create a React hook (or context/provider) that provides this
+//   interface depending on the availability of a RemoteStateClient.
+//   See use of RemoteStateProvider in main.tsx.
+export interface RemoteAppState {
+  processRequests: Record<string, ProcessRequest>;
+
+  setProcessInput(
+    processId: string,
+    inputName: string,
+    inputValue?: Input,
+  ): Promise<void>;
+
+  setProcessOutput(
+    processId: string,
+    outputName: string,
+    outputValue?: Output,
+  ): Promise<void>;
 }
