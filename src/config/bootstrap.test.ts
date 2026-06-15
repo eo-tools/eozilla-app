@@ -38,6 +38,7 @@ describe("parseAppBootstrapConfig", () => {
     ).toEqual({
       compact: true,
       scheme: "dark",
+      ws: null,
       service: {
         id: "notebook",
         meta: {
@@ -63,6 +64,7 @@ describe("parseAppBootstrapConfig", () => {
     ).toEqual({
       compact: true,
       scheme: "dark",
+      ws: null,
       service: null,
     });
 
@@ -73,6 +75,7 @@ describe("parseAppBootstrapConfig", () => {
     expect(parseAppBootstrapConfig("?scheme=auto")).toEqual({
       compact: false,
       scheme: undefined,
+      ws: null,
       service: null,
     });
   });
@@ -81,11 +84,13 @@ describe("parseAppBootstrapConfig", () => {
     expect(parseAppBootstrapConfig("?compact=0")).toEqual({
       compact: false,
       scheme: undefined,
+      ws: null,
       service: null,
     });
     expect(parseAppBootstrapConfig("?compact=false")).toEqual({
       compact: false,
       scheme: undefined,
+      ws: null,
       service: null,
     });
   });
@@ -101,6 +106,16 @@ describe("parseAppBootstrapConfig", () => {
     expect(parseAppBootstrapConfig(`?service=${encodedService}`)).toEqual({
       compact: false,
       scheme: undefined,
+      ws: null,
+      service: null,
+    });
+  });
+
+  it("parses websocket URLs", () => {
+    expect(parseAppBootstrapConfig("?ws=ws://127.0.0.1:8743/ws")).toEqual({
+      compact: false,
+      scheme: undefined,
+      ws: "ws://127.0.0.1:8743/ws",
       service: null,
     });
   });

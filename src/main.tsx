@@ -5,6 +5,7 @@ import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
+import { RemoteStateProvider } from "remotestate";
 
 import {
   registerServiceProviders,
@@ -47,9 +48,11 @@ initAppStore(() => {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <MantineProvider forceColorScheme={bootstrapConfig.scheme}>
-      <Notifications />
-      <App compact={bootstrapConfig.compact} />
-    </MantineProvider>
+    <RemoteStateProvider active={!!bootstrapConfig.ws} url={bootstrapConfig.ws}>
+      <MantineProvider forceColorScheme={bootstrapConfig.scheme}>
+        <Notifications />
+        <App compact={bootstrapConfig.compact} />
+      </MantineProvider>
+    </RemoteStateProvider>
   </StrictMode>,
 );
