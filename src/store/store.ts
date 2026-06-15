@@ -1,7 +1,7 @@
 import { create, type StoreApi } from "zustand";
 import type { UseBoundStore } from "zustand/react";
 
-import { type AppState, createInitialAppState } from "../state/types";
+import { type AppState, createInitialAppState } from "@/state/types";
 
 let _store: UseBoundStore<StoreApi<AppState>> | null = null;
 
