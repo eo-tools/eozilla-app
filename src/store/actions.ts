@@ -136,10 +136,7 @@ export function executeActiveProcess() {
   if (!service || !processId || !processRequests[processId]) {
     return;
   }
-  const processRequest = {
-    inputs: processRequests[processId].inputs,
-    outputs: processRequests[processId].outputs,
-  };
+  const processRequest = processRequests[processId];
   const processExecution = {
     processId,
     processRequest,
@@ -193,10 +190,7 @@ export function setActiveProcessInput(inputName: string, inputValue: Input) {
   });
 }
 
-export function setProcessInputs(
-  processId: string,
-  processInputs: ProcessInputs,
-) {
+function setProcessInputs(processId: string, processInputs: ProcessInputs) {
   const state = getAppState();
   setAppState({
     processRequests: {
@@ -227,15 +221,13 @@ export function setActiveProcessOutput(
     return;
   }
 
+  // Delete output with key outputName
   const nextProcessOutputs = { ...processOutputs };
   delete nextProcessOutputs[outputName];
   setProcessOutputs(activeProcessId, nextProcessOutputs);
 }
 
-export function setProcessOutputs(
-  processId: string,
-  processOutputs: ProcessOutputs,
-) {
+function setProcessOutputs(processId: string, processOutputs: ProcessOutputs) {
   const state = getAppState();
   setAppState({
     processRequests: {
