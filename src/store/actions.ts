@@ -1,6 +1,6 @@
 import { notifications } from "@mantine/notifications";
 
-import { getAppState, setAppState } from "@/store/store";
+import { getAppState, getAppStore, setAppState } from "@/store/store";
 import { type DialogId, createInitialAppState } from "@/state/types";
 import {
   getServiceProvider,
@@ -12,6 +12,7 @@ import {
   type Service,
   type ProcessInputs,
   type ProcessOutputs,
+  type ProcessRequest,
 } from "@/service";
 import { createJsonValueForSchema } from "@/utils/json";
 import { invalidateSWRKeys } from "@/service/swr";
@@ -165,6 +166,18 @@ export function executeActiveProcess() {
     });
 }
 
+export function setProcessRequest(
+  processId: string,
+  processRequest: ProcessRequest,
+) {
+  getAppStore().setState((state) => ({
+    processRequests: {
+      ...state.processRequests,
+      [processId]: processRequest,
+    },
+  }));
+}
+
 // export function showInformationBox(information: InformationData) {
 //   setAppState({ information });
 // }
@@ -192,14 +205,10 @@ export function setActiveProcessInput(inputName: string, inputValue: Input) {
 
 function setProcessInputs(processId: string, processInputs: ProcessInputs) {
   const state = getAppState();
-  setAppState({
-    processRequests: {
-      ...state.processRequests,
-      [processId]: {
-        ...state.processRequests[processId],
-        inputs: processInputs,
-      },
-    },
+  const processRequest = state.processRequests[processId];
+  setProcessRequest(processId, {
+    ...processRequest,
+    inputs: processInputs,
   });
 }
 
@@ -229,14 +238,10 @@ export function setActiveProcessOutput(
 
 function setProcessOutputs(processId: string, processOutputs: ProcessOutputs) {
   const state = getAppState();
-  setAppState({
-    processRequests: {
-      ...state.processRequests,
-      [processId]: {
-        ...state.processRequests[processId],
-        outputs: processOutputs,
-      },
-    },
+  const processRequest = state.processRequests[processId];
+  setProcessRequest(processId, {
+    ...processRequest,
+    outputs: processOutputs,
   });
 }
 

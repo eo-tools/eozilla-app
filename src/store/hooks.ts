@@ -7,6 +7,7 @@ import {
   type ProcessOutputs,
   getServiceProvider,
   getServiceProviders,
+  type ProcessRequest,
 } from "@/service";
 import { swrKeys } from "@/service/swr";
 import { getAppState, getAppStore } from "@/store/store";
@@ -23,11 +24,11 @@ import {
   setService,
 } from "@/store/actions";
 import { storage } from "@/state/storage";
+import { useRemoteState } from "../../../remotestate/remotestate-ts/src/lib";
 
 const selectServiceProviderId = (state: AppState) => state.serviceProviderId;
 const selectService = (state: AppState) => state.service;
 const selectProcessId = (state: AppState) => state.processId;
-const selectProcessesRequests = (state: AppState) => state.processRequests;
 const selectProcessExecution = (state: AppState) => state.processExecution;
 const selectJobId = (state: AppState) => state.jobId;
 const selectConfirmation = (state: AppState) => state.confirmation;
@@ -102,9 +103,21 @@ function getInitialProcessInputs(
   return processInputs;
 }
 
+export function useProcessRequestsState(): [
+  Record<string, ProcessRequest>,
+  (requests: Record<string, ProcessRequest>) => Promise<void>,
+] {
+  const [processRequests, setProcessRequests] =
+    useRemoteState<Record<string, ProcessRequest>>("processRequests");
+  if (!processRequests) {
+    throw new Error("processRequests are not defined");
+  }
+  return [processRequests, setProcessRequests];
+}
+
 export function useActiveProcessInputs(): ProcessInputs | null {
+  const [processRequests, _] = useProcessRequestsState();
   const activeProcessState = useActiveProcessDescription();
-  const processRequests = useAppState(selectProcessesRequests);
   const processDescription = activeProcessState.processDescription;
   return useMemo(() => {
     if (!processDescription) {
@@ -120,8 +133,8 @@ export function useActiveProcessInputs(): ProcessInputs | null {
 }
 
 export function useActiveProcessOutputs(): ProcessOutputs | null {
+  const [processRequests, _] = useProcessRequestsState();
   const activeProcessState = useActiveProcessDescription();
-  const processRequests = useAppState(selectProcessesRequests);
   const processDescription = activeProcessState.processDescription;
   return useMemo(() => {
     if (!processDescription) {

@@ -7,6 +7,7 @@ import {
   useActiveProcessDescription,
   useProcessExecution,
   useActiveProcessId,
+  useProcessRequestsState,
 } from "@/store/hooks";
 import type { ProcessDescription } from "@/service";
 import { Panel } from "@/components/common/Panel";
@@ -26,6 +27,7 @@ import { useState } from "react";
 export default function ProcessPanel() {
   const processesState = useActiveProcessDescription();
   const { processDescription } = processesState;
+  const [_processRequests, setProcessRequests] = useProcessRequestsState();
   const activeProcessInputs = useActiveProcessInputs();
   const activeProcessOutputs = useActiveProcessOutputs();
   const processId = useActiveProcessId();
@@ -72,6 +74,7 @@ export default function ProcessPanel() {
                     processDescription={processDescription}
                     processInputs={activeProcessInputs || {}}
                     setProcessInput={setActiveProcessInput}
+                    setProcessRequests={setProcessRequests}
                   />
                 </SubPanel.Item>
                 <SubPanel.Item value={"outputs"} title={"Outputs"}>
@@ -79,6 +82,7 @@ export default function ProcessPanel() {
                     processDescription={processDescription}
                     processOutputs={activeProcessOutputs || {}}
                     setProcessOutput={setActiveProcessOutput}
+                    setProcessRequests={setProcessRequests}
                   />
                 </SubPanel.Item>
               </SubPanel>
