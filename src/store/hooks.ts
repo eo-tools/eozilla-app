@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import useSWR from "swr";
 
 import {
@@ -25,6 +25,11 @@ import {
 } from "@/store/actions";
 import { storage } from "@/state/storage";
 import { useRemoteState } from "../../../remotestate/remotestate-ts/src/lib";
+import {
+  useRemoteStateClient,
+  useRemoteStateValue,
+} from "../../../remotestate/remotestate-ts";
+import type { ProcessRequestsService } from "@/store/remotestate";
 
 const selectServiceProviderId = (state: AppState) => state.serviceProviderId;
 const selectService = (state: AppState) => state.service;
@@ -115,8 +120,45 @@ export function useProcessRequestsState(): [
   return [processRequests, setProcessRequests];
 }
 
+export function useProcessRequests(): Record<string, ProcessRequest> {
+  const processRequests =
+    useRemoteStateValue<Record<string, ProcessRequest>>("processRequests");
+  if (!processRequests) {
+    throw new Error("processRequests are not defined");
+  }
+  return processRequests;
+}
+
+export function useProcessRequestsActions(): ProcessRequestsService {
+  const remoteStateClient = useRemoteStateClient<ProcessRequestsService>();
+  const setProcessRequest = useCallback(
+    (processId: string, request: ProcessRequest) => {
+      remoteStateClient.store.set(["processRequests", processId], request);
+    },
+    [remoteStateClient],
+  );
+  const setProcessRequestInputs = useCallback(
+    (processId: string, inputs: Record<string, unknown>) => {
+      remoteStateClient.store.set(
+        ["processRequests", processId, "inputs"],
+        inputs,
+      );
+    },
+  );
+  const setProcessRequestOutputs = useCallback(
+    (processId: string, inputs: Record<string, unknown>) => {
+      remoteStateClient.store.set(
+        ["processRequests", processId, "outputs"],
+        inputs,
+      );
+    },
+  );
+  remoteStateClient.store.set("processRequests.");
+  return { setProcessRequest };
+}
+
 export function useActiveProcessInputs(): ProcessInputs | null {
-  const [processRequests, _] = useProcessRequestsState();
+  const processRequests = useProcessRequests();
   const activeProcessState = useActiveProcessDescription();
   const processDescription = activeProcessState.processDescription;
   return useMemo(() => {
@@ -133,7 +175,7 @@ export function useActiveProcessInputs(): ProcessInputs | null {
 }
 
 export function useActiveProcessOutputs(): ProcessOutputs | null {
-  const [processRequests, _] = useProcessRequestsState();
+  const processRequests = useProcessRequests();
   const activeProcessState = useActiveProcessDescription();
   const processDescription = activeProcessState.processDescription;
   return useMemo(() => {
