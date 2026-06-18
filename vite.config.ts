@@ -7,8 +7,16 @@ import { fileURLToPath, URL } from "node:url";
 export default defineConfig({
   plugins: [react()],
   resolve: {
+    dedupe: ["react", "react-dom"],
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      react: fileURLToPath(new URL("./node_modules/react", import.meta.url)),
+      "react-dom": fileURLToPath(
+        new URL("./node_modules/react-dom", import.meta.url),
+      ),
+      "react/jsx-runtime": fileURLToPath(
+        new URL("./node_modules/react/jsx-runtime.js", import.meta.url),
+      ),
     },
   },
   test: {

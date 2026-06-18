@@ -101,7 +101,6 @@ export async function loadServiceRootMetadata(
 
 function validateProcessList(data: unknown): ProcessList {
   // TODO: validate data is ProcessList
-  console.log("validateProcessList:", data);
   return data as ProcessList;
 }
 

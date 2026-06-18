@@ -7,19 +7,15 @@ import {
   type Store,
 } from "remotestate";
 
-import type { ProcessRequest } from "@/service";
 import type { AppState } from "@/state/types";
 import { getAppStore } from "./store";
-import { setProcessRequest } from "./actions";
 
 export type ProcessRequestsService = {
-  setProcessRequest(
-    processId: string,
-    processRequest: ProcessRequest,
-  ): Promise<void>;
+  set(path: Path, value: unknown): Promise<void>;
 };
 
 export function createFallbackProcessRequestsClient(): RemoteStateClient<ProcessRequestsService> {
+  // noinspection JSUnusedGlobalSymbols
   const store: Store = {
     get: (path: Path) => {
       return getPathAt(getAppStore().getState(), path);
@@ -43,6 +39,11 @@ export function createFallbackProcessRequestsClient(): RemoteStateClient<Process
 
   return createLocalStateClient<ProcessRequestsService>({
     store,
-    actions: { setProcessRequest },
+    actions: {
+      set: (path: Path, value: unknown) => {
+        store.set(path, value);
+        return Promise.resolve();
+      },
+    },
   });
 }

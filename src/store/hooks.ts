@@ -8,6 +8,8 @@ import {
   getServiceProvider,
   getServiceProviders,
   type ProcessRequest,
+  type Input,
+  type Output,
 } from "@/service";
 import { swrKeys } from "@/service/swr";
 import { getAppState, getAppStore } from "@/store/store";
@@ -19,16 +21,10 @@ import {
   activateJob,
   activateProcess,
   openDialog,
-  setInitialProcessInputs,
-  setInitialProcessOutputs,
   setService,
 } from "@/store/actions";
 import { storage } from "@/state/storage";
-import { useRemoteState } from "../../../remotestate/remotestate-ts/src/lib";
-import {
-  useRemoteStateClient,
-  useRemoteStateValue,
-} from "../../../remotestate/remotestate-ts";
+import { useRemoteStateClient, useRemoteStateValue } from "remotestate";
 import type { ProcessRequestsService } from "@/store/remotestate";
 
 const selectServiceProviderId = (state: AppState) => state.serviceProviderId;
@@ -95,31 +91,6 @@ export function useActiveProcessId() {
   return useAppState(selectProcessId);
 }
 
-function getInitialProcessInputs(
-  processDescription: ProcessDescription,
-): ProcessInputs {
-  const objectSchema =
-    getSchemaFromProcessDescriptionInputs(processDescription);
-  const processInputs: ProcessInputs = {};
-  const properties = objectSchema.properties || {};
-  Object.keys(properties).forEach((key) => {
-    processInputs[key] = createJsonValueForSchema(properties[key]!);
-  });
-  return processInputs;
-}
-
-export function useProcessRequestsState(): [
-  Record<string, ProcessRequest>,
-  (requests: Record<string, ProcessRequest>) => Promise<void>,
-] {
-  const [processRequests, setProcessRequests] =
-    useRemoteState<Record<string, ProcessRequest>>("processRequests");
-  if (!processRequests) {
-    throw new Error("processRequests are not defined");
-  }
-  return [processRequests, setProcessRequests];
-}
-
 export function useProcessRequests(): Record<string, ProcessRequest> {
   const processRequests =
     useRemoteStateValue<Record<string, ProcessRequest>>("processRequests");
@@ -129,32 +100,42 @@ export function useProcessRequests(): Record<string, ProcessRequest> {
   return processRequests;
 }
 
-export function useProcessRequestsActions(): ProcessRequestsService {
-  const remoteStateClient = useRemoteStateClient<ProcessRequestsService>();
-  const setProcessRequest = useCallback(
-    (processId: string, request: ProcessRequest) => {
-      remoteStateClient.store.set(["processRequests", processId], request);
+export function useSetProcessRequest() {
+  const client = useRemoteStateClient<ProcessRequestsService>();
+  return useCallback(
+    (processId: string, processRequest: ProcessRequest) => {
+      client.store.set(["processRequests", processId], processRequest);
     },
-    [remoteStateClient],
+    [client],
   );
-  const setProcessRequestInputs = useCallback(
-    (processId: string, inputs: Record<string, unknown>) => {
-      remoteStateClient.store.set(
-        ["processRequests", processId, "inputs"],
-        inputs,
-      );
+}
+
+export function useActiveProcessRequestsActions() {
+  const client = useRemoteStateClient<ProcessRequestsService>();
+  const processId = useActiveProcessId();
+  const setProcessRequestInput = useCallback(
+    (name: string, value: Input) => {
+      if (processId) {
+        client.store.set(["processRequests", processId, "inputs", name], value);
+      }
     },
+    [client, processId],
   );
-  const setProcessRequestOutputs = useCallback(
-    (processId: string, inputs: Record<string, unknown>) => {
-      remoteStateClient.store.set(
-        ["processRequests", processId, "outputs"],
-        inputs,
-      );
+  const setProcessRequestOutput = useCallback(
+    (name: string, value: Output | undefined) => {
+      if (processId) {
+        client.store.set(
+          ["processRequests", processId, "outputs", name],
+          value,
+        );
+      }
     },
+    [client, processId],
   );
-  remoteStateClient.store.set("processRequests.");
-  return { setProcessRequest };
+  return {
+    setProcessRequestInput,
+    setProcessRequestOutput,
+  };
 }
 
 export function useActiveProcessInputs(): ProcessInputs | null {
@@ -170,7 +151,7 @@ export function useActiveProcessInputs(): ProcessInputs | null {
     if (processInputs) {
       return processInputs;
     }
-    return getInitialProcessInputs(processDescription);
+    return createInitialProcessInputs(processDescription);
   }, [processRequests, processDescription]);
 }
 
@@ -196,11 +177,13 @@ export function useActiveJobId() {
 }
 
 // do not delete, we need it later
+// noinspection JSUnusedGlobalSymbols
 export function useConfirmation() {
   return useAppState(selectConfirmation);
 }
 
 // do not delete, we need it later
+// noinspection JSUnusedGlobalSymbols
 export function useInformation() {
   return useAppState(selectInformation);
 }
@@ -224,6 +207,7 @@ export function useProcessExecution() {
 }
 
 export function useActiveProcessDescription() {
+  const setProcessRequest = useSetProcessRequest();
   const activeProcessId = useActiveProcessId();
   const service = useService();
   const processesState = useSWR(
@@ -234,10 +218,11 @@ export function useActiveProcessDescription() {
   // Ensure we have initial input values
   useEffect(() => {
     if (processDescription) {
-      setInitialProcessInputs(processDescription);
-      setInitialProcessOutputs(processDescription);
+      const processId = processDescription.id;
+      const processRequest = createInitialProcessRequest(processDescription);
+      setProcessRequest(processId, processRequest);
     }
-  }, [processDescription]);
+  }, [processDescription, setProcessRequest]);
   return {
     ...processesState,
     processDescription,
@@ -299,4 +284,33 @@ export function useActiveJobResults() {
 
 export function useDialogOpened(dialogId: DialogId) {
   return useAppState((state: AppState) => state.dialogId === dialogId);
+}
+
+// --- Helpers
+
+function createInitialProcessRequest(
+  processDescription: ProcessDescription,
+): ProcessRequest {
+  return {
+    inputs: createInitialProcessInputs(processDescription),
+    outputs: createInitialProcessOutputs(processDescription),
+  };
+}
+
+function createInitialProcessInputs(processDescription: ProcessDescription) {
+  const objectSchema =
+    getSchemaFromProcessDescriptionInputs(processDescription);
+  return createJsonValueForSchema(objectSchema) as ProcessInputs;
+}
+
+function createInitialProcessOutputs(processDescription: ProcessDescription) {
+  const processOutputs: ProcessOutputs = {};
+  Object.keys(processDescription.outputs || {}).forEach((outputName) => {
+    processOutputs[outputName] = {
+      transmissionMode: processDescription?.outputTransmission?.length
+        ? processDescription?.outputTransmission[0]
+        : undefined,
+    };
+  });
+  return processOutputs;
 }

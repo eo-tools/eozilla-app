@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ActionIcon, Stack, Tooltip } from "@mantine/core";
 import { IconMathFunction, IconPlayerPlayFilled } from "@tabler/icons-react";
 
@@ -7,7 +8,8 @@ import {
   useActiveProcessDescription,
   useProcessExecution,
   useActiveProcessId,
-  useProcessRequestsState,
+  useActiveProcessRequestsActions,
+  useProcessRequests,
 } from "@/store/hooks";
 import type { ProcessDescription } from "@/service";
 import { Panel } from "@/components/common/Panel";
@@ -15,21 +17,18 @@ import { ResourceView } from "@/components/common/ResourceView";
 import ProcessDescriptionView from "@/components/panels/process/ProcessDescriptionView";
 import ProcessInputsView from "@/components/panels/process/ProcessInputsView";
 import ProcessOutputsView from "@/components/panels/process/ProcessOutputsView";
-import {
-  executeActiveProcess,
-  setActiveProcessInput,
-  setActiveProcessOutput,
-} from "@/store/actions";
+import { executeActiveProcess } from "@/store/actions";
 import styles from "@/components/common/styles";
 import { SubPanel } from "@/components/common/SubPanel";
-import { useState } from "react";
 
 export default function ProcessPanel() {
   const processesState = useActiveProcessDescription();
   const { processDescription } = processesState;
-  const [_processRequests, setProcessRequests] = useProcessRequestsState();
+  const processRequests = useProcessRequests();
   const activeProcessInputs = useActiveProcessInputs();
   const activeProcessOutputs = useActiveProcessOutputs();
+  const { setProcessRequestInput, setProcessRequestOutput } =
+    useActiveProcessRequestsActions();
   const processId = useActiveProcessId();
   const processExecution = useProcessExecution();
   const [openedSubPanels, setOpenedSubPanels] = useState(["inputs", "outputs"]);
@@ -54,7 +53,7 @@ export default function ProcessPanel() {
             <ActionIcon
               {...styles.actionIcon.sm}
               variant="filled"
-              onClick={executeActiveProcess}
+              onClick={() => executeActiveProcess(processRequests)}
               loading={isSubmitting}
               disabled={!canExecute}
             >
@@ -73,16 +72,14 @@ export default function ProcessPanel() {
                   <ProcessInputsView
                     processDescription={processDescription}
                     processInputs={activeProcessInputs || {}}
-                    setProcessInput={setActiveProcessInput}
-                    setProcessRequests={setProcessRequests}
+                    setProcessInput={setProcessRequestInput}
                   />
                 </SubPanel.Item>
                 <SubPanel.Item value={"outputs"} title={"Outputs"}>
                   <ProcessOutputsView
                     processDescription={processDescription}
                     processOutputs={activeProcessOutputs || {}}
-                    setProcessOutput={setActiveProcessOutput}
-                    setProcessRequests={setProcessRequests}
+                    setProcessOutput={setProcessRequestOutput}
                   />
                 </SubPanel.Item>
               </SubPanel>
