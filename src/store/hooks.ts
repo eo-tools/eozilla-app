@@ -91,13 +91,8 @@ export function useActiveProcessId() {
   return useAppState(selectProcessId);
 }
 
-export function useProcessRequests(): Record<string, ProcessRequest> {
-  const processRequests =
-    useRemoteStateValue<Record<string, ProcessRequest>>("processRequests");
-  if (!processRequests) {
-    throw new Error("processRequests are not defined");
-  }
-  return processRequests;
+export function useProcessRequests() {
+  return useRemoteStateValue<Record<string, ProcessRequest>>("processRequests");
 }
 
 export function useSetProcessRequest() {
@@ -143,7 +138,7 @@ export function useActiveProcessInputs(): ProcessInputs | null {
   const activeProcessState = useActiveProcessDescription();
   const processDescription = activeProcessState.processDescription;
   return useMemo(() => {
-    if (!processDescription) {
+    if (!processDescription || !processRequests) {
       return null;
     }
     const processId = processDescription.id;
@@ -160,7 +155,7 @@ export function useActiveProcessOutputs(): ProcessOutputs | null {
   const activeProcessState = useActiveProcessDescription();
   const processDescription = activeProcessState.processDescription;
   return useMemo(() => {
-    if (!processDescription) {
+    if (!processDescription || !processRequests) {
       return null;
     }
     const processId = processDescription.id;

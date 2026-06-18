@@ -32,15 +32,23 @@ export default function ProcessPanel() {
   const processId = useActiveProcessId();
   const processExecution = useProcessExecution();
   const [openedSubPanels, setOpenedSubPanels] = useState(["inputs", "outputs"]);
-  const isSubmitting =
+  const isSubmitting = Boolean(
     processExecution &&
     processExecution.processId === processId &&
-    processExecution.submitting;
-  const canExecute =
+    processExecution.submitting,
+  );
+  const canExecute = Boolean(
+    processRequests &&
     processId &&
     (!processExecution ||
       processExecution.processId !== processId ||
-      !processExecution.submitting);
+      !processExecution.submitting),
+  );
+  const handleExecuteProcess = () => {
+    if (processRequests) {
+      executeActiveProcess(processRequests);
+    }
+  };
   return (
     <Panel>
       <Panel.Header
@@ -53,7 +61,7 @@ export default function ProcessPanel() {
             <ActionIcon
               {...styles.actionIcon.sm}
               variant="filled"
-              onClick={() => executeActiveProcess(processRequests)}
+              onClick={handleExecuteProcess}
               loading={isSubmitting}
               disabled={!canExecute}
             >
