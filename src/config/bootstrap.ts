@@ -6,17 +6,19 @@ import type {
 import { isObject } from "@/utils/common";
 
 const COMPACT_QUERY_PARAM = "compact";
+const DEBUG_QUERY_PARAM = "debug";
 const SCHEME_QUERY_PARAM = "scheme";
-const WEBSOCKET_QUERY_PARAM = "ws";
 const SERVICE_QUERY_PARAM = "service";
+const WEBSOCKET_QUERY_PARAM = "ws";
 
 export type AppColorScheme = "dark" | "light";
 
 export interface AppBootstrapConfig {
   compact: boolean;
+  debug: boolean;
   scheme: AppColorScheme | undefined;
-  ws: string | null;
   service: SerializedServiceProvider | null;
+  ws: string | null;
 }
 
 export interface SerializedServiceProvider {
@@ -30,6 +32,7 @@ export function parseAppBootstrapConfig(
 ): AppBootstrapConfig {
   const params = new URLSearchParams(search);
   const compact = parseBooleanParam(params.get(COMPACT_QUERY_PARAM));
+  const debug = parseBooleanParam(params.get(DEBUG_QUERY_PARAM));
   const scheme = parseSchemeParam(params.get(SCHEME_QUERY_PARAM));
   const ws = params.get(WEBSOCKET_QUERY_PARAM);
   const encodedService = params.get(SERVICE_QUERY_PARAM);
@@ -43,7 +46,7 @@ export function parseAppBootstrapConfig(
       console.warn("Failed to parse value of parameter 'service'.", error);
     }
   }
-  return { compact, scheme, ws, service };
+  return { compact, debug, scheme, service, ws };
 }
 
 export function parseSerializedServiceProvider(

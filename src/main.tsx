@@ -58,6 +58,7 @@ createRoot(document.getElementById("root")!).render(
     <RemoteProcessRequestsProvider
       url={bootstrapConfig.ws}
       fallback={createFallbackProcessRequestsClient}
+      debug={bootstrapConfig.debug}
     >
       <MantineProvider forceColorScheme={bootstrapConfig.scheme}>
         <Notifications />
