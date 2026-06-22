@@ -10,10 +10,12 @@ import {
 import type { AppState } from "@/state/types";
 import { getAppStore } from "./store";
 
-export type ProcessRequestsService = {
-  set(path: Path, value: unknown): Promise<void>;
-};
+export type ProcessRequestsService = {};
 
+// TODO:the fallback created here, is a quite common pattern
+//  to connect a Zustand store to a RemoteStateClient.
+//  Maybe move into remotestate/remotestate-ts into with an optional
+//  Zustand dependency.
 export function createFallbackProcessRequestsClient(): RemoteStateClient<ProcessRequestsService> {
   // noinspection JSUnusedGlobalSymbols
   const store: Store = {
@@ -37,13 +39,5 @@ export function createFallbackProcessRequestsClient(): RemoteStateClient<Process
     dispose: () => {},
   };
 
-  return createLocalStateClient<ProcessRequestsService>({
-    store,
-    actions: {
-      set: (path: Path, value: unknown) => {
-        store.set(path, value);
-        return Promise.resolve();
-      },
-    },
-  });
+  return createLocalStateClient<ProcessRequestsService>({ store });
 }
