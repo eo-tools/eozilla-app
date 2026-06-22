@@ -20,7 +20,7 @@ import { storage } from "@/state/storage";
 import { initAppStore } from "@/store/store";
 import App from "@/components/App";
 import {
-  createFallbackProcessRequestsClient,
+  createFallbackAppRemoteStateClient,
   type ProcessRequestsService,
 } from "@/store/remotestate";
 
@@ -50,20 +50,19 @@ initAppStore(() => {
   registerServiceProviders(providers);
 });
 
-const RemoteProcessRequestsProvider =
-  RemoteStateProvider<ProcessRequestsService>;
+const AppRemoteStateProvider = RemoteStateProvider<ProcessRequestsService>;
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RemoteProcessRequestsProvider
+    <AppRemoteStateProvider
       url={bootstrapConfig.ws}
-      fallback={createFallbackProcessRequestsClient}
+      fallback={createFallbackAppRemoteStateClient}
       debug={bootstrapConfig.debug}
     >
       <MantineProvider forceColorScheme={bootstrapConfig.scheme}>
         <Notifications />
         <App compact={bootstrapConfig.compact} />
       </MantineProvider>
-    </RemoteProcessRequestsProvider>
+    </AppRemoteStateProvider>
   </StrictMode>,
 );
