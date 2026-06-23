@@ -1,4 +1,3 @@
-import { ResetOnKey } from "@/components/common/ResetOnKey";
 import type { Field } from "@/utils/field";
 import type { Input } from "@/service";
 import { InputFieldEditor } from "./InputFieldEditor";
@@ -16,21 +15,12 @@ export default function InputField({
   inputValue,
   setInputValue,
 }: InputFieldProps) {
-  const serializedInputValue = serializeInputValue(inputValue);
-
   return (
-    <ResetOnKey resetKey={serializedInputValue}>
-      <InputFieldEditor
-        inputName={inputName}
-        inputSchema={inputField.schema}
-        inputValue={inputValue}
-        initialTextValue={serializedInputValue}
-        setInputValue={setInputValue}
-      />
-    </ResetOnKey>
+    <InputFieldEditor
+      inputName={inputName}
+      inputSchema={inputField.schema}
+      inputValue={inputValue}
+      setInputValue={setInputValue}
+    />
   );
-}
-
-function serializeInputValue(inputValue: Input): string {
-  return JSON.stringify(inputValue, null, 2) ?? "";
 }
