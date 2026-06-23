@@ -15,7 +15,7 @@ function encodeBase64Url(value: unknown): string {
 }
 
 describe("parseAppBootstrapConfig", () => {
-  it("parses compact mode and the serialized service provider", () => {
+  it("parses compact mode, debug, and the serialized service provider", () => {
     const encodedService = encodeBase64Url({
       id: "notebook",
       meta: {
@@ -33,11 +33,13 @@ describe("parseAppBootstrapConfig", () => {
 
     expect(
       parseAppBootstrapConfig(
-        `?compact=1&scheme=dark&service=${encodedService}`,
+        `?compact=1&debug=1&scheme=dark&service=${encodedService}`,
       ),
     ).toEqual({
       compact: true,
+      debug: true,
       scheme: "dark",
+      ws: null,
       service: {
         id: "notebook",
         meta: {
@@ -62,7 +64,9 @@ describe("parseAppBootstrapConfig", () => {
       parseAppBootstrapConfig("?compact&scheme=dark&service=not-json"),
     ).toEqual({
       compact: true,
+      debug: false,
       scheme: "dark",
+      ws: null,
       service: null,
     });
 
@@ -72,7 +76,9 @@ describe("parseAppBootstrapConfig", () => {
   it("ignores invalid color scheme values", () => {
     expect(parseAppBootstrapConfig("?scheme=auto")).toEqual({
       compact: false,
+      debug: false,
       scheme: undefined,
+      ws: null,
       service: null,
     });
   });
@@ -80,12 +86,16 @@ describe("parseAppBootstrapConfig", () => {
   it("parses explicit compact mode false values", () => {
     expect(parseAppBootstrapConfig("?compact=0")).toEqual({
       compact: false,
+      debug: false,
       scheme: undefined,
+      ws: null,
       service: null,
     });
     expect(parseAppBootstrapConfig("?compact=false")).toEqual({
       compact: false,
+      debug: false,
       scheme: undefined,
+      ws: null,
       service: null,
     });
   });
@@ -100,7 +110,19 @@ describe("parseAppBootstrapConfig", () => {
 
     expect(parseAppBootstrapConfig(`?service=${encodedService}`)).toEqual({
       compact: false,
+      debug: false,
       scheme: undefined,
+      ws: null,
+      service: null,
+    });
+  });
+
+  it("parses websocket URLs", () => {
+    expect(parseAppBootstrapConfig("?ws=ws://127.0.0.1:8743/ws")).toEqual({
+      compact: false,
+      debug: false,
+      scheme: undefined,
+      ws: "ws://127.0.0.1:8743/ws",
       service: null,
     });
   });

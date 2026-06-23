@@ -5,6 +5,7 @@ import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
+import { RemoteStateProvider } from "remotestate";
 
 import {
   registerServiceProviders,
@@ -18,6 +19,10 @@ import { TestServiceProvider } from "@/service/providers/test";
 import { storage } from "@/state/storage";
 import { initAppStore } from "@/store/store";
 import App from "@/components/App";
+import {
+  createFallbackAppRemoteStateClient,
+  type ProcessRequestsService,
+} from "@/store/remotestate";
 
 const bootstrapConfig = parseAppBootstrapConfig();
 
@@ -45,11 +50,19 @@ initAppStore(() => {
   registerServiceProviders(providers);
 });
 
+const AppRemoteStateProvider = RemoteStateProvider<ProcessRequestsService>;
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <MantineProvider forceColorScheme={bootstrapConfig.scheme}>
-      <Notifications />
-      <App compact={bootstrapConfig.compact} />
-    </MantineProvider>
+    <AppRemoteStateProvider
+      url={bootstrapConfig.ws}
+      fallback={createFallbackAppRemoteStateClient}
+      debug={bootstrapConfig.debug}
+    >
+      <MantineProvider forceColorScheme={bootstrapConfig.scheme}>
+        <Notifications />
+        <App compact={bootstrapConfig.compact} />
+      </MantineProvider>
+    </AppRemoteStateProvider>
   </StrictMode>,
 );

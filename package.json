@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "clean": "rimraf dist",
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "rimraf dist && tsc -b && vite build",
     "test": "vitest --run",
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
     "format": "prettier -w src",
@@ -22,7 +23,7 @@
     "react-dom": "^19.2.6",
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^4.11.2",
-    "remotestate": "file:../remotestate/remotestate-ts",
+    "remotestate": "^0.3.0",
     "swr": "^2.4.1",
     "zustand": "^5.0.13"
   },
@@ -43,9 +44,14 @@
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
     "prettier": "3.8.0",
+    "rimraf": "^6.1.3",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",
     "vitest": "^4.0.17"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true,
+    "@swc/core@1.15.24": true
   }
 }

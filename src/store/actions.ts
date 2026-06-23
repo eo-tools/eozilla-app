@@ -6,17 +6,11 @@ import {
   getServiceProvider,
   type ServiceOptions,
   type ServiceOptionsInput,
-  type Input,
-  type Output,
-  type ProcessDescription,
   type Service,
-  type ProcessInputs,
-  type ProcessOutputs,
+  type ProcessRequest,
 } from "@/service";
-import { createJsonValueForSchema } from "@/utils/json";
 import { invalidateSWRKeys } from "@/service/swr";
-import { assert, getErrorMessage, type Optional } from "@/utils/common";
-import { getSchemaFromProcessDescriptionInputs } from "@/utils/field";
+import { getErrorMessage, type Optional } from "@/utils/common";
 import { storage } from "@/state/storage";
 
 ////////////////////////////////////////
@@ -131,15 +125,14 @@ export function activateProcess(processId: Optional<string>) {
   setAppState({ processId: !processId ? undefined : processId });
 }
 
-export function executeActiveProcess() {
-  const { service, processId, processRequests } = getAppState();
+export function executeActiveProcess(
+  processRequests: Record<string, ProcessRequest>,
+) {
+  const { service, processId } = getAppState();
   if (!service || !processId || !processRequests[processId]) {
     return;
   }
-  const processRequest = {
-    inputs: processRequests[processId].inputs,
-    outputs: processRequests[processId].outputs,
-  };
+  const processRequest = processRequests[processId];
   const processExecution = {
     processId,
     processRequest,
@@ -166,111 +159,6 @@ export function executeActiveProcess() {
         processExecution: { ...processExecution, submitting: false, error },
       });
     });
-}
-
-// export function showInformationBox(information: InformationData) {
-//   setAppState({ information });
-// }
-
-export function setActiveProcessInput(inputName: string, inputValue: Input) {
-  const state = getAppState();
-  const activeProcessId = state.processId;
-  if (!activeProcessId) {
-    return;
-  }
-  const processRequest = state.processRequests[activeProcessId];
-  const processInputs = processRequest?.inputs;
-  assert(
-    !!processInputs,
-    () => `no inputs found for process ${activeProcessId}`,
-  );
-  if (processInputs![inputName] === inputValue) {
-    return;
-  }
-  setProcessInputs(activeProcessId, {
-    ...processInputs,
-    [inputName]: inputValue,
-  });
-}
-
-export function setProcessInputs(
-  processId: string,
-  processInputs: ProcessInputs,
-) {
-  const state = getAppState();
-  setAppState({
-    processRequests: {
-      ...state.processRequests,
-      [processId]: {
-        ...state.processRequests[processId],
-        inputs: processInputs,
-      },
-    },
-  });
-}
-
-export function setActiveProcessOutput(
-  outputName: string,
-  outputValue?: Output,
-) {
-  const state = getAppState();
-  const activeProcessId = state.processId;
-  if (!activeProcessId) {
-    return;
-  }
-  const processOutputs = state.processRequests[activeProcessId]?.outputs || {};
-  if (outputValue) {
-    setProcessOutputs(activeProcessId, {
-      ...processOutputs,
-      [outputName]: outputValue,
-    });
-    return;
-  }
-
-  const nextProcessOutputs = { ...processOutputs };
-  delete nextProcessOutputs[outputName];
-  setProcessOutputs(activeProcessId, nextProcessOutputs);
-}
-
-export function setProcessOutputs(
-  processId: string,
-  processOutputs: ProcessOutputs,
-) {
-  const state = getAppState();
-  setAppState({
-    processRequests: {
-      ...state.processRequests,
-      [processId]: {
-        ...state.processRequests[processId],
-        outputs: processOutputs,
-      },
-    },
-  });
-}
-
-export function setInitialProcessInputs(
-  processDescription: ProcessDescription,
-) {
-  const processId = processDescription.id;
-  const objectSchema =
-    getSchemaFromProcessDescriptionInputs(processDescription);
-  const processInputs = createJsonValueForSchema(objectSchema) as ProcessInputs;
-  setProcessInputs(processId, processInputs);
-}
-
-export function setInitialProcessOutputs(
-  processDescription: ProcessDescription,
-) {
-  const processId = processDescription.id;
-  const processOutputs: ProcessOutputs = {};
-  Object.keys(processDescription.outputs || {}).forEach((outputName) => {
-    processOutputs[outputName] = {
-      transmissionMode: processDescription?.outputTransmission?.length
-        ? processDescription?.outputTransmission[0]
-        : undefined,
-    };
-  });
-  setProcessOutputs(processId, processOutputs);
 }
 
 ////////////////////////////////////////
@@ -356,6 +244,10 @@ export function requestConfirmation(confirmation: ConfirmationData) {
 
 export function closeConfirmationBox() {
   setAppState({ confirmation: undefined });
+}
+
+export function showInformationBox(information: InformationData) {
+  setAppState({ information });
 }
 
 export function closeInformationBox() {

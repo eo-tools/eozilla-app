@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type SubmitEvent } from "react";
 
 import {
   Box,
@@ -18,6 +18,7 @@ import type {
   ServiceOptionsInput,
   ServiceProvider,
 } from "@/service";
+import { ResetOnKey } from "@/components/common/ResetOnKey";
 import { getErrorMessage } from "@/utils/common";
 
 type DraftValue = string | number | boolean | null | undefined;
@@ -206,7 +207,7 @@ function OptionField({
   );
 }
 
-export function ServiceProviderOptionsForm({
+function ServiceProviderOptionsFormFields({
   provider,
   loading = false,
   onBack,
@@ -217,13 +218,7 @@ export function ServiceProviderOptionsForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    setDraftOptions(initialDraft);
-    setSubmitError(null);
-    setIsSubmitting(false);
-  }, [initialDraft]);
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
     setSubmitError(null);
@@ -284,5 +279,15 @@ export function ServiceProviderOptionsForm({
         </Group>
       </Stack>
     </Box>
+  );
+}
+
+export function ServiceProviderOptionsForm(
+  props: ServiceProviderOptionsFormProps,
+) {
+  return (
+    <ResetOnKey resetKey={props.provider.id}>
+      <ServiceProviderOptionsFormFields {...props} />
+    </ResetOnKey>
   );
 }

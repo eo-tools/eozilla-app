@@ -5,11 +5,21 @@ import type {
 } from "@/service";
 import { isObject } from "@/utils/common";
 
-const SERVICE_QUERY_PARAM = "service";
-const SCHEME_QUERY_PARAM = "scheme";
 const COMPACT_QUERY_PARAM = "compact";
+const DEBUG_QUERY_PARAM = "debug";
+const SCHEME_QUERY_PARAM = "scheme";
+const SERVICE_QUERY_PARAM = "service";
+const WEBSOCKET_QUERY_PARAM = "ws";
 
 export type AppColorScheme = "dark" | "light";
+
+export interface AppBootstrapConfig {
+  compact: boolean;
+  debug: boolean;
+  scheme: AppColorScheme | undefined;
+  service: SerializedServiceProvider | null;
+  ws: string | null;
+}
 
 export interface SerializedServiceProvider {
   id: string;
@@ -17,10 +27,50 @@ export interface SerializedServiceProvider {
   options: ServiceOptionsInput<ServiceOptions>;
 }
 
-export interface AppBootstrapConfig {
-  compact: boolean;
-  scheme?: AppColorScheme;
-  service: SerializedServiceProvider | null;
+export function parseAppBootstrapConfig(
+  search: string = window.location.search,
+): AppBootstrapConfig {
+  const params = new URLSearchParams(search);
+  const compact = parseBooleanParam(params.get(COMPACT_QUERY_PARAM));
+  const debug = parseBooleanParam(params.get(DEBUG_QUERY_PARAM));
+  const scheme = parseSchemeParam(params.get(SCHEME_QUERY_PARAM));
+  const ws = params.get(WEBSOCKET_QUERY_PARAM);
+  const encodedService = params.get(SERVICE_QUERY_PARAM);
+  let service = null;
+  if (encodedService) {
+    try {
+      service = parseSerializedServiceProvider(
+        decodeBase64UrlJson(encodedService),
+      );
+    } catch (error) {
+      console.warn("Failed to parse value of parameter 'service'.", error);
+    }
+  }
+  return { compact, debug, scheme, service, ws };
+}
+
+export function parseSerializedServiceProvider(
+  value: unknown,
+): SerializedServiceProvider | null {
+  if (!isObject(value)) {
+    return null;
+  }
+  const serviceProviderId = value.id;
+  const serviceProviderMeta = parseServiceProviderMeta(value.meta);
+  const serviceProviderOptions = parseServiceProviderOptions(value.options);
+  if (
+    typeof serviceProviderId !== "string" ||
+    !serviceProviderId ||
+    !serviceProviderMeta ||
+    !serviceProviderOptions
+  ) {
+    return null;
+  }
+  return {
+    id: serviceProviderId,
+    meta: serviceProviderMeta,
+    options: serviceProviderOptions,
+  };
 }
 
 function parseBooleanParam(value: string | null): boolean {
@@ -85,52 +135,4 @@ function parseServiceProviderOptions(
     }
   });
   return options;
-}
-
-export function parseSerializedServiceProvider(
-  value: unknown,
-): SerializedServiceProvider | null {
-  if (!isObject(value)) {
-    return null;
-  }
-  const serviceProviderId = value.id;
-  const serviceProviderMeta = parseServiceProviderMeta(value.meta);
-  const serviceProviderOptions = parseServiceProviderOptions(value.options);
-  if (
-    typeof serviceProviderId !== "string" ||
-    !serviceProviderId ||
-    !serviceProviderMeta ||
-    !serviceProviderOptions
-  ) {
-    return null;
-  }
-  return {
-    id: serviceProviderId,
-    meta: serviceProviderMeta,
-    options: serviceProviderOptions,
-  };
-}
-
-export function parseAppBootstrapConfig(
-  search: string = window.location.search,
-): AppBootstrapConfig {
-  const params = new URLSearchParams(search);
-  const compact = parseBooleanParam(params.get(COMPACT_QUERY_PARAM));
-  const scheme = parseSchemeParam(params.get(SCHEME_QUERY_PARAM));
-  const encodedService = params.get(SERVICE_QUERY_PARAM);
-  if (!encodedService) {
-    return { compact, scheme, service: null };
-  }
-  try {
-    return {
-      compact,
-      scheme,
-      service: parseSerializedServiceProvider(
-        decodeBase64UrlJson(encodedService),
-      ),
-    };
-  } catch (error) {
-    console.warn("Failed to parse app bootstrap service.", error);
-    return { compact, scheme, service: null };
-  }
 }

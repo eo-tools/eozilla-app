@@ -1,8 +1,8 @@
 import {
   isServiceProviderId,
   type JobInfo,
-  type Service,
   type ProcessRequest,
+  type Service,
 } from "@/service";
 import { storage } from "@/state/storage";
 
