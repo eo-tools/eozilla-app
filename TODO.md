@@ -1,3 +1,12 @@
+# Open issues
+
+In the dev console we still have:
+
+- [ ] Regular `[Violation] 'setTimeout' handler took <N>ms` with N being 50 to 100 ms
+- [ ] Once `<p> cannot contain a nested <div>.`
+- [ ] Once `<button> cannot contain a nested <button>.`
+
+
 # Features
 
 - [ ] Allow running the app in an iframe in Jupyter notebooks. 
@@ -91,3 +100,4 @@
 - [ ] Add unit tests also for `src/store` and `src/components` after having decided how
   to do (a) app store, (b) hooks, (c) component testing. 
 - [x] Setup GitHub CI which includes typecheck, lint, and testing. 
+
