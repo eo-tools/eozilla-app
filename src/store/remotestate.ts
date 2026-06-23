@@ -13,7 +13,12 @@ import {
 import type { AppState } from "@/state/types";
 import { getAppStore } from "./store";
 
-export type ProcessRequestsService = {};
+export interface ProcessRequestsService {
+  // Define any server-side Python queries or actions here
+
+  /** Placeholder until any methods are added */
+  _?: never;
+}
 
 const allowedPaths: Path[] = [["processRequests"]];
 function isAllowedPath(path: Path) {
