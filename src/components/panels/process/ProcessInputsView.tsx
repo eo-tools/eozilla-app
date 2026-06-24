@@ -1,8 +1,7 @@
-import { useMemo } from "react";
 import { Table } from "@mantine/core";
 
 import type { Input, ProcessDescription, ProcessInputs } from "@/service";
-import { getFieldFromProcessDescriptionInputs } from "@/utils/field";
+import { type ObjectField } from "@/utils/field";
 import InputLabel from "./InputLabel";
 import InputField from "./InputField";
 import { UnavailableHint } from "@/components/common/UnavailableHint";
@@ -10,6 +9,7 @@ import { UnavailableHint } from "@/components/common/UnavailableHint";
 interface ProcessInputsViewProps {
   processDescription: ProcessDescription;
   processInputs: ProcessInputs;
+  inputsField: ObjectField;
   setProcessInput: (name: string, value: Input) => void;
   hideAdvanced?: boolean;
 }
@@ -17,14 +17,11 @@ interface ProcessInputsViewProps {
 export default function ProcessInputsView({
   processDescription,
   processInputs,
+  inputsField,
   setProcessInput,
   hideAdvanced,
 }: ProcessInputsViewProps) {
-  const objectField = useMemo(
-    () => getFieldFromProcessDescriptionInputs(processDescription),
-    [processDescription],
-  );
-  const inputNames = Object.keys(objectField.properties);
+  const inputNames = Object.keys(inputsField.properties);
   if (inputNames.length === 0) {
     return <UnavailableHint message="No inputs available." />;
   }
@@ -35,7 +32,7 @@ export default function ProcessInputsView({
           .map((inputName) => ({
             name: inputName,
             description: (processDescription.inputs || {})[inputName]!,
-            field: objectField.properties[inputName]!,
+            field: inputsField.properties[inputName]!,
             value: processInputs[inputName]!,
           }))
           .map(({ name, description, field, value }) =>
