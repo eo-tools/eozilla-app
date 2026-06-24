@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import type { Input } from "@/service";
 import type { Field } from "@/utils/field";
@@ -67,6 +73,7 @@ function serializeInputValue(inputValue: Input): string {
 
 function useJsonInputDraft(inputValue: Input) {
   const serializedInputValue = serializeInputValue(inputValue);
+  // Remember the last external JSON snapshot so we only react when the prop changes.
   const lastSerializedInputValue = useRef(serializedInputValue);
   const [draft, setDraft] = useState(() => ({
     textValue: serializedInputValue,
@@ -79,11 +86,16 @@ function useJsonInputDraft(inputValue: Input) {
     }
 
     lastSerializedInputValue.current = serializedInputValue;
-    // External store updates replace the local editor draft without remounting,
-    // so the JSON editor keeps focus while the user types valid values.
-    setDraft({
-      textValue: serializedInputValue,
-      errorText: undefined,
+    // Treat the prop-driven draft reset as non-urgent so it does
+    // not interrupt typing.
+    startTransition(() => {
+      // External store updates replace the local editor draft without
+      // remounting, so the JSON editor keeps focus while the user types
+      // valid values.
+      setDraft({
+        textValue: serializedInputValue,
+        errorText: undefined,
+      });
     });
   }, [serializedInputValue]);
 

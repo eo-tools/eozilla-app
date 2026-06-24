@@ -1,5 +1,7 @@
 import type { JsonValue } from "./value";
 
+type AdditionalProperty = JsonSchema | JsonSchema[] | JsonValue;
+
 export interface SchemaBase<T extends JsonValue = JsonValue> {
   type?: "boolean" | "integer" | "number" | "string" | "array" | "object";
   nullable?: boolean;
@@ -7,6 +9,7 @@ export interface SchemaBase<T extends JsonValue = JsonValue> {
   enum?: T[];
   title?: string;
   description?: string;
+  [additionalProperty: `x-${string}`]: AdditionalProperty | undefined;
 }
 
 export type UntypedSchema = SchemaBase;

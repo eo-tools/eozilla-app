@@ -15,6 +15,8 @@ export interface Description {
   keywords?: string[];
   /**Optional list of related metadata.*/
   metadata?: Metadata[];
+  /**Allow for additional properties.*/
+  [additionalProperty: `x-${string}`]: unknown;
 }
 
 /**

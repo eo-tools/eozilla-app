@@ -15,11 +15,11 @@ import type { ProcessDescription } from "@/service";
 import { Panel } from "@/components/common/Panel";
 import { ResourceView } from "@/components/common/ResourceView";
 import ProcessDescriptionView from "@/components/panels/process/ProcessDescriptionView";
-import ProcessInputsView from "@/components/panels/process/ProcessInputsView";
-import ProcessOutputsView from "@/components/panels/process/ProcessOutputsView";
 import { executeActiveProcess } from "@/store/actions";
 import styles from "@/components/common/styles";
 import { SubPanel } from "@/components/common/SubPanel";
+import ProcessInputsSubPanel from "@/components/panels/process/ProcessInputsSubPanel";
+import ProcessOutputsSubPanel from "@/components/panels/process/ProcessOutputsSubPanel";
 
 export default function ProcessPanel() {
   const processesState = useActiveProcessDescription();
@@ -76,20 +76,16 @@ export default function ProcessPanel() {
             <Stack>
               <ProcessDescriptionView processDescription={processDescription} />
               <SubPanel values={openedSubPanels} setValues={setOpenedSubPanels}>
-                <SubPanel.Item value={"inputs"} title={"Inputs"}>
-                  <ProcessInputsView
-                    processDescription={processDescription}
-                    processInputs={activeProcessInputs || {}}
-                    setProcessInput={setProcessRequestInput}
-                  />
-                </SubPanel.Item>
-                <SubPanel.Item value={"outputs"} title={"Outputs"}>
-                  <ProcessOutputsView
-                    processDescription={processDescription}
-                    processOutputs={activeProcessOutputs || {}}
-                    setProcessOutput={setProcessRequestOutput}
-                  />
-                </SubPanel.Item>
+                <ProcessInputsSubPanel
+                  processDescription={processDescription}
+                  processInputs={activeProcessInputs || {}}
+                  setProcessInput={setProcessRequestInput}
+                />
+                <ProcessOutputsSubPanel
+                  processDescription={processDescription}
+                  processOutputs={activeProcessOutputs || {}}
+                  setProcessOutput={setProcessRequestOutput}
+                />
               </SubPanel>
             </Stack>
           )}
