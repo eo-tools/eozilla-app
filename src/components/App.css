@@ -44,3 +44,15 @@
 .vertical-group > [data-separator] {
   cursor: row-resize;
 }
+
+.input-row-appear > th,
+.input-row-appear > td {
+  animation: input-row-glow 1000ms ease-out;
+}
+
+@keyframes input-row-glow {
+  0% {
+    box-shadow: inset 0 0 0 999px
+      color-mix(in srgb, var(--mantine-color-blue-2) 25%, transparent);
+  }
+}

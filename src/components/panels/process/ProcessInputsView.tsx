@@ -37,7 +37,10 @@ export default function ProcessInputsView({
           }))
           .map(({ name, description, field, value }) =>
             hideAdvanced && field.advanced ? null : (
-              <Table.Tr key={name}>
+              <Table.Tr
+                key={name}
+                className={!hideAdvanced && field.advanced ? "input-row-appear" : undefined}
+              >
                 <Table.Th w={200}>
                   <InputLabel inputName={name} inputDescription={description} />
                 </Table.Th>
