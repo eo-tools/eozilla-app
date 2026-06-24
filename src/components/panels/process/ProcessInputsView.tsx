@@ -11,12 +11,14 @@ interface ProcessInputsViewProps {
   processDescription: ProcessDescription;
   processInputs: ProcessInputs;
   setProcessInput: (name: string, value: Input) => void;
+  hideAdvanced?: boolean;
 }
 
 export default function ProcessInputsView({
   processDescription,
   processInputs,
   setProcessInput,
+  hideAdvanced,
 }: ProcessInputsViewProps) {
   const objectField = useMemo(
     () => getFieldFromProcessDescriptionInputs(processDescription),
@@ -36,21 +38,23 @@ export default function ProcessInputsView({
             field: objectField.properties[inputName]!,
             value: processInputs[inputName]!,
           }))
-          .map(({ name, description, field, value }) => (
-            <Table.Tr key={name}>
-              <Table.Th w={200}>
-                <InputLabel inputName={name} inputDescription={description} />
-              </Table.Th>
-              <Table.Td>
-                <InputField
-                  inputName={name}
-                  inputField={field}
-                  inputValue={value}
-                  setInputValue={setProcessInput}
-                />
-              </Table.Td>
-            </Table.Tr>
-          ))}
+          .map(({ name, description, field, value }) =>
+            hideAdvanced && field.advanced ? null : (
+              <Table.Tr key={name}>
+                <Table.Th w={200}>
+                  <InputLabel inputName={name} inputDescription={description} />
+                </Table.Th>
+                <Table.Td>
+                  <InputField
+                    inputName={name}
+                    inputField={field}
+                    inputValue={value}
+                    setInputValue={setProcessInput}
+                  />
+                </Table.Td>
+              </Table.Tr>
+            ),
+          )}
       </Table.Tbody>
     </Table>
   );

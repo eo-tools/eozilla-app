@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionIcon, Stack, Tooltip } from "@mantine/core";
+import { ActionIcon, Stack, Switch, Tooltip } from "@mantine/core";
 import { IconMathFunction, IconPlayerPlayFilled } from "@tabler/icons-react";
 
 import {
@@ -32,6 +32,7 @@ export default function ProcessPanel() {
   const processId = useActiveProcessId();
   const processExecution = useProcessExecution();
   const [openedSubPanels, setOpenedSubPanels] = useState(["inputs", "outputs"]);
+  const [showAdvancedInputs, setShowAdvancedInputs] = useState(false);
   const isSubmitting = Boolean(
     processExecution &&
     processExecution.processId === processId &&
@@ -49,6 +50,14 @@ export default function ProcessPanel() {
       executeActiveProcess(processRequests);
     }
   };
+  const inputsActions = (
+    <Switch
+      label={"Show advanced"}
+      checked={showAdvancedInputs}
+      onClick={() => setShowAdvancedInputs(!showAdvancedInputs)}
+      size={"xs"}
+    />
+  );
   return (
     <Panel>
       <Panel.Header
@@ -76,11 +85,16 @@ export default function ProcessPanel() {
             <Stack>
               <ProcessDescriptionView processDescription={processDescription} />
               <SubPanel values={openedSubPanels} setValues={setOpenedSubPanels}>
-                <SubPanel.Item value={"inputs"} title={"Inputs"}>
+                <SubPanel.Item
+                  value={"inputs"}
+                  title={"Inputs"}
+                  actions={inputsActions}
+                >
                   <ProcessInputsView
                     processDescription={processDescription}
                     processInputs={activeProcessInputs || {}}
                     setProcessInput={setProcessRequestInput}
+                    hideAdvanced={!showAdvancedInputs}
                   />
                 </SubPanel.Item>
                 <SubPanel.Item value={"outputs"} title={"Outputs"}>

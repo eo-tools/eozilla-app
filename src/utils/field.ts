@@ -19,6 +19,7 @@ export interface XUi {
   widget?: string;
   layout?: "row" | "column";
   order?: number;
+  advanced?: boolean;
 }
 
 export interface FieldBase<S extends JsonSchema> extends XUi {
@@ -107,7 +108,7 @@ export function getFieldFromSchema(name: string, schema: JsonSchema): Field {
     } else if (isObject(additionalProperties)) {
       additionalProperties_ = getFieldFromSchema(
         `${name}`,
-        additionalProperties,
+        additionalProperties as JsonSchema,
       );
     }
 
@@ -175,7 +176,7 @@ function getInputDescriptionSchema(
       ...meta,
     };
   } else {
-    newSchema = { ...schema, ...meta };
+    newSchema = { ...schema, ...meta } as JsonSchema;
   }
   return [newSchema, required];
 }
