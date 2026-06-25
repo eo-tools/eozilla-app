@@ -1,9 +1,10 @@
 import type { Field } from "@/utils/field";
 import type { Input } from "@/service";
-import { isArraySchema, isStringSchema } from "@/utils/json";
+import { isStringSchema } from "@/utils/json";
 import { InputFieldEditor } from "./InputFieldEditor";
-import { BboxInputFieldEditor } from "./BboxInputFieldEditor";
-import { WktInputFieldEditor } from "./WktInputFieldEditor";
+import { DateInputFieldEditor } from "./DateInputFieldEditor";
+import { MapInputFieldEditor } from "./MapInputFieldEditor";
+import { RadioInputFieldEditor } from "./RadioInputFieldEditor";
 
 export interface InputFieldProps {
   inputName: string;
@@ -18,20 +19,41 @@ export default function InputField({
   inputValue,
   setInputValue,
 }: InputFieldProps) {
-  if (inputField.widget === "map" && isStringSchema(inputField.schema)) {
+  if (
+    isStringSchema(inputField.schema) &&
+    Array.isArray(inputField.schema.enum) &&
+    inputField.schema.enum.every((value) => typeof value === "string") &&
+    inputField.widget === "radio"
+  ) {
     return (
-      <WktInputFieldEditor
+      <RadioInputFieldEditor
         inputName={inputName}
+        inputSchema={inputField.schema}
         inputValue={inputValue}
         setInputValue={setInputValue}
       />
     );
   }
 
-  if (inputField.widget === "map" && isArraySchema(inputField.schema)) {
+  if (
+    isStringSchema(inputField.schema) &&
+    inputField.schema.format === "date"
+  ) {
     return (
-      <BboxInputFieldEditor
+      <DateInputFieldEditor
         inputName={inputName}
+        inputSchema={inputField.schema}
+        inputValue={inputValue}
+        setInputValue={setInputValue}
+      />
+    );
+  }
+
+  if (inputField.widget === "map") {
+    return (
+      <MapInputFieldEditor
+        inputName={inputName}
+        inputSchema={inputField.schema}
         inputValue={inputValue}
         setInputValue={setInputValue}
       />
