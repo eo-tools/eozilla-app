@@ -56,3 +56,11 @@
       color-mix(in srgb, var(--mantine-color-blue-2) 25%, transparent);
   }
 }
+
+.map-input-editor-map {
+  width: 100%;
+  height: 320px;
+  overflow: hidden;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--mantine-radius-sm);
+}
