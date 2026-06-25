@@ -6,7 +6,7 @@ import { SubPanel } from "@/components/common/SubPanel";
 import type { Input, ProcessDescription, ProcessInputs } from "@/service";
 import {
   getFieldFromProcessDescriptionInputs,
-  getVisibleInputFieldEntries,
+  getVisibleInputFields,
   type ObjectField,
 } from "@/utils/field";
 
@@ -28,8 +28,8 @@ export default function ProcessInputsSubPanel({
     [processDescription],
   );
 
-  const hasAdvancedInputs = getVisibleInputFieldEntries(inputsField).some(
-    ({ field }) => Boolean(field.advanced),
+  const hasAdvancedInputs = getVisibleInputFields(inputsField).some(
+    (field) => Boolean(field.advanced),
   );
 
   const inputsActions = hasAdvancedInputs ? (

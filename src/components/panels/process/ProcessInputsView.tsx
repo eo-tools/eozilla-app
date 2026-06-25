@@ -1,7 +1,7 @@
 import { Table } from "@mantine/core";
 
 import type { Input, ProcessDescription, ProcessInputs } from "@/service";
-import { getVisibleInputFieldEntries, type ObjectField } from "@/utils/field";
+import { getVisibleInputFields, type ObjectField } from "@/utils/field";
 import InputLabel from "./InputLabel";
 import InputField from "./InputField";
 import { UnavailableHint } from "@/components/common/UnavailableHint";
@@ -21,13 +21,13 @@ export default function ProcessInputsView({
   setProcessInput,
   hideAdvanced,
 }: ProcessInputsViewProps) {
-  const visibleInputs = getVisibleInputFieldEntries(inputsField, {
+  const visibleInputs = getVisibleInputFields(inputsField, {
     hideAdvanced,
-  }).map(({ name, field }) => ({
-    name,
-    description: (processDescription.inputs || {})[name]!,
+  }).map((field) => ({
+    name: field.name,
+    description: (processDescription.inputs || {})[field.name]!,
     field,
-    value: processInputs[name]!,
+    value: processInputs[field.name]!,
   }));
 
   if (visibleInputs.length === 0) {
