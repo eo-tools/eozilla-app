@@ -1,8 +1,9 @@
 import type { Field } from "@/utils/field";
 import type { Input } from "@/service";
-import { isStringSchema } from "@/utils/json";
+import { isArraySchema, isStringSchema } from "@/utils/json";
 import { InputFieldEditor } from "./InputFieldEditor";
-import { MapInputFieldEditor } from "./MapInputFieldEditor";
+import { BboxInputFieldEditor } from "./BboxInputFieldEditor";
+import { WktInputFieldEditor } from "./WktInputFieldEditor";
 
 export interface InputFieldProps {
   inputName: string;
@@ -17,12 +18,19 @@ export default function InputField({
   inputValue,
   setInputValue,
 }: InputFieldProps) {
-  if (
-    isStringSchema(inputField.schema) &&
-    (inputField.widget === "map" || inputField.schema.format === "wkt")
-  ) {
+  if (inputField.widget === "map" && isStringSchema(inputField.schema)) {
     return (
-      <MapInputFieldEditor
+      <WktInputFieldEditor
+        inputName={inputName}
+        inputValue={inputValue}
+        setInputValue={setInputValue}
+      />
+    );
+  }
+
+  if (inputField.widget === "map" && isArraySchema(inputField.schema)) {
+    return (
+      <BboxInputFieldEditor
         inputName={inputName}
         inputValue={inputValue}
         setInputValue={setInputValue}
