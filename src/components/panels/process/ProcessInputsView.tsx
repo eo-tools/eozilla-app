@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Table } from "@mantine/core";
 
 import type { Input, ProcessDescription, ProcessInputs } from "@/service";
@@ -21,34 +22,33 @@ export default function ProcessInputsView({
   setProcessInput,
   hideAdvanced,
 }: ProcessInputsViewProps) {
-  const visibleInputs = getVisibleInputFields(inputsField, {
-    hideAdvanced,
-  }).map((field) => ({
-    name: field.name,
-    description: (processDescription.inputs || {})[field.name]!,
-    field,
-    value: processInputs[field.name]!,
-  }));
+  const visibleFields = useMemo(
+    () => getVisibleInputFields(inputsField, { hideAdvanced }),
+    [inputsField, hideAdvanced],
+  );
 
-  if (visibleInputs.length === 0) {
+  if (visibleFields.length === 0) {
     return <UnavailableHint message="No inputs available." />;
   }
   return (
     <Table variant="vertical" layout="fixed" withTableBorder>
       <Table.Tbody>
-        {visibleInputs.map(({ name, description, field, value }) => (
+        {visibleFields.map((field) => (
           <Table.Tr
-            key={name}
+            key={field.name}
             className={!hideAdvanced && field.advanced ? "input-row-appear" : undefined}
           >
             <Table.Th w={200}>
-              <InputLabel inputName={name} inputDescription={description} />
+              <InputLabel
+                inputName={field.name}
+                inputDescription={(processDescription.inputs || {})[field.name]!}
+              />
             </Table.Th>
             <Table.Td>
               <InputField
-                inputName={name}
+                inputName={field.name}
                 inputField={field}
-                inputValue={value}
+                inputValue={processInputs[field.name]!}
                 setInputValue={setProcessInput}
               />
             </Table.Td>
