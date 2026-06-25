@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Button, Group, Stack, Text } from "@mantine/core";
 import "ol/ol.css";
 import Feature from "ol/Feature.js";
@@ -31,9 +31,8 @@ export function MapInputFieldEditor({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const sourceRef = useRef(new VectorSource());
   const mapRef = useRef<Map | null>(null);
-  const formatRef = useRef(new WKT());
+  const format = useMemo(() => new WKT(), []);
   const syncingRef = useRef(false);
-  const [errorText, setErrorText] = useState<string>();
 
   const resetView = () => {
     const view = mapRef.current?.getView();
@@ -95,7 +94,7 @@ export function MapInputFieldEditor({
       }
       setInputValue(
         inputName,
-        formatRef.current.writeGeometry(geometry, {
+        format.writeGeometry(geometry, {
           dataProjection: "EPSG:4326",
           featureProjection: "EPSG:3857",
           decimals: 6,
@@ -142,15 +141,34 @@ export function MapInputFieldEditor({
       map.setTarget(undefined);
       mapRef.current = null;
     };
-  }, [inputName, setInputValue]);
+  }, [format, inputName, setInputValue]);
+
+  const wktValue = typeof inputValue === "string" ? inputValue.trim() : "";
+  const { geometry, errorText } = useMemo(() => {
+    if (!wktValue) {
+      return { geometry: undefined, errorText: undefined as string | undefined };
+    }
+    try {
+      return {
+        geometry: format.readGeometry(wktValue, {
+          dataProjection: "EPSG:4326",
+          featureProjection: "EPSG:3857",
+        }),
+        errorText: undefined as string | undefined,
+      };
+    } catch (_error) {
+      return {
+        geometry: undefined,
+        errorText: "Could not parse WKT geometry.",
+      };
+    }
+  }, [format, wktValue]);
 
   useEffect(() => {
     const source = sourceRef.current;
-    const wktValue = typeof inputValue === "string" ? inputValue.trim() : "";
 
     syncingRef.current = true;
     source.clear();
-    setErrorText(undefined);
 
     if (!wktValue) {
       resetView();
@@ -158,24 +176,16 @@ export function MapInputFieldEditor({
       return;
     }
 
-    try {
-      const geometry = formatRef.current.readGeometry(wktValue, {
-        dataProjection: "EPSG:4326",
-        featureProjection: "EPSG:3857",
-      });
+    if (geometry) {
       source.addFeature(new Feature({ geometry }));
       requestAnimationFrame(() => {
         fitCurrentGeometry();
       });
-    } catch (_error) {
-      setErrorText("Could not parse WKT geometry.");
-    } finally {
-      syncingRef.current = false;
     }
-  }, [inputValue]);
+    syncingRef.current = false;
+  }, [geometry, wktValue]);
 
   const hasGeometry = typeof inputValue === "string" && inputValue.trim().length > 0;
-  const wktValue = typeof inputValue === "string" ? inputValue.trim() : "";
 
   return (
     <Stack gap={"xs"}>
