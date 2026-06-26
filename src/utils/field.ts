@@ -20,6 +20,7 @@ export interface XUi {
   layout?: "row" | "column";
   order?: number;
   advanced?: boolean;
+  hidden?: boolean;
 }
 
 export interface FieldBase<S extends JsonSchema> extends XUi {
@@ -69,6 +70,39 @@ export function getFieldFromProcessDescriptionInputs(
   const objectSchema =
     getSchemaFromProcessDescriptionInputs(processDescription);
   return getFieldFromSchema("inputs", objectSchema) as ObjectField;
+}
+
+export function getVisibleInputFields(
+  inputsField: ObjectField,
+  options?: { hideAdvanced?: boolean },
+): Field[] {
+  const hideAdvanced = options?.hideAdvanced ?? false;
+  return Object.keys(inputsField.properties)
+    .map((name, index) => ({
+      index,
+      field: inputsField.properties[name]!,
+    }))
+    .filter(({ field }) => !field.hidden)
+    .filter(({ field }) => !(hideAdvanced && field.advanced))
+    .sort((a, b) => {
+      const aHasOrder = Number.isFinite(a.field.order);
+      const bHasOrder = Number.isFinite(b.field.order);
+      if (aHasOrder && bHasOrder) {
+        return (
+          (a.field.order as number) -
+            (b.field.order as number) ||
+          a.index - b.index
+        );
+      }
+      if (aHasOrder) {
+        return -1;
+      }
+      if (bHasOrder) {
+        return 1;
+      }
+      return a.index - b.index;
+    })
+    .map(({ field }) => field);
 }
 
 export function getFieldFromSchema(name: string, schema: JsonSchema): Field {

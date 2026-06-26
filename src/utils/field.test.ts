@@ -3,9 +3,11 @@ import {
   getFieldFromProcessDescriptionInputs,
   getFieldFromSchema,
   getSchemaFromProcessDescriptionInputs,
+  getVisibleInputFields,
 } from "./field";
 import type { JsonSchema } from "@/utils/json";
 import type { ProcessDescription } from "@/service";
+import type { ObjectField } from "./field";
 
 describe("field helpers", () => {
   it("converts process inputs into a schema object", () => {
@@ -54,7 +56,7 @@ describe("field helpers", () => {
   it("turns schemas into fields and preserves x-ui metadata", () => {
     const field = getFieldFromSchema("root", {
       type: "object",
-      "x-ui": { widget: "card", layout: "row" },
+      "x-ui": { widget: "card", layout: "row", hidden: true },
       "x-ui-order": 3,
       "x-note": "custom",
       properties: {
@@ -71,6 +73,7 @@ describe("field helpers", () => {
       name: "root",
       widget: "card",
       layout: "row",
+      hidden: true,
       order: 3,
       note: "custom",
       properties: {
@@ -98,5 +101,50 @@ describe("field helpers", () => {
 
     expect(field.name).toBe("inputs");
     expect(field.properties.name.name).toBe("name");
+  });
+
+  it("filters hidden inputs before advanced handling", () => {
+    const field = getFieldFromSchema("inputs", {
+      type: "object",
+      properties: {
+        visible: { type: "string" },
+        advancedVisible: { type: "string", "x-ui-advanced": true },
+        hidden: { type: "string", "x-ui-hidden": true },
+        hiddenAdvanced: {
+          type: "string",
+          "x-ui-advanced": true,
+          "x-ui-hidden": true,
+        },
+      },
+    } as unknown as JsonSchema) as ObjectField;
+
+    expect(getVisibleInputFields(field)).toEqual([
+      field.properties.visible!,
+      field.properties.advancedVisible!,
+    ]);
+    expect(getVisibleInputFields(field, { hideAdvanced: true })).toEqual([
+      field.properties.visible!,
+    ]);
+  });
+
+  it("sorts ordered inputs first and keeps the rest in original order", () => {
+    const field = getFieldFromSchema("inputs", {
+      type: "object",
+      properties: {
+        firstUnordered: { type: "string" },
+        secondOrdered: { type: "string", "x-ui-order": 2 },
+        firstOrdered: { type: "string", "x-ui-order": 1 },
+        secondUnordered: { type: "string" },
+        alsoFirstOrdered: { type: "string", "x-ui-order": 1 },
+      },
+    } as unknown as JsonSchema) as ObjectField;
+
+    expect(getVisibleInputFields(field).map(({ name }) => name)).toEqual([
+      "firstOrdered",
+      "alsoFirstOrdered",
+      "secondOrdered",
+      "firstUnordered",
+      "secondUnordered",
+    ]);
   });
 });
