@@ -3,7 +3,7 @@ import {
   getFieldFromProcessDescriptionInputs,
   getFieldFromSchema,
   getSchemaFromProcessDescriptionInputs,
-  getVisibleInputFieldEntries,
+  getVisibleInputFields,
 } from "./field";
 import type { JsonSchema } from "@/utils/json";
 import type { ProcessDescription } from "@/service";
@@ -118,20 +118,12 @@ describe("field helpers", () => {
       },
     } as unknown as JsonSchema) as ObjectField;
 
-    expect(getVisibleInputFieldEntries(field)).toEqual([
-      { name: "visible", field: field.properties.visible! },
-      {
-        name: "advancedVisible",
-        field: field.properties.advancedVisible!,
-      },
+    expect(getVisibleInputFields(field)).toEqual([
+      field.properties.visible!,
+      field.properties.advancedVisible!,
     ]);
-    expect(
-      getVisibleInputFieldEntries(field, { hideAdvanced: true }),
-    ).toEqual([
-      {
-        name: "visible",
-        field: field.properties.visible!,
-      },
+    expect(getVisibleInputFields(field, { hideAdvanced: true })).toEqual([
+      field.properties.visible!,
     ]);
   });
 
@@ -147,7 +139,7 @@ describe("field helpers", () => {
       },
     } as unknown as JsonSchema) as ObjectField;
 
-    expect(getVisibleInputFieldEntries(field).map(({ name }) => name)).toEqual([
+    expect(getVisibleInputFields(field).map(({ name }) => name)).toEqual([
       "firstOrdered",
       "alsoFirstOrdered",
       "secondOrdered",

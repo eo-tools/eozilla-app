@@ -72,19 +72,13 @@ export function getFieldFromProcessDescriptionInputs(
   return getFieldFromSchema("inputs", objectSchema) as ObjectField;
 }
 
-export interface InputFieldEntry {
-  name: string;
-  field: Field;
-}
-
-export function getVisibleInputFieldEntries(
+export function getVisibleInputFields(
   inputsField: ObjectField,
   options?: { hideAdvanced?: boolean },
-): InputFieldEntry[] {
+): Field[] {
   const hideAdvanced = options?.hideAdvanced ?? false;
   return Object.keys(inputsField.properties)
     .map((name, index) => ({
-      name,
       index,
       field: inputsField.properties[name]!,
     }))
@@ -108,7 +102,7 @@ export function getVisibleInputFieldEntries(
       }
       return a.index - b.index;
     })
-    .map(({ name, field }) => ({ name, field }));
+    .map(({ field }) => field);
 }
 
 export function getFieldFromSchema(name: string, schema: JsonSchema): Field {
