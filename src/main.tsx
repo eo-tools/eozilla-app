@@ -25,6 +25,7 @@ import {
 } from "@/store/remotestate";
 
 const bootstrapConfig = parseAppBootstrapConfig();
+console.debug("bootstrapConfig:", bootstrapConfig);
 
 initAppStore(() => {
   const providers: ServiceProvider<ServiceOptions>[] = [

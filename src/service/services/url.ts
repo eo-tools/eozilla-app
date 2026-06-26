@@ -20,22 +20,27 @@ interface ApiCallOptions<T> {
   validate?: (data: unknown) => T;
 }
 
+type ApiHeaders = Record<string, string>;
+
 export class UrlService implements Service {
   readonly providerId: string;
   readonly apiUrl: string;
   readonly user: UserIdentity;
   readonly root: ServiceMetadata;
+  readonly defaultHeaders: ApiHeaders;
 
   constructor(
     providerId: string,
     apiUrl: string,
     user: UserIdentity,
     root: ServiceMetadata,
+    defaultHeaders: ApiHeaders = {},
   ) {
     this.providerId = providerId;
     this.apiUrl = apiUrl;
     this.user = user;
     this.root = root;
+    this.defaultHeaders = defaultHeaders;
   }
 
   async getProcesses(): Promise<ProcessList> {
@@ -89,14 +94,20 @@ export class UrlService implements Service {
     path: string[] = [],
     options?: ApiCallOptions<T>,
   ): Promise<T> {
-    return await callApi(this.apiUrl, path, options);
+    return await callApi(this.apiUrl, path, options, this.defaultHeaders);
   }
 }
 
 export async function loadServiceRootMetadata(
   apiUrl: string,
+  defaultHeaders: ApiHeaders = {},
 ): Promise<ServiceMetadata> {
-  return await callApi(apiUrl, [], { validate: validateServiceMetadata });
+  return await callApi(
+    apiUrl,
+    [],
+    { validate: validateServiceMetadata },
+    defaultHeaders,
+  );
 }
 
 function validateProcessList(data: unknown): ProcessList {
@@ -133,18 +144,14 @@ async function callApi<T>(
   apiUrl: string,
   path: string[] = [],
   options?: ApiCallOptions<T>,
+  defaultHeaders: ApiHeaders = {},
 ): Promise<T> {
   const url = buildUrl(apiUrl, path, options?.params || []);
+  const hasData = typeof options?.data !== "undefined";
   const response = await fetch(url, {
     method: options?.method,
-    headers:
-      typeof options?.data !== "undefined"
-        ? { "Content-Type": "application/json" }
-        : undefined,
-    body:
-      typeof options?.data !== "undefined"
-        ? JSON.stringify(options.data)
-        : undefined,
+    headers: buildHeaders(defaultHeaders, hasData),
+    body: hasData ? JSON.stringify(options.data) : undefined,
   });
   const returnValue = await response.json();
   if (isApiError(returnValue)) {
@@ -157,6 +164,17 @@ async function callApi<T>(
     return options?.validate(returnValue);
   }
   return returnValue as T;
+}
+
+function buildHeaders(
+  defaultHeaders: ApiHeaders,
+  includeContentType: boolean,
+): ApiHeaders | undefined {
+  const headers = {
+    ...defaultHeaders,
+    ...(includeContentType ? { "Content-Type": "application/json" } : {}),
+  };
+  return Object.keys(headers).length ? headers : undefined;
 }
 
 function isApiError(data: unknown): data is ApiError {

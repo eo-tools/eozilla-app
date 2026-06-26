@@ -45,8 +45,22 @@ export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions>
       options.apiUrl ??
       (URL_SERVICE_OPTIONS_SCHEMA.apiUrl.default as string) ??
       "http://localhost:8008";
-    return loadServiceRootMetadata(apiUrl).then(
-      (root) => new UrlService(this.id, apiUrl, user, root),
+    const authHeaders = createTokenAuthHeaders(options);
+    return loadServiceRootMetadata(apiUrl, authHeaders).then(
+      (root) => new UrlService(this.id, apiUrl, user, root, authHeaders),
     );
   }
+}
+
+function createTokenAuthHeaders(
+  options: ServiceOptionsInput<UrlServiceOptions>,
+): Record<string, string> {
+  if (options.authType !== "token" || !options.token) {
+    return {};
+  }
+  if (options.useBearer === true) {
+    return { Authorization: `Bearer ${options.token}` };
+  }
+  const tokenHeader = options.tokenHeader || "X-Auth-Token";
+  return { [tokenHeader]: options.token };
 }

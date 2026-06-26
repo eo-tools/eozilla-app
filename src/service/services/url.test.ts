@@ -54,6 +54,22 @@ describe("UrlService", () => {
     });
   });
 
+  it("loads root metadata with default headers", async () => {
+    fetchMock.mockResolvedValueOnce(createJsonResponse(root));
+
+    await expect(
+      loadServiceRootMetadata("https://example.com/api/", {
+        "X-Auth-Token": "secret",
+      }),
+    ).resolves.toEqual(root);
+
+    expect(fetchMock).toHaveBeenCalledWith("https://example.com/api/", {
+      method: undefined,
+      headers: { "X-Auth-Token": "secret" },
+      body: undefined,
+    });
+  });
+
   it("performs the public service operations", async () => {
     const service = new UrlService(
       "custom",
@@ -120,6 +136,48 @@ describe("UrlService", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "https://example.com/api/jobs/j1",
       expect.objectContaining({ method: "delete" }),
+    );
+  });
+
+  it("includes default headers in every service operation", async () => {
+    const service = new UrlService(
+      "custom",
+      "https://example.com/api/",
+      user,
+      root,
+      { Authorization: "Bearer secret" },
+    );
+
+    fetchMock
+      .mockResolvedValueOnce(createJsonResponse({ processes: [], links: [] }))
+      .mockResolvedValueOnce(
+        createJsonResponse({
+          jobID: "j1",
+          processID: "p1",
+          type: "process",
+          status: "accepted",
+        } satisfies JobInfo),
+      );
+
+    await service.getProcesses();
+    await service.executeProcess("p1", { inputs: { answer: 42 } });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://example.com/api/processes",
+      expect.objectContaining({
+        headers: { Authorization: "Bearer secret" },
+      }),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://example.com/api/processes/p1/execution",
+      expect.objectContaining({
+        method: "post",
+        headers: {
+          Authorization: "Bearer secret",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ inputs: { answer: 42 } }),
+      }),
     );
   });
 
