@@ -22,6 +22,29 @@
   height: 100dvh;
 }
 
+.app-footer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  height: 100%;
+  column-gap: var(--mantine-spacing-xs);
+}
+
+.app-footer > .mantine-Group-root {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.app-footer-version {
+  grid-column: 3;
+  justify-self: end;
+  overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 [data-separator] {
   min-width: 5px !important;
   min-height: 5px !important;
