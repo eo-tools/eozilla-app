@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ActionIcon,
   Button,
@@ -32,28 +32,12 @@ export function DateInputFieldEditor({
   setInputValue,
 }: DateInputFieldEditorProps) {
   const [opened, setOpened] = useState(false);
-  const [value, setValue] = useState<string | null>(() =>
-    toPickerValue(inputValue),
-  );
-  const [errorText, setErrorText] = useState<string | undefined>(() =>
-    getInputErrorText(inputName, inputSchema, inputValue),
-  );
-
-  useEffect(() => {
-    setValue(toPickerValue(inputValue));
-    setErrorText(getInputErrorText(inputName, inputSchema, inputValue));
-  }, [inputName, inputSchema, inputValue]);
+  const value = toPickerValue(inputValue);
+  const errorText = getInputErrorText(inputName, inputSchema, inputValue);
 
   const handleChange = (nextValue: string | null) => {
-    setValue(nextValue);
-
     const nextInputValue = nextValue ?? "";
-    const nextErrorText = getInputErrorText(
-      inputName,
-      inputSchema,
-      nextInputValue,
-    );
-    setErrorText(nextErrorText);
+    const nextErrorText = getInputErrorText(inputName, inputSchema, nextInputValue);
 
     if (!nextErrorText && inputValue !== nextInputValue) {
       setInputValue(inputName, nextInputValue);
