@@ -38,6 +38,9 @@ export default function ProcessInputsSubPanel({
       checked={showAdvancedInputs}
       onClick={() => setShowAdvancedInputs(!showAdvancedInputs)}
       size={"xs"}
+      styles={{
+        body: { alignItems: "center" },
+      }}
     />
   ) : null;
   return (

@@ -19,17 +19,16 @@ export function SubPanelItem({
   keepMounted,
 }: SubPanelItemProps) {
   const titleText = <Text {...styles.text.title2}>{title}</Text>;
-  const control = !actions ? (
-    titleText
-  ) : (
-    <Flex justify={"space-between"} align={"flex-start"}>
-      <Text {...styles.text.title2}>{title}</Text>
-      {actions}
-    </Flex>
-  );
   return (
     <Accordion.Item value={value}>
-      <Accordion.Control>{control}</Accordion.Control>
+      {!actions ? (
+        <Accordion.Control>{titleText}</Accordion.Control>
+      ) : (
+        <Flex align={"center"} gap={"xs"}>
+          <Accordion.Control style={{ flex: 1 }}>{titleText}</Accordion.Control>
+          <Flex align={"center"}>{actions}</Flex>
+        </Flex>
+      )}
       <Accordion.Panel keepMounted={keepMounted}>{children}</Accordion.Panel>
     </Accordion.Item>
   );
