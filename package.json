@@ -7,6 +7,7 @@
     "clean": "rimraf dist",
     "dev": "vite",
     "build": "rimraf dist && tsc -b && vite build",
+    "build:cuiman": "rimraf ../eozilla/cuiman/src/cuiman/app/dist && tsc -b && vite build --outDir ../eozilla/cuiman/src/cuiman/app/dist",
     "test": "vitest --run",
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
     "format": "prettier -w src",
