@@ -36,12 +36,16 @@ export default function ProcessInputsView({
         {visibleFields.map((field) => (
           <Table.Tr
             key={field.name}
-            className={!hideAdvanced && field.advanced ? "input-row-appear" : undefined}
+            className={
+              !hideAdvanced && field.advanced ? "input-row-appear" : undefined
+            }
           >
             <Table.Th w={200}>
               <InputLabel
                 inputName={field.name}
-                inputDescription={(processDescription.inputs || {})[field.name]!}
+                inputDescription={
+                  (processDescription.inputs || {})[field.name]!
+                }
               />
             </Table.Th>
             <Table.Td>

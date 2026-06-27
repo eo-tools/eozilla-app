@@ -1,7 +1,11 @@
 import { notifications } from "@mantine/notifications";
 
 import { getAppState, setAppState } from "@/store/store";
-import { type DialogId, createInitialAppState } from "@/state/types";
+import {
+  type DialogId,
+  type ProcessInputEditorMode,
+  createInitialAppState,
+} from "@/state/types";
 import {
   getServiceProvider,
   type ServiceOptions,
@@ -63,6 +67,10 @@ export function copyTextToClipboard(text: string) {
         color: "red",
       });
     });
+}
+
+export function setProcessInputEditorMode(mode: ProcessInputEditorMode) {
+  setAppState({ processInputEditorMode: mode });
 }
 
 ////////////////////////////////////////

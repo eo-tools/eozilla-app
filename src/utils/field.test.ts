@@ -91,6 +91,23 @@ describe("field helpers", () => {
     });
   });
 
+  it("extracts colon-prefixed x-ui metadata", () => {
+    const field = getFieldFromSchema("root", {
+      type: "number",
+      "x-ui:widget": "slider",
+      "x-ui:minimum": 1,
+      "x-ui:maximum": 10,
+      "ui:step": 0.5,
+    } as unknown as JsonSchema);
+
+    expect(field).toMatchObject({
+      widget: "slider",
+      minimum: 1,
+      maximum: 10,
+      step: 0.5,
+    });
+  });
+
   it("wraps process descriptions in a top-level inputs field", () => {
     const field = getFieldFromProcessDescriptionInputs({
       inputs: {
