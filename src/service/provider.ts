@@ -8,7 +8,7 @@ export interface ServiceProviderMeta {
   hidden?: boolean;
 }
 
-export type ServiceOption = boolean | number | string;
+export type ServiceOption = boolean | number | string | undefined;
 export type ServiceOptions = Record<string, ServiceOption>;
 export type ServiceOptionsInput<T extends ServiceOptions> = Partial<T>;
 export type NoServiceOptions = Record<string, never>;
@@ -43,6 +43,7 @@ export interface StringServiceOptionSchema extends ServiceOptionSchemaBase {
   type: "string";
   enum?: string[];
   default?: string;
+  format?: string;
 }
 
 export type ServiceOptionSchema =

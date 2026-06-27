@@ -26,7 +26,10 @@ describe("parseAppBootstrapConfig", () => {
       },
       options: {
         apiUrl: "https://example.test/ogcapi",
-        authType: "none",
+        authType: "token",
+        token: "secret",
+        useBearer: false,
+        tokenHeader: "X-Auth-Token",
         ignoredObject: { value: "not supported" },
       },
     });
@@ -51,7 +54,10 @@ describe("parseAppBootstrapConfig", () => {
         },
         options: {
           apiUrl: "https://example.test/ogcapi",
-          authType: "none",
+          authType: "token",
+          token: "secret",
+          useBearer: false,
+          tokenHeader: "X-Auth-Token",
         },
       },
     });

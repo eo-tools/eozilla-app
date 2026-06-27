@@ -1,12 +1,13 @@
 {
   "name": "eozilla",
   "private": true,
-  "version": "0.3.0-dev.0",
+  "version": "0.1.0-dev.0",
   "type": "module",
   "scripts": {
     "clean": "rimraf dist",
     "dev": "vite",
     "build": "rimraf dist && tsc -b && vite build",
+    "build:cuiman": "rimraf ../eozilla/cuiman/src/cuiman/app/dist && tsc -b && vite build --outDir ../eozilla/cuiman/src/cuiman/app/dist",
     "test": "vitest --run",
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
     "format": "prettier -w src",
@@ -23,7 +24,7 @@
     "react-dom": "^19.2.6",
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^4.11.2",
-    "remotestate": "^0.3.0",
+    "remotestate": "^0.3.2",
     "swr": "^2.4.1",
     "zustand": "^5.0.13"
   },
@@ -52,6 +53,6 @@
   },
   "allowScripts": {
     "esbuild@0.27.7": true,
-    "@swc/core@1.15.24": true
+    "@swc/core@1.15.43": true
   }
 }
