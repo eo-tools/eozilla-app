@@ -265,7 +265,7 @@ export interface Format {
   /**The value's media / mime type.*/
   mediaType?: string;
 
-  /**The value's title encoding. For title values only.*/
+  /**The value's title encoding. For text values only.*/
   encoding?: string;
 
   /**The OpenAPI schema or schema URI.*/

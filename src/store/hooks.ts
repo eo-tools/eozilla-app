@@ -169,7 +169,7 @@ export function useActiveProcessOutputs(): ProcessOutputs | null {
     if (processOutputs) {
       return processOutputs;
     }
-    return {};
+    return createInitialProcessOutputs(processDescription);
   }, [processRequests, processDescription]);
 }
 
@@ -265,7 +265,7 @@ export function useActiveJobInfo() {
     async () => await service!.getJob(activeJobId!),
     {
       // TODO: make configurable
-      refreshInterval: 500 /*ms*/,
+      refreshInterval: 1000 /*ms*/,
     },
   );
   const jobInfo = jobInfoState.data;
@@ -304,14 +304,12 @@ function createInitialProcessInputs(processDescription: ProcessDescription) {
   return createJsonValueForSchema(objectSchema) as ProcessInputs;
 }
 
-function createInitialProcessOutputs(processDescription: ProcessDescription) {
+function createInitialProcessOutputs(
+  processDescription: ProcessDescription,
+): ProcessOutputs {
   const processOutputs: ProcessOutputs = {};
-  Object.keys(processDescription.outputs || {}).forEach((outputName) => {
-    processOutputs[outputName] = {
-      transmissionMode: processDescription?.outputTransmission?.length
-        ? processDescription?.outputTransmission[0]
-        : undefined,
-    };
-  });
+  for (const outputName of Object.keys(processDescription.outputs ?? {})) {
+    processOutputs[outputName] = {};
+  }
   return processOutputs;
 }
