@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo } from "react";
 import useSWR from "swr";
 
 import {
-  type ProcessDescription,
   type ProcessInputs,
   type ProcessOutputs,
   getServiceProvider,
@@ -15,8 +14,6 @@ import { swrKeys } from "@/service/swr";
 import { getAppState, getAppStore } from "@/store/store";
 import type { AppState, DialogId } from "@/state/types";
 
-import { createJsonValueForSchema } from "@/utils/json";
-import { getSchemaFromProcessDescriptionInputs } from "@/utils/field";
 import {
   activateJob,
   activateProcess,
@@ -26,6 +23,11 @@ import {
 import { storage } from "@/state/storage";
 import { useRemoteStateClient, useRemoteStateValue } from "remotestate";
 import type { ProcessRequestsService } from "@/store/remotestate";
+import {
+  createInitialProcessInputs,
+  createInitialProcessOutputs,
+  ensureInitialProcessRequest,
+} from "@/store/processRequests";
 
 const selectServiceProviderId = (state: AppState) => state.serviceProviderId;
 const selectService = (state: AppState) => state.service;
@@ -210,6 +212,7 @@ export function useProcessExecution() {
 export function useActiveProcessDescription() {
   const setProcessRequest = useSetProcessRequest();
   const activeProcessId = useActiveProcessId();
+  const processRequests = useProcessRequests();
   const service = useService();
   const processesState = useSWR(
     swrKeys.processDescription(service, activeProcessId),
@@ -218,12 +221,17 @@ export function useActiveProcessDescription() {
   const processDescription = processesState.data;
   // Ensure we have initial input values
   useEffect(() => {
-    if (processDescription) {
+    if (processDescription && processRequests) {
       const processId = processDescription.id;
-      const processRequest = createInitialProcessRequest(processDescription);
-      setProcessRequest(processId, processRequest);
+      const processRequest = ensureInitialProcessRequest(
+        processRequests,
+        processDescription,
+      );
+      if (processRequest !== processRequests[processId]) {
+        setProcessRequest(processId, processRequest);
+      }
     }
-  }, [processDescription, setProcessRequest]);
+  }, [processDescription, processRequests, setProcessRequest]);
   return {
     ...processesState,
     processDescription,
@@ -285,31 +293,4 @@ export function useActiveJobResults() {
 
 export function useDialogOpened(dialogId: DialogId) {
   return useAppState((state: AppState) => state.dialogId === dialogId);
-}
-
-// --- Helpers
-
-function createInitialProcessRequest(
-  processDescription: ProcessDescription,
-): ProcessRequest {
-  return {
-    inputs: createInitialProcessInputs(processDescription),
-    outputs: createInitialProcessOutputs(processDescription),
-  };
-}
-
-function createInitialProcessInputs(processDescription: ProcessDescription) {
-  const objectSchema =
-    getSchemaFromProcessDescriptionInputs(processDescription);
-  return createJsonValueForSchema(objectSchema) as ProcessInputs;
-}
-
-function createInitialProcessOutputs(
-  processDescription: ProcessDescription,
-): ProcessOutputs {
-  const processOutputs: ProcessOutputs = {};
-  for (const outputName of Object.keys(processDescription.outputs ?? {})) {
-    processOutputs[outputName] = {};
-  }
-  return processOutputs;
 }
