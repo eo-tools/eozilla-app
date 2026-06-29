@@ -1,0 +1,116 @@
+{
+  "type": "object",
+  "title": "Primitive controls",
+  "description": "Covers the currently supported primitive widgets, nullable fields, and the advanced toggle.",
+  "additionalProperties": false,
+  "properties": {
+    "enabled": {
+      "type": "boolean",
+      "title": "Enabled",
+      "description": "Turns the feature on or off."
+    },
+    "visibility": {
+      "type": "boolean",
+      "title": "Visibility",
+      "description": "Rendered as a switch.",
+      "x-ui:widget": "switch"
+    },
+    "count": {
+      "type": "integer",
+      "title": "Count",
+      "description": "Slider-backed integer input.",
+      "minimum": 0,
+      "maximum": 10,
+      "x-ui:widget": "slider"
+    },
+    "ratio": {
+      "type": "number",
+      "title": "Ratio",
+      "description": "Slider-backed decimal input.",
+      "minimum": 0,
+      "maximum": 1,
+      "x-ui:widget": "slider"
+    },
+    "size": {
+      "type": "integer",
+      "title": "Size",
+      "description": "Enum buttons.",
+      "enum": [1, 2, 3],
+      "x-ui:widget": "button"
+    },
+    "theme": {
+      "type": "string",
+      "title": "Theme",
+      "description": "Enum radio group.",
+      "enum": ["light", "dark"],
+      "x-ui:widget": "radio"
+    },
+    "name": {
+      "type": "string",
+      "title": "Name",
+      "description": "Display name shown in the app.",
+      "x-ui:placeholder": "Display name"
+    },
+    "secret": {
+      "type": "string",
+      "title": "Secret",
+      "description": "Password input.",
+      "format": "password",
+      "x-ui:placeholder": "Enter secret"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes",
+      "description": "Textarea example.",
+      "x-ui:widget": "textarea"
+    },
+    "day": {
+      "type": "string",
+      "title": "Day",
+      "description": "Date picker example.",
+      "format": "date"
+    },
+    "clock": {
+      "type": "string",
+      "title": "Clock",
+      "description": "Time picker example.",
+      "format": "time"
+    },
+    "timestamp": {
+      "type": "string",
+      "title": "Timestamp",
+      "description": "Date-time picker example.",
+      "format": "date-time"
+    },
+    "optionalTag": {
+      "type": "string",
+      "title": "Optional tag",
+      "description": "Nullable primitive field.",
+      "nullable": true,
+      "x-ui:placeholder": "Optional tag"
+    },
+    "contact": {
+      "type": "object",
+      "title": "Contact",
+      "description": "Nullable nested object.",
+      "nullable": true,
+      "properties": {
+        "email": {
+          "type": "string",
+          "title": "Email"
+        },
+        "phone": {
+          "type": "string",
+          "title": "Phone"
+        }
+      }
+    },
+    "advancedDebug": {
+      "type": "string",
+      "title": "Advanced debug",
+      "description": "Hidden unless advanced fields are enabled.",
+      "x-ui:advanced": true,
+      "x-ui:placeholder": "Advanced only"
+    }
+  }
+}
