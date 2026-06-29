@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
-import { Group, SegmentedControl, Switch } from "@mantine/core";
+import { ActionIcon, Tooltip } from "@mantine/core";
+import {
+  IconBrightnessAuto,
+  IconBrightnessAutoFilled,
+  IconJson,
+} from "@tabler/icons-react";
 
 import ProcessInputsView from "@/components/panels/process/ProcessInputsView";
 import GeneratedProcessInputsView from "@/components/panels/process/GeneratedProcessInputsView";
@@ -12,6 +17,7 @@ import {
   getVisibleInputFields,
   type ObjectField,
 } from "@/utils/field";
+import styles from "@/components/common/styles";
 
 interface ProcessInputsSubPanelProps {
   processDescription: ProcessDescription;
@@ -37,31 +43,39 @@ export default function ProcessInputsSubPanel({
   );
 
   const inputsActions = (
-    <Group gap="xs" wrap="nowrap">
+    <ActionIcon.Group>
       {hasAdvancedInputs ? (
-        <Switch
-          label={"Show advanced"}
-          checked={showAdvancedInputs}
-          onClick={() => setShowAdvancedInputs(!showAdvancedInputs)}
-          size="xs"
-          styles={{
-            body: { alignItems: "center" },
-            label: { whiteSpace: "nowrap" },
-          }}
-        />
+        <Tooltip label={"Show advanced inputs"}>
+          <ActionIcon
+            aria-label="Show advanced"
+            {...styles.actionIcon.md}
+            variant={showAdvancedInputs ? "filled" : "subtle"}
+            onClick={() => setShowAdvancedInputs(!showAdvancedInputs)}
+          >
+            {showAdvancedInputs ? (
+              <IconBrightnessAutoFilled {...styles.icon.md} />
+            ) : (
+              <IconBrightnessAuto {...styles.icon.md} />
+            )}
+          </ActionIcon>
+        </Tooltip>
       ) : null}
-      <SegmentedControl
-        size="xs"
-        value={inputEditorMode}
-        onChange={(value) =>
-          setProcessInputEditorMode(value === "json" ? "json" : "form")
-        }
-        data={[
-          { label: "Form", value: "form" },
-          { label: "JSON", value: "json" },
-        ]}
-      />
-    </Group>
+      <Tooltip label={"Use raw JSON-value input fields"}>
+        <ActionIcon
+          aria-label="Use raw JSON-value input fields"
+          {...styles.actionIcon.md}
+          mr={10}
+          variant={inputEditorMode === "json" ? "filled" : "subtle"}
+          onClick={() =>
+            setProcessInputEditorMode(
+              inputEditorMode === "json" ? "form" : "json",
+            )
+          }
+        >
+          <IconJson {...styles.icon.md} />
+        </ActionIcon>
+      </Tooltip>
+    </ActionIcon.Group>
   );
   return (
     <SubPanel.Item value={"inputs"} title={"Inputs"} actions={inputsActions}>
