@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { Group, Stack } from "@mantine/core";
+import { Box, Group, Stack } from "@mantine/core";
 
 import {
   getVisibleInputFields,
@@ -62,23 +62,32 @@ function createPropertyElements(
   for (const propertyField of visibleFields) {
     elements.set(
       propertyField.name,
-      ctx.generator.renderField(
-        propertyField,
-        objectValue[propertyField.name],
-        (propertyValue) => {
-          ctx.onChange(
-            replaceObjectProperty(
-              objectValue,
-              propertyField.name,
-              propertyValue,
-            ),
-          );
-        },
-        {
-          hideAdvanced: ctx.hideAdvanced,
-          path: [...ctx.path, propertyField.name],
-        },
-      ),
+      <Box
+        key={propertyField.name}
+        className={
+          !ctx.hideAdvanced && propertyField.advanced
+            ? "input-row-appear"
+            : undefined
+        }
+      >
+        {ctx.generator.renderField(
+          propertyField,
+          objectValue[propertyField.name],
+          (propertyValue) => {
+            ctx.onChange(
+              replaceObjectProperty(
+                objectValue,
+                propertyField.name,
+                propertyValue,
+              ),
+            );
+          },
+          {
+            hideAdvanced: ctx.hideAdvanced,
+            path: [...ctx.path, propertyField.name],
+          },
+        )}
+      </Box>,
     );
   }
 
