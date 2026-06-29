@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import { Fragment, type ReactElement } from "react";
 import { Group, Stack } from "@mantine/core";
 
 import {
@@ -62,23 +62,25 @@ function createPropertyElements(
   for (const propertyField of visibleFields) {
     elements.set(
       propertyField.name,
-      ctx.generator.renderField(
-        propertyField,
-        objectValue[propertyField.name],
-        (propertyValue) => {
-          ctx.onChange(
-            replaceObjectProperty(
-              objectValue,
-              propertyField.name,
-              propertyValue,
-            ),
-          );
-        },
-        {
-          hideAdvanced: ctx.hideAdvanced,
-          path: [...ctx.path, propertyField.name],
-        },
-      ),
+      <Fragment key={propertyField.name}>
+        {ctx.generator.renderField(
+          propertyField,
+          objectValue[propertyField.name],
+          (propertyValue) => {
+            ctx.onChange(
+              replaceObjectProperty(
+                objectValue,
+                propertyField.name,
+                propertyValue,
+              ),
+            );
+          },
+          {
+            hideAdvanced: ctx.hideAdvanced,
+            path: [...ctx.path, propertyField.name],
+          },
+        )}
+      </Fragment>,
     );
   }
 
@@ -116,7 +118,7 @@ function layoutGroup(
       }
     } else {
       children.push(
-        layoutElements(item.type, layoutGroup(item, childrenByName)),
+          layoutElements(item.type, layoutGroup(item, childrenByName)),
       );
     }
   }
