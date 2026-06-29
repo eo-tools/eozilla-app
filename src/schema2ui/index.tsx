@@ -1,4 +1,4 @@
-import { StrictMode, useEffect, useMemo, useState } from "react";
+import { StrictMode, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
@@ -55,9 +55,13 @@ function Schema2UiPlayground() {
     createJsonValueForSchema(selectedFixture.schema),
   );
 
-  useEffect(() => {
-    setValue(createJsonValueForSchema(selectedFixture.schema));
-  }, [selectedFixture]);
+  const handleFixtureChange = (nextFixtureId: SchemaFixtureId) => {
+    const nextFixture =
+      schemaFixtures.find((fixture) => fixture.id === nextFixtureId) ??
+      schemaFixtures[0]!;
+    setSelectedFixtureId(nextFixtureId);
+    setValue(createJsonValueForSchema(nextFixture.schema));
+  };
 
   return (
     <AppShell
@@ -75,7 +79,7 @@ function Schema2UiPlayground() {
               data={schemaOptions}
               onChange={(nextValue) => {
                 if (nextValue) {
-                  setSelectedFixtureId(nextValue);
+                  handleFixtureChange(nextValue as SchemaFixtureId);
                 }
               }}
               w={220}
@@ -143,6 +147,8 @@ function Schema2UiPlayground() {
     </AppShell>
   );
 }
+
+export default Schema2UiPlayground;
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
