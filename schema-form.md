@@ -311,15 +311,6 @@ match a widget hint such as `x-ui-widget: map` for a supported schema type,
 then render a controlled React map component while still using the schema
 field's existing title and description. The current implementation uses that
 general bucket for string-backed map fields and handles polygon WKT values first.
-The map factory is intentionally scored above the primitive renderer but below
-nullable handling, so nullable string map fields still pass through the
-nullable wrapper before rendering the specialized map control.
-
-For long-lived third-party widgets such as the current OpenLayers-based
-`MapField`, avoid recreating the widget instance on ordinary React rerenders.
-Keep the widget setup effect stable and use refs for changing callbacks when
-needed. The current `MapField` does this for `onChange` so sibling field edits
-do not tear down and rebuild the map.
 
 ## Likely Next Extensions
 
