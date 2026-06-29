@@ -8,11 +8,15 @@ import {
   Textarea,
   Tooltip,
 } from "@mantine/core";
-import { IconTrash } from "@tabler/icons-react";
+import {
+  IconPolygon,
+  IconRectangle,
+  IconTrash,
+} from "@tabler/icons-react";
 
 import Map from "ol/Map";
 import View from "ol/View";
-import Draw from "ol/interaction/Draw";
+import Draw, { createBox } from "ol/interaction/Draw";
 import Modify from "ol/interaction/Modify";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
@@ -34,6 +38,8 @@ interface MapFieldProps {
   hideLabel?: boolean;
 }
 
+type DrawMode = "polygon" | "rectangle";
+
 const wktFormat = new WKT();
 
 const polygonStyle = new Style({
@@ -54,11 +60,13 @@ export function MapField({
 }: MapFieldProps) {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
+  const drawRef = useRef<Draw | null>(null);
   const onChangeRef = useRef(onChange);
   const vectorSource = useMemo(() => new VectorSource(), []);
   const isSyncingRef = useRef(false);
   const isClearingForRedrawRef = useRef(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [drawMode, setDrawMode] = useState<DrawMode>("polygon");
   const hasGeometry = value.trim().length > 0;
 
   useEffect(() => {
@@ -89,19 +97,8 @@ export function MapField({
       }),
     });
 
-    const draw = new Draw({
-      source: source3857,
-      type: "Polygon",
-    });
     const modify = new Modify({
       source: source3857,
-    });
-
-    draw.on("drawstart", () => {
-      clearSourceForRedraw(source3857, isClearingForRedrawRef);
-    });
-    draw.on("drawend", () => {
-      fitToSource(map, source3857);
     });
     source3857.on("addfeature", (event) => {
       if (!event.feature) {
@@ -130,15 +127,42 @@ export function MapField({
       onChangeRef.current("");
     });
 
-    map.addInteraction(draw);
     map.addInteraction(modify);
     mapRef.current = map;
 
     return () => {
+      drawRef.current = null;
       map.setTarget(undefined);
       mapRef.current = null;
     };
   }, [vectorSource]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) {
+      return;
+    }
+
+    if (drawRef.current) {
+      map.removeInteraction(drawRef.current);
+    }
+
+    const draw = createDrawInteraction(drawMode, vectorSource, map, {
+      onChangeRef,
+      setErrorMessage,
+      isSyncingRef,
+      isClearingForRedrawRef,
+    });
+    drawRef.current = draw;
+    map.addInteraction(draw);
+
+    return () => {
+      if (drawRef.current === draw) {
+        map.removeInteraction(draw);
+        drawRef.current = null;
+      }
+    };
+  }, [drawMode, vectorSource]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -162,30 +186,57 @@ export function MapField({
               overflow: "hidden",
             }}
           />
-          <Tooltip label="Delete polygon">
-            <ActionIcon
-              aria-label="Delete polygon"
-              color="red"
-              variant="filled"
-              size="sm"
-              disabled={!hasGeometry}
-              onClick={() => {
-                setErrorMessage(null);
-                onChange("");
-              }}
-              style={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                zIndex: 1,
-              }}
-            >
-              <IconTrash size={14} />
-            </ActionIcon>
-          </Tooltip>
+          <Stack
+            gap="xs"
+            style={{
+              position: "absolute",
+              bottom: 8,
+              left: 8,
+              zIndex: 1,
+            }}
+          >
+            <Tooltip label="Draw polygon" position="right">
+              <ActionIcon
+                aria-label="Draw polygon"
+                color={drawMode === "polygon" ? "blue" : "gray"}
+                variant={drawMode === "polygon" ? "filled" : "default"}
+                size="sm"
+                onClick={() => setDrawMode("polygon")}
+              >
+                <IconPolygon size={14} />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label="Draw rectangle" position="right">
+              <ActionIcon
+                aria-label="Draw rectangle"
+                color={drawMode === "rectangle" ? "blue" : "gray"}
+                variant={drawMode === "rectangle" ? "filled" : "default"}
+                size="sm"
+                onClick={() => setDrawMode("rectangle")}
+              >
+                <IconRectangle size={14} />
+              </ActionIcon>
+            </Tooltip>
+            {hasGeometry ? (
+              <Tooltip label="Delete polygon" position="left">
+                <ActionIcon
+                  aria-label="Delete polygon"
+                  color="red"
+                  variant="filled"
+                  size="sm"
+                  onClick={() => {
+                    setErrorMessage(null);
+                    onChange("");
+                  }}
+                >
+                  <IconTrash size={14} />
+                </ActionIcon>
+              </Tooltip>
+            ) : null}
+          </Stack>
         </Box>
         <Text size="xs" c="dimmed">
-          Map widget for geometry strings. Today it supports one polygon WKT value.
+          Map widget for geometry strings. Rectangle drawing is stored as polygon WKT.
         </Text>
         {errorMessage ? (
           <Alert color="yellow" variant="light" py="xs">
@@ -315,6 +366,40 @@ function fitToSource(map: Map, source: VectorSource) {
     maxZoom: 16,
     duration: 150,
   });
+}
+
+function createDrawInteraction(
+  drawMode: DrawMode,
+  source: VectorSource,
+  map: Map,
+  deps: {
+    onChangeRef: { current: (value: string) => void };
+    setErrorMessage: (message: string | null) => void;
+    isSyncingRef: { current: boolean };
+    isClearingForRedrawRef: { current: boolean };
+  },
+) {
+  const draw = new Draw(
+    drawMode === "rectangle"
+      ? {
+          source,
+          type: "Circle",
+          geometryFunction: createBox(),
+        }
+      : {
+          source,
+          type: "Polygon",
+        },
+  );
+
+  draw.on("drawstart", () => {
+    clearSourceForRedraw(source, deps.isClearingForRedrawRef);
+  });
+  draw.on("drawend", () => {
+    fitToSource(map, source);
+  });
+
+  return draw;
 }
 
 function clearSourceForRedraw(
