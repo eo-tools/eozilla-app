@@ -23,7 +23,7 @@ export const nullableFieldFactory: FieldFactory = {
     return (
       <Stack gap="xs">
         <Switch
-          label={ctx.labelHidden ? undefined : getFieldLabel(ctx.field)}
+          label={ctx.hideLabel ? undefined : getFieldLabel(ctx.field)}
           description={getFieldDescription(ctx.field)}
           checked={enabled}
           onChange={(event) => {
@@ -36,7 +36,7 @@ export const nullableFieldFactory: FieldFactory = {
         />
         <Collapse expanded={enabled}>
           {ctx.generator.renderField(innerField, innerValue, ctx.onChange, {
-            labelHidden: true,
+            hideLabel: true,
             hideAdvanced: ctx.hideAdvanced,
             path: ctx.path,
           })}

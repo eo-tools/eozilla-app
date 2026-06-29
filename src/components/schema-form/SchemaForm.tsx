@@ -21,7 +21,7 @@ export function SchemaForm({
   value,
   onChange,
   registry,
-  labelHidden,
+  hideLabel,
   hideAdvanced,
 }: SchemaFormProps) {
   const generator = useMemo(
@@ -33,7 +33,7 @@ export function SchemaForm({
   );
 
   return generator.renderField(field, value, onChange, {
-    labelHidden,
+    hideLabel,
     hideAdvanced,
   });
 }

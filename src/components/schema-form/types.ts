@@ -6,7 +6,7 @@ import type { JsonValue } from "@/utils/json";
 export type FieldValue = JsonValue | undefined;
 
 export interface FieldRenderOptions {
-  labelHidden?: boolean;
+  hideLabel?: boolean;
   hideAdvanced?: boolean;
 }
 

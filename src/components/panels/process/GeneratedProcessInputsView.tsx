@@ -32,7 +32,7 @@ export default function GeneratedProcessInputsView({
         field={inputsField}
         value={processInputs}
         onChange={handleChange}
-        labelHidden
+        hideLabel
         hideAdvanced={hideAdvanced}
       />
     </Stack>

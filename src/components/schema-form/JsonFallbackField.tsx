@@ -22,14 +22,14 @@ interface JsonFallbackFieldProps {
   field: Field;
   value: FieldValue;
   onChange: (value: JsonValue) => void;
-  labelHidden?: boolean;
+  hideLabel?: boolean;
 }
 
 export function JsonFallbackField({
   field,
   value,
   onChange,
-  labelHidden,
+  hideLabel,
 }: JsonFallbackFieldProps) {
   const initialValue = getFieldValue(field, value);
   const [{ textValue, errorText }, setDraft] = useJsonInputDraft(initialValue);
@@ -57,7 +57,7 @@ export function JsonFallbackField({
   );
 
   return (
-    <FieldShell field={field} labelHidden={labelHidden}>
+    <FieldShell field={field} hideLabel={hideLabel}>
       <JsonInput
         value={textValue}
         onChange={handleChange}

@@ -85,7 +85,7 @@ The public component is `SchemaForm`:
   field={inputsField}
   value={processInputs}
   onChange={handleChange}
-  labelHidden
+  hideLabel={hideLabel}
   hideAdvanced={hideAdvanced}
 />
 ```
@@ -111,7 +111,7 @@ export interface FieldRenderContext {
   value: JsonValue | undefined;
   onChange: (value: JsonValue) => void;
   generator: SchemaFormGenerator;
-  labelHidden?: boolean;
+  hideLabel?: boolean;
   hideAdvanced?: boolean;
 }
 ```
@@ -256,7 +256,7 @@ process inputs:
   field={inputsField}
   value={processInputs}
   onChange={handleChange}
-  labelHidden
+  hideLabel
   hideAdvanced={hideAdvanced}
 />
 ```
@@ -331,24 +331,3 @@ Good next tasks:
 - Date/time inputs currently preserve empty string defaults unless the schema has
   an explicit default. This avoids silently changing initial process request
   payloads.
-
-## Verification Commands
-
-`npm` may be broken in this shell, so use local binaries directly:
-
-```powershell
-.\node_modules\.bin\tsc.cmd -p tsconfig.app.json --noEmit
-.\node_modules\.bin\vitest.cmd --run
-.\node_modules\.bin\eslint.cmd .
-```
-
-Run these from:
-
-```text
-C:\Users\norma\Projects\eozilla\eozilla-app
-```
-
-At the time this document was written, the checks passed with:
-
-- 21 Vitest files
-- 70 tests

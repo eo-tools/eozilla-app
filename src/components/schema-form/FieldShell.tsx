@@ -10,14 +10,14 @@ import { getFieldDescription, getFieldLabel } from "./fieldUtils";
 interface FieldShellProps {
   field: Field;
   children: ReactNode;
-  labelHidden?: boolean;
+  hideLabel?: boolean;
 }
 
-export function FieldShell({ field, children, labelHidden }: FieldShellProps) {
+export function FieldShell({ field, children, hideLabel }: FieldShellProps) {
   const { containerProps, revealStyle } = useHoverReveal();
   const description = getFieldDescription(field);
 
-  if (labelHidden) {
+  if (hideLabel) {
     return <>{children}</>;
   }
 

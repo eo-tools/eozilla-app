@@ -54,7 +54,7 @@ function renderBooleanField(ctx: FieldRenderContext) {
   const Control = ctx.field.widget === "switch" ? Switch : Checkbox;
   return (
     <Control
-      label={ctx.labelHidden ? undefined : getFieldLabel(ctx.field)}
+      label={ctx.hideLabel ? undefined : getFieldLabel(ctx.field)}
       description={getFieldDescription(ctx.field)}
       checked={value}
       onChange={(event) => ctx.onChange(event.currentTarget.checked)}
@@ -77,7 +77,7 @@ function renderNumericField(ctx: FieldRenderContext) {
     (getMinimum(ctx) as number) < (getMaximum(ctx) as number)
   ) {
     return (
-      <FieldShell field={ctx.field} labelHidden={ctx.labelHidden}>
+      <FieldShell field={ctx.field} hideLabel={ctx.hideLabel}>
         <Slider
           value={value}
           min={getMinimum(ctx)}
@@ -93,7 +93,7 @@ function renderNumericField(ctx: FieldRenderContext) {
 
   return (
     <NumberInput
-      label={ctx.labelHidden ? undefined : getFieldLabel(ctx.field)}
+      label={ctx.hideLabel ? undefined : getFieldLabel(ctx.field)}
       description={getFieldDescription(ctx.field)}
       value={value}
       min={getMinimum(ctx)}
@@ -132,7 +132,7 @@ function renderStringField(ctx: FieldRenderContext) {
   if (schema.format === "password" || ctx.field.password) {
     return (
       <PasswordInput
-        label={ctx.labelHidden ? undefined : getFieldLabel(ctx.field)}
+        label={ctx.hideLabel ? undefined : getFieldLabel(ctx.field)}
         description={getFieldDescription(ctx.field)}
         placeholder={ctx.field.placeholder}
         value={value}
@@ -144,7 +144,7 @@ function renderStringField(ctx: FieldRenderContext) {
   if (ctx.field.widget === "textarea") {
     return (
       <Textarea
-        label={ctx.labelHidden ? undefined : getFieldLabel(ctx.field)}
+        label={ctx.hideLabel ? undefined : getFieldLabel(ctx.field)}
         description={getFieldDescription(ctx.field)}
         placeholder={ctx.field.placeholder}
         autosize
@@ -158,7 +158,7 @@ function renderStringField(ctx: FieldRenderContext) {
 
   return (
     <TextInput
-      label={ctx.labelHidden ? undefined : getFieldLabel(ctx.field)}
+      label={ctx.hideLabel ? undefined : getFieldLabel(ctx.field)}
       description={getFieldDescription(ctx.field)}
       placeholder={ctx.field.placeholder}
       value={value}
@@ -170,7 +170,7 @@ function renderStringField(ctx: FieldRenderContext) {
 function renderDateField(ctx: FieldRenderContext, value: string) {
   return (
     <DatePickerInput
-      label={ctx.labelHidden ? undefined : getFieldLabel(ctx.field)}
+      label={ctx.hideLabel ? undefined : getFieldLabel(ctx.field)}
       description={getFieldDescription(ctx.field)}
       placeholder={ctx.field.placeholder}
       value={toDateValue(value)}
@@ -186,7 +186,7 @@ function renderDateField(ctx: FieldRenderContext, value: string) {
 function renderTimeField(ctx: FieldRenderContext, value: string) {
   return (
     <TimeInput
-      label={ctx.labelHidden ? undefined : getFieldLabel(ctx.field)}
+      label={ctx.hideLabel ? undefined : getFieldLabel(ctx.field)}
       description={getFieldDescription(ctx.field)}
       placeholder={ctx.field.placeholder}
       value={toTimeValue(value)}
@@ -201,14 +201,14 @@ function renderTimeField(ctx: FieldRenderContext, value: string) {
 function renderDateTimeField(ctx: FieldRenderContext, value: string) {
   return (
     <DateTimePicker
-      label={ctx.labelHidden ? undefined : getFieldLabel(ctx.field)}
+      label={ctx.hideLabel ? undefined : getFieldLabel(ctx.field)}
       description={getFieldDescription(ctx.field)}
       placeholder={ctx.field.placeholder}
       value={toDateTimePickerValue(value)}
       valueFormat="YYYY-MM-DD HH:mm:ss"
       withSeconds
       clearable={Boolean(ctx.field.schema.nullable)}
-      onChange={(nextValue) => {
+      onChange={(nextValue: string | null) => {
         ctx.onChange(nextValue ? fromDateTimePickerValue(nextValue) : "");
       }}
     />
@@ -225,7 +225,7 @@ function renderEnumSelect(ctx: FieldRenderContext, value: JsonValue) {
   if (ctx.field.widget === "radio") {
     return (
       <Radio.Group
-        label={ctx.labelHidden ? undefined : getFieldLabel(ctx.field)}
+        label={ctx.hideLabel ? undefined : getFieldLabel(ctx.field)}
         description={getFieldDescription(ctx.field)}
         value={encodeEnumValue(value)}
         onChange={(nextValue) => {
@@ -241,7 +241,7 @@ function renderEnumSelect(ctx: FieldRenderContext, value: JsonValue) {
 
   if (ctx.field.widget === "button") {
     return (
-      <FieldShell field={ctx.field} labelHidden={ctx.labelHidden}>
+      <FieldShell field={ctx.field} hideLabel={ctx.hideLabel}>
         <SegmentedControl
           value={encodeEnumValue(value)}
           data={data}
@@ -255,7 +255,7 @@ function renderEnumSelect(ctx: FieldRenderContext, value: JsonValue) {
 
   return (
     <Select
-      label={ctx.labelHidden ? undefined : getFieldLabel(ctx.field)}
+      label={ctx.hideLabel ? undefined : getFieldLabel(ctx.field)}
       description={getFieldDescription(ctx.field)}
       value={encodeEnumValue(value)}
       data={data}

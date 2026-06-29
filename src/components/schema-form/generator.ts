@@ -63,7 +63,7 @@ export class DefaultSchemaFormGenerator implements SchemaFormGenerator {
       onChange,
       generator: this,
       path: options.path ?? [field.name],
-      labelHidden: options.labelHidden,
+      hideLabel: options.hideLabel,
       hideAdvanced: options.hideAdvanced,
     };
     return factory.render(ctx);
