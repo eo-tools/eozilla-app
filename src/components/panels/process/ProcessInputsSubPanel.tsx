@@ -40,12 +40,13 @@ export default function ProcessInputsSubPanel({
     <Group gap="xs" wrap="nowrap">
       {hasAdvancedInputs ? (
         <Switch
-          label={"All"}
+          label={"Show advanced"}
           checked={showAdvancedInputs}
           onClick={() => setShowAdvancedInputs(!showAdvancedInputs)}
           size="xs"
           styles={{
             body: { alignItems: "center" },
+            label: { whiteSpace: "nowrap" },
           }}
         />
       ) : null}
