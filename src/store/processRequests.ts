@@ -13,7 +13,8 @@ export function ensureInitialProcessRequest(
 ): ProcessRequest {
   const processId = processDescription.id;
   return (
-    processRequests[processId] ?? createInitialProcessRequest(processDescription)
+    processRequests[processId] ??
+    createInitialProcessRequest(processDescription)
   );
 }
 
