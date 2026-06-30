@@ -60,11 +60,9 @@ export function MapField({
 }: MapFieldProps) {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
-  const drawRef = useRef<Draw | null>(null);
   const onChangeRef = useRef(onChange);
   const vectorSource = useMemo(() => new VectorSource(), []);
   const isSyncingRef = useRef(false);
-  const isClearingForRedrawRef = useRef(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [drawMode, setDrawMode] = useState<DrawMode>("polygon");
   const hasGeometry = value.trim().length > 0;
@@ -119,19 +117,11 @@ export function MapField({
         isSyncingRef,
       );
     });
-    source3857.on("removefeature", () => {
-      if (isSyncingRef.current || isClearingForRedrawRef.current) {
-        return;
-      }
-      setErrorMessage(null);
-      onChangeRef.current("");
-    });
 
     map.addInteraction(modify);
     mapRef.current = map;
 
     return () => {
-      drawRef.current = null;
       map.setTarget(undefined);
       mapRef.current = null;
     };
@@ -143,24 +133,11 @@ export function MapField({
       return;
     }
 
-    if (drawRef.current) {
-      map.removeInteraction(drawRef.current);
-    }
-
-    const draw = createDrawInteraction(drawMode, vectorSource, map, {
-      onChangeRef,
-      setErrorMessage,
-      isSyncingRef,
-      isClearingForRedrawRef,
-    });
-    drawRef.current = draw;
+    const draw = createDrawInteraction(drawMode, vectorSource, map);
     map.addInteraction(draw);
 
     return () => {
-      if (drawRef.current === draw) {
-        map.removeInteraction(draw);
-        drawRef.current = null;
-      }
+      map.removeInteraction(draw);
     };
   }, [drawMode, vectorSource]);
 
@@ -372,12 +349,6 @@ function createDrawInteraction(
   drawMode: DrawMode,
   source: VectorSource,
   map: Map,
-  deps: {
-    onChangeRef: { current: (value: string) => void };
-    setErrorMessage: (message: string | null) => void;
-    isSyncingRef: { current: boolean };
-    isClearingForRedrawRef: { current: boolean };
-  },
 ) {
   const draw = new Draw(
     drawMode === "rectangle"
@@ -393,22 +364,11 @@ function createDrawInteraction(
   );
 
   draw.on("drawstart", () => {
-    clearSourceForRedraw(source, deps.isClearingForRedrawRef);
+    source.clear();
   });
   draw.on("drawend", () => {
     fitToSource(map, source);
   });
 
   return draw;
-}
-
-function clearSourceForRedraw(
-  source: VectorSource,
-  isClearingForRedrawRef: { current: boolean },
-) {
-  isClearingForRedrawRef.current = true;
-  source.clear();
-  queueMicrotask(() => {
-    isClearingForRedrawRef.current = false;
-  });
 }
