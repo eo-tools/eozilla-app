@@ -57,8 +57,8 @@ Useful entry points when exploring the code:
 ### Prerequisites
 
 - Node.js and npm
-- Optional: [Pixi](https://pixi.sh/) and a sibling checkout of
-  `../eozilla` if you want to run the local Dev Service backend
+- Optional: [Pixi](https://pixi.sh/) and a checkout of
+  `eozilla` if you want to run the local Eozilla Dev-Service backend
 
 ### Install Dependencies
 
@@ -74,30 +74,38 @@ npm run dev
 
 ### Run With The Local Dev Service
 
-The `dev-server` script expects the `eozilla` backend repository next to this
-project at `../eozilla`.
+The `eozilla:dev` script expects the `eozilla-app` repository to be checked out into the
+`eozilla` Python repository.
 
-1. Clone the backend repository next to this one.
-2. Install backend dependencies:
+First do
 
 ```bash
-cd ../eozilla
+git clone https://github.com/eo-tools/eozilla.git`
+cd eozilla
 pixi install
 ```
 
-3. Start the backend service from this repository:
+then
 
 ```bash
-npm run dev-server
+git clone https://github.com/eo-tools/eozilla.app.git`
+cd eozilla-app
+npm install
 ```
 
-4. In a second terminal, start the frontend:
+and finally
+
+```bash
+npm run eozilla:dev
+```
+
+and in a second terminal
 
 ```bash
 npm run dev
 ```
 
-5. In the app, select the `Dev Service` provider.
+In the app, select the `Dev Service` provider.
 
 ## Useful Scripts
 
