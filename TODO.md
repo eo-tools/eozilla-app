@@ -101,3 +101,34 @@ In the dev console we still have:
   to do (a) app store, (b) hooks, (c) component testing. 
 - [x] Setup GitHub CI which includes typecheck, lint, and testing. 
 
+
+
+# Generator TODOs
+### Array support
+- [] array text input
+- [] array editor
+- [] add/remove/reorder UI
+- [] separator handling
+- [] date/date-time ranges
+- [x] bbox/map editor for WKT strings
+- [ ] bbox/map editor for 4-tuples of floats
+### Schema composition:
+- [] oneOf
+- [] anyOf
+- [] allOf
+- [] discriminator support
+- [] $ref resolution in TypeScript metadata.
+- [] prefixItems / tuple conversion.
+- [] File/bytes inputs and dropper support.
+- [] Enum discrete slider for enum + x-ui-widget: slider.
+- [] Additional-properties editor.
+- [] Group titles/styles and group_name.
+- [] TypeScript equivalent of Python FieldFactoryBase.
+- [] Schema playground like Python schema2ui.
+- [] Full validation parity with the Python/OpenAPI behavior.
+- [] Exact Python-style initial value behavior.
+
+- [] finer grained schema files:
+  - per schema type and anyOf, oneOf etc
+  - per customization through x-ui and format
+- [] grouped schema selection panel, e.g., a tree view, or nested menu

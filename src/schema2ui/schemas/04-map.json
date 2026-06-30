@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "title": "Map field",
+  "description": "Renders a string-backed map field through the map widget.",
+  "properties": {
+    "geometry": {
+      "type": "string",
+      "title": "Geometry (WKT)",
+      "default": "POLYGON((-3.560653 18.579611,24.045399 2.389933,24.045399 34.39422,-3.560653 18.579611))",
+      "description": "Draw a polygon or paste a geometry string. The current implementation expects POLYGON WKT.",
+      "format": "wkt",
+      "x-ui-widget": "map",
+      "x-ui-order": 20
+    }
+  },
+  "required": ["geometry"],
+  "additionalProperties": false
+}

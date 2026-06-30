@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
-import { Flex, Stack, Text } from "@mantine/core";
+import { Flex, Input, Stack } from "@mantine/core";
 
 import HoverHelpIcon from "@/components/common/HoverHelpIcon";
 import { useHoverReveal } from "@/components/common/useHoverReveal";
-import styles from "@/components/common/styles";
 import type { Field } from "@/utils/field";
 import { getFieldDescription, getFieldLabel } from "./fieldUtils";
 
@@ -24,9 +23,9 @@ export function FieldShell({ field, children, hideLabel }: FieldShellProps) {
   return (
     <Stack gap={4}>
       <Flex justify="space-between" align="center" {...containerProps}>
-        <Text {...styles.text.id2} size="sm">
+        <Input.Label>
           {getFieldLabel(field)}
-        </Text>
+        </Input.Label>
         <HoverHelpIcon markdownText={description} revealStyle={revealStyle} />
       </Flex>
       {children}

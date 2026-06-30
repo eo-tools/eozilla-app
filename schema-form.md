@@ -294,8 +294,8 @@ Then register it before broader factories in `defaultRegistry.ts`:
 
 ```ts
 return new FieldFactoryRegistry([
-  bboxFieldFactory,
   nullableFieldFactory,
+  mapFieldFactory,
   objectFieldFactory,
   primitiveFieldFactory,
   jsonFallbackFieldFactory,
@@ -306,6 +306,12 @@ Use a score higher than the default primitive/object score (`10`) if the factory
 is a more specific handler for an otherwise supported schema. Use `100` for
 strong semantic matches such as a future `BBoxEditor`.
 
+The same approach now applies to the map field: a specialized factory can
+match a widget hint such as `x-ui-widget: map` for a supported schema type,
+then render a controlled React map component while still using the schema
+field's existing title and description. The current implementation uses that
+general bucket for string-backed map fields and handles polygon WKT values first.
+
 ## Likely Next Extensions
 
 Good next tasks:
@@ -314,6 +320,7 @@ Good next tasks:
 - Add specialized date/date-time range array handling.
 - Add a BBox editor factory for numeric 4-tuples with `format: bbox` or
   `x-ui:widget: map`.
+- Extend the current WKT map field beyond single `POLYGON` support if needed.
 - Add `oneOf` / `anyOf` support with Mantine `Tabs` or `SegmentedControl`.
 - Add `allOf` merging support, likely in field metadata utilities.
 - Improve enum rendering with radio groups or segmented controls based on
