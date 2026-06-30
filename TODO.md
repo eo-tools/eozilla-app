@@ -110,7 +110,8 @@ In the dev console we still have:
 - [] add/remove/reorder UI
 - [] separator handling
 - [] date/date-time ranges
-- [] bbox/map editor
+- [x] bbox/map editor for WKT strings
+- [ ] bbox/map editor for 4-tuples of floats
 ### Schema composition:
 - [] oneOf
 - [] anyOf
