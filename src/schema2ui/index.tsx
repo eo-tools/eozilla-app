@@ -22,10 +22,7 @@ import { JsonCode } from "@/components/common/JsonCode";
 import styles from "@/components/common/styles";
 import { SchemaForm } from "@/components/schema-form";
 import { getFieldFromSchema } from "@/utils/field";
-import {
-  createJsonValueForSchema,
-  type JsonValue,
-} from "@/utils/json";
+import { createJsonValueForSchema, type JsonValue } from "@/utils/json";
 
 import { schemaFixtures } from "./schemaFixtures";
 
