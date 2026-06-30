@@ -110,14 +110,15 @@ In the app, select the `Dev Service` provider.
 ## Useful Scripts
 
 ```bash
-npm run dev         # Start the Vite dev server
-npm run dev-server  # Start the local wraptile-backed service
-npm run test        # Run the Vitest suite
-npm run typecheck   # TypeScript type check without emitting files
-npm run lint        # Run ESLint
-npm run format      # Format source files with Prettier
-npm run build       # Type-check and build production assets
-npm run preview     # Preview the production build locally
+npm run dev            # Start the Vite dev server
+npm run eozilla:dev    # Start the local wraptile API server for testing
+npm run build          # Type-check and build production assets
+npm run eozilla:build  # Type-check and build production assets into eozilla cuiman
+npm run test           # Run the Vitest suite
+npm run typecheck      # TypeScript type check without emitting files
+npm run lint           # Run ESLint
+npm run format         # Format source files with Prettier
+npm run preview        # Preview the production build locally
 ```
 
 ## Working On The Codebase
