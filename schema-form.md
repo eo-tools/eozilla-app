@@ -295,7 +295,7 @@ Then register it before broader factories in `defaultRegistry.ts`:
 ```ts
 return new FieldFactoryRegistry([
   nullableFieldFactory,
-  bboxFieldFactory,
+  mapFieldFactory,
   objectFieldFactory,
   primitiveFieldFactory,
   jsonFallbackFieldFactory,
