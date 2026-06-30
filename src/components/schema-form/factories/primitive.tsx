@@ -1,5 +1,6 @@
 import {
   Checkbox,
+  Group,
   NumberInput,
   PasswordInput,
   Radio,
@@ -223,7 +224,12 @@ function renderEnumSelect(ctx: FieldRenderContext, value: JsonValue) {
     label: formatEnumLabel(item),
   }));
 
-  if (ctx.field.widget === "radio") {
+  if (
+    ctx.field.widget === "radio" ||
+    ctx.field.widget === "radio-column" ||
+    ctx.field.widget === "radio-row"
+  ) {
+    const layout = ctx.field.widget === "radio-row" ? "row" : "column";
     return (
       <Radio.Group
         label={ctx.hideLabel ? undefined : getFieldLabel(ctx.field)}
@@ -233,11 +239,19 @@ function renderEnumSelect(ctx: FieldRenderContext, value: JsonValue) {
           ctx.onChange(decodeEnumValue(nextValue));
         }}
       >
-        <Stack gap="xs" mt="xs">
-          {data.map((item) => (
-            <Radio key={item.value} value={item.value} label={item.label} />
-          ))}
-        </Stack>
+        {layout === "row" ? (
+          <Group gap="sm" mt="xs">
+            {data.map((item) => (
+              <Radio key={item.value} value={item.value} label={item.label} />
+            ))}
+          </Group>
+        ) : (
+          <Stack gap="xs" mt="xs">
+            {data.map((item) => (
+              <Radio key={item.value} value={item.value} label={item.label} />
+            ))}
+          </Stack>
+        )}
       </Radio.Group>
     );
   }

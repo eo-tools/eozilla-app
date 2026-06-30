@@ -47,10 +47,15 @@
       "type": "string",
       "enum": ["yellow", "red", "green", "blue"]
     },
-    "radio": {
+    "radio_column": {
       "type": "string",
       "enum": ["yellow", "red", "green", "blue"],
-      "x-ui-widget": "radio"
+      "x-ui-widget": "radio-column"
+    },
+    "radio_row": {
+      "type": "string",
+      "enum": ["yellow", "red", "green", "blue"],
+      "x-ui-widget": "radio-row"
     },
     "button": {
       "type": "string",

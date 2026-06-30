@@ -142,15 +142,17 @@ Supported mappings:
 - `type: integer` / `type: number`
   - default: Mantine `NumberInput`
   - `x-ui:widget: slider` with finite min/max: Mantine `Slider`
-  - `enum`: Mantine `Select`
-  - `enum` with `x-ui:widget: radio`: Mantine `Radio.Group`
+- `enum`: Mantine `Select`
+  - `enum` with `x-ui:widget: radio`, `radio-column`: Mantine `Radio.Group` in a vertical stack
+  - `enum` with `x-ui:widget: radio-row`: Mantine `Radio.Group` in a horizontal row
   - `enum` with `x-ui:widget: button`: Mantine `SegmentedControl`
 - `type: string`
   - default: Mantine `TextInput`
   - `x-ui:widget: textarea`: Mantine `Textarea`
   - `format: password` or `x-ui:password`: Mantine `PasswordInput`
-  - `enum`: Mantine `Select`
-  - `enum` with `x-ui:widget: radio`: Mantine `Radio.Group`
+- `enum`: Mantine `Select`
+  - `enum` with `x-ui:widget: radio`, `radio-column`: Mantine `Radio.Group` in a vertical stack
+  - `enum` with `x-ui:widget: radio-row`: Mantine `Radio.Group` in a horizontal row
   - `enum` with `x-ui:widget: button`: Mantine `SegmentedControl`
   - `format: date`: Mantine Dates `DatePickerInput`
   - `format: time`: Mantine Dates `TimeInput`

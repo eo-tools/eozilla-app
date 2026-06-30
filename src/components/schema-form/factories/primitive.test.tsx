@@ -8,11 +8,55 @@ import { primitiveFieldFactory } from "./primitive";
 import type { FieldRenderContext } from "../types";
 
 describe("primitiveFieldFactory", () => {
-  it("renders enum fields with x-ui-widget radio as radio groups", () => {
+  it("renders enum fields with x-ui-widget radio as column radio groups", () => {
     const field = getFieldFromSchema("quality", {
       type: "string",
       enum: ["low", "high"],
       "x-ui-widget": "radio",
+    } as JsonSchema);
+
+    const element = primitiveFieldFactory.render({
+      field,
+      value: "high",
+      onChange: vi.fn(),
+      path: ["quality"],
+      generator: {
+        renderField: () => {
+          throw new Error("not used");
+        },
+      },
+    } satisfies FieldRenderContext);
+
+    expect(element.type).toBe(Radio.Group);
+  });
+
+  it("renders enum fields with x-ui-widget radio-column as radio groups", () => {
+    const field = getFieldFromSchema("quality", {
+      type: "string",
+      enum: ["low", "high"],
+      "x-ui-widget": "radio-column",
+    } as JsonSchema);
+
+    const element = primitiveFieldFactory.render({
+      field,
+      value: "high",
+      onChange: vi.fn(),
+      path: ["quality"],
+      generator: {
+        renderField: () => {
+          throw new Error("not used");
+        },
+      },
+    } satisfies FieldRenderContext);
+
+    expect(element.type).toBe(Radio.Group);
+  });
+
+  it("renders enum fields with x-ui-widget radio-row as radio groups", () => {
+    const field = getFieldFromSchema("quality", {
+      type: "string",
+      enum: ["low", "high"],
+      "x-ui-widget": "radio-row",
     } as JsonSchema);
 
     const element = primitiveFieldFactory.render({
