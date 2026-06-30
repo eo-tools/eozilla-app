@@ -1,4 +1,4 @@
-import { StrictMode, useMemo, useState } from "react";
+import { StrictMode, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
@@ -29,10 +29,11 @@ import { schemaFixtures } from "./schemaFixtures";
 type SchemaFixtureId = (typeof schemaFixtures)[number]["id"];
 
 const defaultFixture = schemaFixtures[0]!;
+const selectedFixtureStorageKey = "schema2ui:selected-fixture";
 
 function Schema2UiPlayground() {
   const [selectedFixtureId, setSelectedFixtureId] = useState<SchemaFixtureId>(
-    defaultFixture.id,
+    () => loadSelectedFixtureId() ?? defaultFixture.id,
   );
   const [hideAdvanced, setHideAdvanced] = useState(true);
   const selectedFixture = useMemo(
@@ -52,6 +53,10 @@ function Schema2UiPlayground() {
   const resetValue = () => {
     setValue(createJsonValueForSchema(selectedFixture.schema));
   };
+
+  useEffect(() => {
+    window.localStorage.setItem(selectedFixtureStorageKey, selectedFixture.id);
+  }, [selectedFixture.id]);
 
   const handleFixtureChange = (nextFixtureId: SchemaFixtureId) => {
     const nextFixture =
@@ -188,3 +193,13 @@ createRoot(document.getElementById("root")!).render(
     </MantineProvider>
   </StrictMode>,
 );
+
+function loadSelectedFixtureId(): SchemaFixtureId | null {
+  const storedValue = window.localStorage.getItem(selectedFixtureStorageKey);
+  if (!storedValue) {
+    return null;
+  }
+  return schemaFixtures.some((fixture) => fixture.id === storedValue)
+    ? (storedValue as SchemaFixtureId)
+    : null;
+}
