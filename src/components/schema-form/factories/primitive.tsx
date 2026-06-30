@@ -7,6 +7,7 @@ import {
   Select,
   Slider,
   Switch,
+  Stack,
   Textarea,
   TextInput,
 } from "@mantine/core";
@@ -232,9 +233,11 @@ function renderEnumSelect(ctx: FieldRenderContext, value: JsonValue) {
           ctx.onChange(decodeEnumValue(nextValue));
         }}
       >
-        {data.map((item) => (
-          <Radio key={item.value} value={item.value} label={item.label} />
-        ))}
+        <Stack gap="xs" mt="xs">
+          {data.map((item) => (
+            <Radio key={item.value} value={item.value} label={item.label} />
+          ))}
+        </Stack>
       </Radio.Group>
     );
   }
