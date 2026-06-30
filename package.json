@@ -6,8 +6,8 @@
   "scripts": {
     "clean": "rimraf dist",
     "dev": "vite",
-    "build": "rimraf dist && tsc -b && vite build",
     "eozilla:dev": "pixi run --manifest-path ../pyproject.toml wraptile run -- wraptile.services.local.testing:service",
+    "build": "rimraf dist && tsc -b && vite build",
     "eozilla:build": "rimraf ../cuiman/src/cuiman/app/dist && tsc -b && vite build --outDir ../cuiman/src/cuiman/app/dist",
     "schema2ui": "vite --config vite.schema2ui.config.ts --open / --port 4174",
     "test": "vitest --run",

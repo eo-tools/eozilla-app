@@ -1,5 +1,5 @@
-import { Fragment, type ReactElement } from "react";
-import { Group, Stack } from "@mantine/core";
+import type { ReactElement } from "react";
+import { Box, Group, Stack } from "@mantine/core";
 
 import {
   getVisibleInputFields,
@@ -62,7 +62,14 @@ function createPropertyElements(
   for (const propertyField of visibleFields) {
     elements.set(
       propertyField.name,
-      <Fragment key={propertyField.name}>
+      <Box
+        key={propertyField.name}
+        className={
+          !ctx.hideAdvanced && propertyField.advanced
+            ? "input-row-appear"
+            : undefined
+        }
+      >
         {ctx.generator.renderField(
           propertyField,
           objectValue[propertyField.name],
@@ -80,7 +87,7 @@ function createPropertyElements(
             path: [...ctx.path, propertyField.name],
           },
         )}
-      </Fragment>,
+      </Box>,
     );
   }
 
@@ -118,7 +125,7 @@ function layoutGroup(
       }
     } else {
       children.push(
-          layoutElements(item.type, layoutGroup(item, childrenByName)),
+        layoutElements(item.type, layoutGroup(item, childrenByName)),
       );
     }
   }

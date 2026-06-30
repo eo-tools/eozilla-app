@@ -69,7 +69,8 @@
 }
 
 .input-row-appear > th,
-.input-row-appear > td {
+.input-row-appear > td,
+.input-row-appear:not(tr) {
   animation: input-row-glow 1000ms ease-out;
 }
 
