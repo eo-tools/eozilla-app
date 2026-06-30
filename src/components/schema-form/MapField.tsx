@@ -1,12 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActionIcon,
   Alert,
   Box,
   Stack,
-  Text,
-  Textarea,
-  Tooltip,
 } from "@mantine/core";
 import {
   IconPolygon,
@@ -20,12 +16,10 @@ import Draw, { createBox } from "ol/interaction/Draw";
 import Modify from "ol/interaction/Modify";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
-import { fromExtent } from "ol/geom/Polygon";
 import OSM from "ol/source/OSM";
 import VectorSource from "ol/source/Vector";
 import WKT from "ol/format/WKT";
 import { Fill, Stroke, Style } from "ol/style";
-import { getCenter } from "ol/extent";
 import "ol/ol.css";
 
 import { FieldShell } from "./FieldShell";
@@ -52,6 +46,11 @@ const polygonStyle = new Style({
   }),
 });
 
+const activeControlStyle = {
+  backgroundColor: "rgba(116, 192, 252, 0.35)",
+  color: "#1c7ed6",
+} as const;
+
 export function MapField({
   field,
   value,
@@ -64,8 +63,12 @@ export function MapField({
   const vectorSource = useMemo(() => new VectorSource(), []);
   const isSyncingRef = useRef(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [drawMode, setDrawMode] = useState<DrawMode>("polygon");
+  const [drawMode, setDrawMode] = useState<DrawMode>("rectangle");
   const hasGeometry = value.trim().length > 0;
+  const handleDelete = () => {
+    setErrorMessage(null);
+    onChange("");
+  };
 
   useEffect(() => {
     onChangeRef.current = onChange;
@@ -98,7 +101,7 @@ export function MapField({
     const modify = new Modify({
       source: source3857,
     });
-    source3857.on("addfeature", (event) => {
+    const handleFeatureChange = (event: { feature?: Parameters<WKT["writeFeature"]>[0] }) => {
       if (!event.feature) {
         return;
       }
@@ -108,15 +111,9 @@ export function MapField({
         setErrorMessage,
         isSyncingRef,
       );
-    });
-    source3857.on("changefeature", () => {
-      syncValueFromSource(
-        source3857,
-        onChangeRef,
-        setErrorMessage,
-        isSyncingRef,
-      );
-    });
+    };
+    source3857.on("addfeature", handleFeatureChange);
+    source3857.on("changefeature", handleFeatureChange);
 
     map.addInteraction(modify);
     mapRef.current = map;
@@ -133,7 +130,7 @@ export function MapField({
       return;
     }
 
-    const draw = createDrawInteraction(drawMode, vectorSource, map);
+    const draw = createDrawInteraction(drawMode, vectorSource);
     map.addInteraction(draw);
 
     return () => {
@@ -142,12 +139,7 @@ export function MapField({
   }, [drawMode, vectorSource]);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map) {
-      return;
-    }
-
-    syncSourceFromValue(value, vectorSource, map, setErrorMessage, isSyncingRef);
+    syncSourceFromValue(value, vectorSource, setErrorMessage, isSyncingRef);
   }, [value, vectorSource]);
 
   return (
@@ -163,71 +155,53 @@ export function MapField({
               overflow: "hidden",
             }}
           />
-          <Stack
-            gap="xs"
+          <Box
+            className="ol-unselectable ol-control"
             style={{
               position: "absolute",
-              bottom: 8,
-              left: 8,
+              top: "4.5em",
+              left: ".5em",
               zIndex: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: "2px",
             }}
           >
-            <Tooltip label="Draw polygon" position="right">
-              <ActionIcon
-                aria-label="Draw polygon"
-                color={drawMode === "polygon" ? "blue" : "gray"}
-                variant={drawMode === "polygon" ? "filled" : "default"}
-                size="sm"
-                onClick={() => setDrawMode("polygon")}
-              >
-                <IconPolygon size={14} />
-              </ActionIcon>
-            </Tooltip>
-            <Tooltip label="Draw rectangle" position="right">
-              <ActionIcon
-                aria-label="Draw rectangle"
-                color={drawMode === "rectangle" ? "blue" : "gray"}
-                variant={drawMode === "rectangle" ? "filled" : "default"}
-                size="sm"
-                onClick={() => setDrawMode("rectangle")}
-              >
-                <IconRectangle size={14} />
-              </ActionIcon>
-            </Tooltip>
+            <button
+              type="button"
+              aria-label="Draw rectangle"
+              title="Draw rectangle"
+              onClick={() => setDrawMode("rectangle")}
+              style={drawMode === "rectangle" ? activeControlStyle : undefined}
+            >
+              <IconRectangle size={14} />
+            </button>
+            <button
+              type="button"
+              aria-label="Draw polygon"
+              title="Draw polygon"
+              onClick={() => setDrawMode("polygon")}
+              style={drawMode === "polygon" ? activeControlStyle : undefined}
+            >
+              <IconPolygon size={14} />
+            </button>
             {hasGeometry ? (
-              <Tooltip label="Delete polygon" position="left">
-                <ActionIcon
-                  aria-label="Delete polygon"
-                  color="red"
-                  variant="filled"
-                  size="sm"
-                  onClick={() => {
-                    setErrorMessage(null);
-                    onChange("");
-                  }}
-                >
-                  <IconTrash size={14} />
-                </ActionIcon>
-              </Tooltip>
+              <button
+                type="button"
+                aria-label="Delete polygon"
+                title="Delete polygon"
+                onClick={handleDelete}
+              >
+                <IconTrash size={14} />
+              </button>
             ) : null}
-          </Stack>
+          </Box>
         </Box>
-        <Text size="xs" c="dimmed">
-          Map widget for geometry strings. Rectangle drawing is stored as polygon WKT.
-        </Text>
         {errorMessage ? (
           <Alert color="yellow" variant="light" py="xs">
             {errorMessage}
           </Alert>
         ) : null}
-        <Textarea
-          label="WKT"
-          autosize
-          minRows={3}
-          maxRows={8}
-          value={value}
-          onChange={(event) => onChange(event.currentTarget.value)}
-        />
       </Stack>
     </FieldShell>
   );
@@ -236,7 +210,6 @@ export function MapField({
 function syncSourceFromValue(
   value: string,
   source: VectorSource,
-  map: Map,
   setErrorMessage: (message: string | null) => void,
   isSyncingRef: { current: boolean },
 ) {
@@ -264,39 +237,11 @@ function syncSourceFromValue(
 
     source.addFeature(feature);
     setErrorMessage(null);
-    fitToSource(map, source);
   } catch {
     setErrorMessage("Invalid geometry string. Expected a POLYGON WKT value.");
   } finally {
     isSyncingRef.current = false;
   }
-}
-
-function syncValueFromSource(
-  source: VectorSource,
-  onChangeRef: { current: (value: string) => void },
-  setErrorMessage: (message: string | null) => void,
-  isSyncingRef: { current: boolean },
-) {
-  if (isSyncingRef.current) {
-    return;
-  }
-
-  const features = source.getFeatures();
-  const feature = features[0];
-  if (!feature) {
-    setErrorMessage(null);
-    onChangeRef.current("");
-    return;
-  }
-
-  const geometry = feature.getGeometry();
-  if (!geometry || geometry.getType() !== "Polygon") {
-    setErrorMessage("Map fields currently support one POLYGON WKT value.");
-    return;
-  }
-
-  syncValueFromFeature(feature, onChangeRef, setErrorMessage, isSyncingRef);
 }
 
 function syncValueFromFeature(
@@ -319,36 +264,9 @@ function syncValueFromFeature(
   );
 }
 
-function fitToSource(map: Map, source: VectorSource) {
-  const extent = source.getExtent();
-  if (!extent || !extent.every(Number.isFinite)) {
-    return;
-  }
-
-  const width = extent[2] - extent[0];
-  const height = extent[3] - extent[1];
-  const view = map.getView();
-
-  if (width === 0 || height === 0) {
-    view.animate({
-      center: getCenter(extent),
-      zoom: 12,
-      duration: 150,
-    });
-    return;
-  }
-
-  view.fit(fromExtent(extent), {
-    padding: [24, 24, 24, 24],
-    maxZoom: 16,
-    duration: 150,
-  });
-}
-
 function createDrawInteraction(
   drawMode: DrawMode,
   source: VectorSource,
-  map: Map,
 ) {
   const draw = new Draw(
     drawMode === "rectangle"
@@ -365,9 +283,6 @@ function createDrawInteraction(
 
   draw.on("drawstart", () => {
     source.clear();
-  });
-  draw.on("drawend", () => {
-    fitToSource(map, source);
   });
 
   return draw;
