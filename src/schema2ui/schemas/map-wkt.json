@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "title": "Map WKT",
+  "description": "Renders a string-backed map widget for polygon WKT values.",
+  "required": ["geometry"],
+  "additionalProperties": false,
+  "properties": {
+    "geometry": {
+      "type": "string",
+      "title": "Geometry (WKT)",
+      "default": "POLYGON((-3.560653 18.579611,24.045399 2.389933,24.045399 34.394220,-3.560653 18.579611))",
+      "description": "Current React map field expects a single POLYGON WKT value.",
+      "format": "wkt",
+      "x-ui-widget": "map",
+      "x-ui-order": 20
+    }
+  }
+}

@@ -125,9 +125,10 @@ The default registry is defined in `factories/defaultRegistry.ts`, in this
 priority order:
 
 1. nullable
-2. object
-3. primitive
-4. JSON fallback
+2. map
+3. object
+4. primitive
+5. JSON fallback
 
 ### Primitive Factory
 
@@ -270,6 +271,30 @@ setProcessInput(name, nextValue);
 
 This keeps the generated form compatible with the existing process request
 storage/update path.
+
+## schema2ui Playground
+
+The developer-facing playground lives in `src/schema2ui/` and is started with:
+
+```bash
+npm run schema2ui
+```
+
+It is intentionally separate from the main app and is meant for manual work on
+schema-driven components.
+
+The current workflow is modeled after the old Python `schema2ui` tool:
+
+- fixtures live in `src/schema2ui/schemas/`
+- each file represents one structure or schema case
+- the playground shows a sidebar of fixtures
+- selecting a fixture resets and renders one generated UI at a time
+- the live JSON value is shown alongside the generated UI
+
+Fixture files are JSON-only in this repo. Where possible, their names mirror the
+older `gavicore/tests/ui/schemas` corpus (for example `string`, `number`,
+`object-layout`, `nullable-required`). React-specific experiments can live beside
+them as additional fixtures, such as `map-wkt`.
 
 ## How To Add A New Specialized Field
 

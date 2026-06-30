@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "simple": {
+      "type": "number"
+    },
+    "select": {
+      "type": "number",
+      "enum": [0.1, 0.5, 1, 5, 10, 50, 100]
+    },
+    "radio": {
+      "type": "number",
+      "enum": [1, 5, 10, 50, 100],
+      "x-ui:widget": "radio"
+    },
+    "button": {
+      "type": "number",
+      "enum": [1, 5, 10, 50, 100],
+      "x-ui:widget": "button"
+    },
+    "slider": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "x-ui:widget": "slider"
+    },
+    "discrete_slider": {
+      "type": "number",
+      "enum": [0.1, 0.5, 1, 5, 10, 50, 100],
+      "x-ui:widget": "slider"
+    }
+  }
+}

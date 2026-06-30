@@ -4,6 +4,7 @@ export interface SchemaFixture {
   id: string;
   title: string;
   description: string;
+  fileName: string;
   schema: JsonSchema;
 }
 
@@ -13,16 +14,18 @@ const schemaModules = import.meta.glob("./schemas/*.json", {
 }) as Record<string, JsonSchema>;
 
 export const schemaFixtures = Object.entries(schemaModules)
+  .sort(([pathA], [pathB]) => pathA.localeCompare(pathB))
   .map(([path, schema]) => {
-    const id = path.replace(/^.*\//, "").replace(/\.json$/, "");
+    const fileName = path.replace(/^.*\//, "");
+    const id = fileName.replace(/\.json$/, "");
     return {
       id,
       title: schema.title ?? makeTitle(id),
       description: schema.description ?? "",
+      fileName,
       schema,
     };
-  })
-  .sort((a, b) => a.id.localeCompare(b.id));
+  });
 
 function makeTitle(id: string): string {
   return id

@@ -6,11 +6,12 @@ import "@mantine/notifications/styles.css";
 import {
   ActionIcon,
   AppShell,
-  Button,
   Divider,
   Group,
   MantineProvider,
-  Select,
+  NavLink,
+  Paper,
+  ScrollArea,
   SimpleGrid,
   Stack,
   Switch,
@@ -19,32 +20,25 @@ import {
 import { IconRefresh } from "@tabler/icons-react";
 
 import { JsonCode } from "@/components/common/JsonCode";
-import styles from "@/components/common/styles";
 import { SchemaForm } from "@/components/schema-form";
 import { getFieldFromSchema } from "@/utils/field";
-import {
-  createJsonValueForSchema,
-  type JsonValue,
-} from "@/utils/json";
+import { createJsonValueForSchema, type JsonValue } from "@/utils/json";
 
 import { schemaFixtures } from "./schemaFixtures";
 
-const schemaOptions = schemaFixtures.map((fixture) => ({
-  value: fixture.id,
-  label: fixture.title,
-}));
-
 type SchemaFixtureId = (typeof schemaFixtures)[number]["id"];
+
+const defaultFixture = schemaFixtures[0]!;
 
 function Schema2UiPlayground() {
   const [selectedFixtureId, setSelectedFixtureId] = useState<SchemaFixtureId>(
-    schemaFixtures[0]!.id,
+    defaultFixture.id,
   );
   const [hideAdvanced, setHideAdvanced] = useState(true);
   const selectedFixture = useMemo(
     () =>
       schemaFixtures.find((fixture) => fixture.id === selectedFixtureId) ??
-      schemaFixtures[0]!,
+      defaultFixture,
     [selectedFixtureId],
   );
   const field = useMemo(
@@ -52,38 +46,36 @@ function Schema2UiPlayground() {
     [selectedFixture],
   );
   const [value, setValue] = useState<JsonValue>(() =>
-    createJsonValueForSchema(selectedFixture.schema),
+    createJsonValueForSchema(defaultFixture.schema),
   );
+
+  const resetValue = () => {
+    setValue(createJsonValueForSchema(selectedFixture.schema));
+  };
 
   const handleFixtureChange = (nextFixtureId: SchemaFixtureId) => {
     const nextFixture =
       schemaFixtures.find((fixture) => fixture.id === nextFixtureId) ??
-      schemaFixtures[0]!;
-    setSelectedFixtureId(nextFixtureId);
+      defaultFixture;
+    setSelectedFixtureId(nextFixture.id);
     setValue(createJsonValueForSchema(nextFixture.schema));
   };
 
   return (
     <AppShell
-      withBorder={false}
-      padding={styles.shell.py}
+      padding="md"
       header={{ height: 56 }}
+      navbar={{ width: 280, breakpoint: 0 }}
     >
-      <AppShell.Header px={styles.shell.px} pb={0}>
+      <AppShell.Header px="md">
         <Group justify="space-between" align="center" h="100%">
-          <Text fw={700}>schema2ui</Text>
+          <Stack gap={0}>
+            <Text fw={700}>schema2ui</Text>
+            <Text size="xs" c="dimmed">
+              One structure per fixture
+            </Text>
+          </Stack>
           <Group gap="xs" wrap="nowrap">
-            <Select
-              size="xs"
-              value={selectedFixtureId}
-              data={schemaOptions}
-              onChange={(nextValue) => {
-                if (nextValue) {
-                  handleFixtureChange(nextValue as SchemaFixtureId);
-                }
-              }}
-              w={220}
-            />
             <Switch
               size="xs"
               label="Hide advanced"
@@ -94,9 +86,7 @@ function Schema2UiPlayground() {
               size="sm"
               variant="default"
               aria-label="Reset current value"
-              onClick={() =>
-                setValue(createJsonValueForSchema(selectedFixture.schema))
-              }
+              onClick={resetValue}
             >
               <IconRefresh size={14} />
             </ActionIcon>
@@ -104,44 +94,85 @@ function Schema2UiPlayground() {
         </Group>
       </AppShell.Header>
 
-      <AppShell.Main>
-        <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="lg">
-          <Stack gap="sm">
-            <Text fw={600}>{selectedFixture.title}</Text>
-            <Text size="sm" c="dimmed">
-              {selectedFixture.description}
-            </Text>
-            <JsonCode value={selectedFixture.schema} maxHeight={360} />
-            <Divider />
-            <Group justify="space-between" align="center">
-              <Text fw={600}>Current value</Text>
-              <Button
-                size="xs"
-                variant="light"
-                onClick={() =>
-                  setValue(createJsonValueForSchema(selectedFixture.schema))
-                }
-              >
-                Reset
-              </Button>
-            </Group>
-            <JsonCode value={value} maxHeight={260} />
+      <AppShell.Navbar p="xs">
+        <ScrollArea type="auto" h="100%">
+          <Stack gap={4}>
+            {schemaFixtures.map((fixture) => {
+              const isActive = fixture.id === selectedFixture.id;
+              return (
+                <NavLink
+                  key={fixture.id}
+                  active={isActive}
+                  variant={isActive ? "filled" : "default"}
+                  onClick={() => handleFixtureChange(fixture.id)}
+                  label={
+                    <Stack gap={2}>
+                      <Text size="sm" fw={500}>
+                        {fixture.title}
+                      </Text>
+                      <Text size="xs" c="dimmed">
+                        {fixture.fileName}
+                      </Text>
+                    </Stack>
+                  }
+                />
+              );
+            })}
           </Stack>
+        </ScrollArea>
+      </AppShell.Navbar>
 
-          <Stack gap="sm">
-            <Group justify="space-between" align="center">
-              <Text fw={600}>Generated UI</Text>
-              <Text size="sm" c="dimmed">
-                live controlled form
-              </Text>
-            </Group>
-            <SchemaForm
-              field={field}
-              value={value}
-              onChange={setValue}
-              hideAdvanced={hideAdvanced}
-            />
-          </Stack>
+      <AppShell.Main>
+        <SimpleGrid cols={{ base: 1, xl: 2 }} spacing="lg">
+          <Paper withBorder p="md" radius="sm">
+            <Stack gap="sm">
+              <Stack gap={2}>
+                <Text fw={600}>{selectedFixture.title}</Text>
+                <Text size="xs" c="dimmed">
+                  {selectedFixture.fileName}
+                </Text>
+              </Stack>
+              {selectedFixture.description ? (
+                <Text size="sm" c="dimmed">
+                  {selectedFixture.description}
+                </Text>
+              ) : null}
+              <Group justify="space-between" align="center">
+                <Text fw={600}>Current value</Text>
+                <ActionIcon
+                  size="sm"
+                  variant="default"
+                  aria-label="Reset current value"
+                  onClick={resetValue}
+                >
+                  <IconRefresh size={14} />
+                </ActionIcon>
+              </Group>
+              <JsonCode value={value} maxHeight={520} />
+              <Divider />
+              <Stack gap="xs">
+                <Text fw={600}>Schema</Text>
+                <JsonCode value={selectedFixture.schema} maxHeight={280} />
+              </Stack>
+            </Stack>
+          </Paper>
+
+          <Paper withBorder p="md" radius="sm">
+            <Stack gap="sm">
+              <Group justify="space-between" align="center">
+                <Text fw={600}>Generated UI</Text>
+                <Text size="sm" c="dimmed">
+                  live controlled form
+                </Text>
+              </Group>
+              <SchemaForm
+                field={field}
+                value={value}
+                onChange={setValue}
+                hideAdvanced={hideAdvanced}
+              />
+            </Stack>
+          </Paper>
         </SimpleGrid>
       </AppShell.Main>
     </AppShell>
