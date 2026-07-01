@@ -19,17 +19,23 @@ import VectorLayer from "ol/layer/Vector";
 import OSM from "ol/source/OSM";
 import VectorSource from "ol/source/Vector";
 import WKT from "ol/format/WKT";
+import { transformExtent } from "ol/proj";
 import { Fill, Stroke, Style } from "ol/style";
 import "ol/ol.css";
 
 import { FieldShell } from "./FieldShell";
 import type { Field } from "@/utils/field";
 
+type BBox = [number, number, number, number];
+
+type MapValueType = "wkt" | "bbox";
+
 interface MapFieldProps {
   field: Field;
-  value: string;
-  onChange: (value: string) => void;
+  value: string | number[];
+  onChange: (value: string | BBox) => void;
   hideLabel?: boolean;
+  valueType?: MapValueType;
 }
 
 type DrawMode = "polygon" | "rectangle";
@@ -56,23 +62,30 @@ export function MapField({
   value,
   onChange,
   hideLabel,
+  valueType = "wkt",
 }: MapFieldProps) {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
+  const valueTypeRef = useRef<MapValueType>(valueType);
   const onChangeRef = useRef(onChange);
   const vectorSource = useMemo(() => new VectorSource(), []);
   const isSyncingRef = useRef(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [drawMode, setDrawMode] = useState<DrawMode>("rectangle");
-  const hasGeometry = value.trim().length > 0;
+  const hasGeometry = hasMapValue(valueType, value);
   const handleDelete = () => {
     setErrorMessage(null);
-    onChange("");
+    if (valueType === "bbox") {
+      onChangeRef.current([0, 0, 0, 0]);
+      return;
+    }
+    onChangeRef.current("");
   };
 
   useEffect(() => {
+    valueTypeRef.current = valueType;
     onChangeRef.current = onChange;
-  }, [onChange]);
+  }, [valueType, onChange]);
 
   useEffect(() => {
     if (!mapElementRef.current || mapRef.current) {
@@ -107,6 +120,7 @@ export function MapField({
       }
       syncValueFromFeature(
         event.feature,
+        valueTypeRef,
         onChangeRef,
         setErrorMessage,
         isSyncingRef,
@@ -130,17 +144,35 @@ export function MapField({
       return;
     }
 
-    const draw = createDrawInteraction(drawMode, vectorSource);
+    const draw = createDrawInteraction(
+      valueType === "bbox" ? "rectangle" : drawMode,
+      vectorSource,
+    );
     map.addInteraction(draw);
 
     return () => {
       map.removeInteraction(draw);
     };
-  }, [drawMode, vectorSource]);
+  }, [drawMode, valueType, vectorSource]);
 
   useEffect(() => {
-    syncSourceFromValue(value, vectorSource, setErrorMessage, isSyncingRef);
-  }, [value, vectorSource]);
+    if (valueType === "bbox") {
+      syncBBoxSourceFromValue(
+        value,
+        vectorSource,
+        setErrorMessage,
+        isSyncingRef,
+      );
+      return;
+    }
+
+    syncSourceFromValue(
+      value,
+      vectorSource,
+      setErrorMessage,
+      isSyncingRef,
+    );
+  }, [valueType, value, vectorSource]);
 
   return (
     <FieldShell field={field} hideLabel={hideLabel}>
@@ -155,47 +187,57 @@ export function MapField({
               overflow: "hidden",
             }}
           />
-          <Box
-            className="ol-unselectable ol-control"
-            style={{
-              position: "absolute",
-              top: "4.5em",
-              left: ".5em",
-              zIndex: 1,
-              display: "flex",
-              flexDirection: "column",
-              gap: "2px",
-            }}
-          >
-            <button
-              type="button"
-              aria-label="Draw rectangle"
-              title="Draw rectangle"
-              onClick={() => setDrawMode("rectangle")}
-              style={drawMode === "rectangle" ? activeControlStyle : undefined}
+          {valueType === "wkt" || hasGeometry ? (
+            <Box
+              className="ol-unselectable ol-control"
+              style={{
+                position: "absolute",
+                top: "4.5em",
+                left: ".5em",
+                zIndex: 1,
+                display: "flex",
+                flexDirection: "column",
+                gap: "2px",
+              }}
             >
-              <IconRectangle size={14} />
-            </button>
-            <button
-              type="button"
-              aria-label="Draw polygon"
-              title="Draw polygon"
-              onClick={() => setDrawMode("polygon")}
-              style={drawMode === "polygon" ? activeControlStyle : undefined}
-            >
-              <IconPolygon size={14} />
-            </button>
-            {hasGeometry ? (
-              <button
-                type="button"
-                aria-label="Delete polygon"
-                title="Delete polygon"
-                onClick={handleDelete}
-              >
-                <IconTrash size={14} />
-              </button>
-            ) : null}
-          </Box>
+              {valueType === "wkt" ? (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Draw rectangle"
+                    title="Draw rectangle"
+                    onClick={() => setDrawMode("rectangle")}
+                    style={
+                      drawMode === "rectangle" ? activeControlStyle : undefined
+                    }
+                  >
+                    <IconRectangle size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Draw polygon"
+                    title="Draw polygon"
+                    onClick={() => setDrawMode("polygon")}
+                    style={
+                      drawMode === "polygon" ? activeControlStyle : undefined
+                    }
+                  >
+                    <IconPolygon size={14} />
+                  </button>
+                </>
+              ) : null}
+              {hasGeometry ? (
+                <button
+                  type="button"
+                  aria-label="Delete geometry"
+                  title="Delete geometry"
+                  onClick={handleDelete}
+                >
+                  <IconTrash size={14} />
+                </button>
+              ) : null}
+            </Box>
+          ) : null}
         </Box>
         {errorMessage ? (
           <Alert color="yellow" variant="light" py="xs">
@@ -208,14 +250,15 @@ export function MapField({
 }
 
 function syncSourceFromValue(
-  value: string,
+  value: string | number[],
   source: VectorSource,
   setErrorMessage: (message: string | null) => void,
   isSyncingRef: { current: boolean },
 ) {
-  const trimmedValue = value.trim();
   isSyncingRef.current = true;
   source.clear();
+
+  const trimmedValue = typeof value === "string" ? value.trim() : "";
 
   if (!trimmedValue) {
     setErrorMessage(null);
@@ -244,13 +287,58 @@ function syncSourceFromValue(
   }
 }
 
+function syncBBoxSourceFromValue(
+  value: string | number[],
+  source: VectorSource,
+  setErrorMessage: (message: string | null) => void,
+  isSyncingRef: { current: boolean },
+) {
+  isSyncingRef.current = true;
+  source.clear();
+
+  if (!Array.isArray(value) || !isBBox(value)) {
+    setErrorMessage("Expected bbox value [minLon, minLat, maxLon, maxLat].");
+    isSyncingRef.current = false;
+    return;
+  }
+
+  if (!hasArea(value)) {
+    setErrorMessage(null);
+    isSyncingRef.current = false;
+    return;
+  }
+
+  try {
+    const feature = wktFormat.readFeature(bboxToWkt(value), {
+      dataProjection: "EPSG:4326",
+      featureProjection: "EPSG:3857",
+    });
+    source.addFeature(feature);
+    setErrorMessage(null);
+  } catch {
+    setErrorMessage("Invalid bbox value [minLon, minLat, maxLon, maxLat].");
+  } finally {
+    isSyncingRef.current = false;
+  }
+}
+
 function syncValueFromFeature(
   feature: Parameters<WKT["writeFeature"]>[0],
-  onChangeRef: { current: (value: string) => void },
+  valueTypeRef: { current: MapValueType },
+  onChangeRef: { current: (value: string | BBox) => void },
   setErrorMessage: (message: string | null) => void,
   isSyncingRef: { current: boolean },
 ) {
   if (isSyncingRef.current) {
+    return;
+  }
+
+  if (valueTypeRef.current === "bbox") {
+    syncBBoxValueFromFeature(
+      feature,
+      onChangeRef,
+      setErrorMessage,
+    );
     return;
   }
 
@@ -262,6 +350,56 @@ function syncValueFromFeature(
       decimals: 6,
     }),
   );
+}
+
+function syncBBoxValueFromFeature(
+  feature: Parameters<WKT["writeFeature"]>[0],
+  onChangeRef: { current: (value: string | BBox) => void },
+  setErrorMessage: (message: string | null) => void,
+) {
+  const geometry = feature.getGeometry();
+  if (!geometry) {
+    setErrorMessage("No bbox geometry was drawn.");
+    return;
+  }
+
+  const bbox = normalizeBBox(
+    transformExtent(geometry.getExtent(), "EPSG:3857", "EPSG:4326"),
+  );
+  setErrorMessage(null);
+  onChangeRef.current(bbox);
+}
+
+function hasMapValue(valueType: MapValueType, value: string | number[]) {
+  return valueType === "bbox"
+    ? Array.isArray(value) && isBBox(value) && hasArea(value)
+    : typeof value === "string" && value.trim().length > 0;
+}
+
+function isBBox(value: number[]): value is BBox {
+  return value.length === 4 && value.every(Number.isFinite);
+}
+
+function hasArea([minLon, minLat, maxLon, maxLat]: BBox) {
+  return minLon !== maxLon && minLat !== maxLat;
+}
+
+function normalizeBBox(value: number[]): BBox {
+  const [x1, y1, x2, y2] = value;
+  return [
+    roundCoordinate(Math.min(x1, x2)),
+    roundCoordinate(Math.min(y1, y2)),
+    roundCoordinate(Math.max(x1, x2)),
+    roundCoordinate(Math.max(y1, y2)),
+  ];
+}
+
+function roundCoordinate(value: number) {
+  return Number(value.toFixed(6));
+}
+
+function bboxToWkt([minLon, minLat, maxLon, maxLat]: BBox) {
+  return `POLYGON((${minLon} ${minLat}, ${maxLon} ${minLat}, ${maxLon} ${maxLat}, ${minLon} ${maxLat}, ${minLon} ${minLat}))`;
 }
 
 function createDrawInteraction(
