@@ -25,14 +25,6 @@
         "type": "string"
       }
     },
-    "date_array": {
-      "type": "array",
-      "x-ui-widget": "input",
-      "items": {
-        "type": "string",
-        "format": "date"
-      }
-    },
     "string_array_with_array_default": {
       "type": "array",
       "default": ["contains", "a previously", "known reference"],
@@ -45,6 +37,13 @@
       "items": {
         "type": "string",
         "default": "ABC"
+      }
+    },
+    "string_array_with_custom_separator": {
+      "type": "array",
+      "x-ui-separator": ";",
+      "items": {
+        "type": "string"
       }
     }
   }

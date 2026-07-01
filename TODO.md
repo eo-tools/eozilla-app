@@ -105,13 +105,15 @@ In the dev console we still have:
 
 # Generator TODOs
 ### Array support
-- [] array text input
-- [] array editor
-- [] add/remove/reorder UI
-- [] separator handling
-- [] date/date-time ranges
+- [x] array text input
+- [x] array editor
+- [x] add/remove/reorder UI
+- [x] separator handling
+- [x] custom separator disables comma fallback
+- [x] date/date-time ranges
 - [x] bbox/map editor for WKT strings
 - [ ] bbox/map editor for 4-tuples of floats
+- [ ] URI arrays
 ### Schema composition:
 - [] oneOf
 - [] anyOf

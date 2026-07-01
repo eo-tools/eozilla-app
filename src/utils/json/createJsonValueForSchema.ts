@@ -20,10 +20,7 @@ export function createJsonValueForSchema(schema: JsonSchema): JsonValue {
   } else if (isStringSchema(schema)) {
     return "";
   } else if (isArraySchema(schema)) {
-    const items = schema.items || {};
-    const n = schema.minItems || 0;
-    const value: JsonValue[] = Array.from({ length: n });
-    return value.map(() => createJsonValueForSchema(items)) as JsonValue;
+    return createArrayValueForSchema(schema);
   } else if (isObjectSchema(schema)) {
     const properties = schema.properties || {};
     const value: Record<string, JsonValue> = {};
@@ -36,4 +33,19 @@ export function createJsonValueForSchema(schema: JsonSchema): JsonValue {
     return null;
   }
   return 0;
+}
+
+function createArrayValueForSchema(schema: Extract<JsonSchema, { type: "array" }>) {
+  const items = schema.items || {};
+  const itemDefault =
+    typeof items.default !== "undefined"
+      ? createJsonValueForSchema(items)
+      : undefined;
+  const n = schema.minItems || 0;
+
+  if (n === 0) {
+    return itemDefault !== undefined ? [itemDefault] : [];
+  }
+
+  return Array.from({ length: n }, () => createJsonValueForSchema(items));
 }
