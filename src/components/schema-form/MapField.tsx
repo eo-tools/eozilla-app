@@ -10,8 +10,10 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 
+import Feature from "ol/Feature";
 import Map from "ol/Map";
 import View from "ol/View";
+import { fromExtent } from "ol/geom/Polygon";
 import Draw, { createBox } from "ol/interaction/Draw";
 import Modify from "ol/interaction/Modify";
 import TileLayer from "ol/layer/Tile";
@@ -309,9 +311,10 @@ function syncBBoxSourceFromValue(
   }
 
   try {
-    const feature = wktFormat.readFeature(bboxToWkt(value), {
-      dataProjection: "EPSG:4326",
-      featureProjection: "EPSG:3857",
+    const feature = new Feature({
+      geometry: fromExtent(
+        transformExtent(value, "EPSG:4326", "EPSG:3857"),
+      ),
     });
     source.addFeature(feature);
     setErrorMessage(null);
@@ -334,11 +337,25 @@ function syncValueFromFeature(
   }
 
   if (valueTypeRef.current === "bbox") {
-    syncBBoxValueFromFeature(
-      feature,
-      onChangeRef,
-      setErrorMessage,
+    const geometry = feature.getGeometry();
+    if (!geometry) {
+      setErrorMessage("No bbox geometry was drawn.");
+      return;
+    }
+
+    const extent = transformExtent(
+      geometry.getExtent(),
+      "EPSG:3857",
+      "EPSG:4326",
     );
+    const bbox: BBox = [
+      extent[0],
+      extent[1],
+      extent[2],
+      extent[3],
+    ];
+    setErrorMessage(null);
+    onChangeRef.current(bbox);
     return;
   }
 
@@ -350,24 +367,6 @@ function syncValueFromFeature(
       decimals: 6,
     }),
   );
-}
-
-function syncBBoxValueFromFeature(
-  feature: Parameters<WKT["writeFeature"]>[0],
-  onChangeRef: { current: (value: string | BBox) => void },
-  setErrorMessage: (message: string | null) => void,
-) {
-  const geometry = feature.getGeometry();
-  if (!geometry) {
-    setErrorMessage("No bbox geometry was drawn.");
-    return;
-  }
-
-  const bbox = normalizeBBox(
-    transformExtent(geometry.getExtent(), "EPSG:3857", "EPSG:4326"),
-  );
-  setErrorMessage(null);
-  onChangeRef.current(bbox);
 }
 
 function hasMapValue(valueType: MapValueType, value: string | number[]) {
@@ -382,24 +381,6 @@ function isBBox(value: number[]): value is BBox {
 
 function hasArea([minLon, minLat, maxLon, maxLat]: BBox) {
   return minLon !== maxLon && minLat !== maxLat;
-}
-
-function normalizeBBox(value: number[]): BBox {
-  const [x1, y1, x2, y2] = value;
-  return [
-    roundCoordinate(Math.min(x1, x2)),
-    roundCoordinate(Math.min(y1, y2)),
-    roundCoordinate(Math.max(x1, x2)),
-    roundCoordinate(Math.max(y1, y2)),
-  ];
-}
-
-function roundCoordinate(value: number) {
-  return Number(value.toFixed(6));
-}
-
-function bboxToWkt([minLon, minLat, maxLon, maxLat]: BBox) {
-  return `POLYGON((${minLon} ${minLat}, ${maxLon} ${minLat}, ${maxLon} ${maxLat}, ${minLon} ${maxLat}, ${minLon} ${minLat}))`;
 }
 
 function createDrawInteraction(
