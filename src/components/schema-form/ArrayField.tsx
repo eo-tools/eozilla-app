@@ -14,7 +14,6 @@ import {
   Stack,
   TextInput,
 } from "@mantine/core";
-import { DatePickerInput, DateTimePicker } from "@mantine/dates";
 import {
   IconArrowDown,
   IconArrowUp,
@@ -27,7 +26,7 @@ import { FieldShell } from "./FieldShell";
 import { getFieldValue, isArrayField } from "./fieldUtils";
 import type { FieldRenderContext } from "./types";
 
-export type ArrayFieldMode = "input" | "editor" | "date-range" | "date-time-range";
+export type ArrayFieldMode = "input" | "editor";
 
 interface ArrayFieldProps {
   ctx: FieldRenderContext;
@@ -36,56 +35,11 @@ interface ArrayFieldProps {
 }
 
 export function ArrayField({ ctx, mode, separator }: ArrayFieldProps) {
-  if (mode === "date-range") {
-    return renderDateRangeField(ctx);
-  }
-
-  if (mode === "date-time-range") {
-    return renderDateTimeRangeField(ctx);
-  }
-
   if (mode === "input") {
     return <ArrayTextInputField ctx={ctx} separator={separator} />;
   }
 
   return <ArrayEditorField ctx={ctx} />;
-}
-
-function renderDateRangeField(ctx: FieldRenderContext) {
-  const value = getArrayValue(ctx).slice(0, 2);
-  return (
-    <FieldShell field={ctx.field} hideLabel={ctx.hideLabel}>
-      <DatePickerInput<"range">
-        type="range"
-        value={toDateRangeValue(value)}
-        valueFormat="YYYY-MM-DD"
-        onChange={(nextValue) =>
-          ctx.onChange([nextValue[0] ?? "", nextValue[1] ?? ""])
-        }
-      />
-    </FieldShell>
-  );
-}
-
-function renderDateTimeRangeField(ctx: FieldRenderContext) {
-  const value = getArrayValue(ctx).slice(0, 2);
-
-  return (
-    <FieldShell field={ctx.field} hideLabel={ctx.hideLabel}>
-      <DateTimePicker<"range">
-        type="range"
-        value={toDateTimeRangeValue(value)}
-        valueFormat="YYYY-MM-DD HH:mm:ss"
-        withSeconds
-        onChange={(nextValue) =>
-          ctx.onChange([
-            nextValue[0] ? fromDateTimePickerValue(nextValue[0]) : "",
-            nextValue[1] ? fromDateTimePickerValue(nextValue[1]) : "",
-          ])
-        }
-      />
-    </FieldShell>
-  );
 }
 
 function ArrayTextInputField({
@@ -334,27 +288,4 @@ function moveArrayItem(value: JsonArray, fromIndex: number, toIndex: number) {
   const [item] = nextValue.splice(fromIndex, 1);
   nextValue.splice(toIndex, 0, item);
   return nextValue;
-}
-
-function toDateRangeValue(value: JsonArray): [string | null, string | null] {
-  const start = typeof value[0] === "string" && value[0] ? value[0] : null;
-  const end = typeof value[1] === "string" && value[1] ? value[1] : null;
-  return [start, end];
-}
-
-function toDateTimeRangeValue(value: JsonArray): [string | null, string | null] {
-  const start = typeof value[0] === "string" && value[0] ? value[0] : null;
-  const end = typeof value[1] === "string" && value[1] ? value[1] : null;
-  return [toDateTimePickerValue(start), toDateTimePickerValue(end)];
-}
-
-function toDateTimePickerValue(value: string | null): string | null {
-  if (!value) {
-    return null;
-  }
-  return value.replace("T", " ");
-}
-
-function fromDateTimePickerValue(value: string): string {
-  return value.replace(" ", "T");
 }

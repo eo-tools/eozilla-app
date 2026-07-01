@@ -80,7 +80,7 @@ describe("arrayFieldFactory", () => {
     expect(arrayFieldFactory.getScore(field)).toBe(0);
   });
 
-  it("renders date tuples as range fields", () => {
+  it("renders date arrays as separator-based input fields", () => {
     const field = getFieldFromSchema("date_range", {
       type: "array",
       minItems: 2,
@@ -99,10 +99,10 @@ describe("arrayFieldFactory", () => {
       }),
     ) as ArrayFieldElement;
 
-    expect(element.props.mode).toBe("date-range");
+    expect(element.props.mode).toBe("input");
   });
 
-  it("renders date-time tuples as date-time range fields", () => {
+  it("renders date-time arrays as separator-based input fields", () => {
     const field = getFieldFromSchema("datetime_range", {
       type: "array",
       minItems: 2,
@@ -121,10 +121,10 @@ describe("arrayFieldFactory", () => {
       }),
     ) as ArrayFieldElement;
 
-    expect(element.props.mode).toBe("date-time-range");
+    expect(element.props.mode).toBe("input");
   });
 
-  it("does not score date-time item arrays without an explicit editor widget", () => {
+  it("does not render date-time item arrays as editors without an explicit editor widget", () => {
     const field = getFieldFromSchema("datetime_array", {
       type: "array",
       items: {
@@ -133,7 +133,15 @@ describe("arrayFieldFactory", () => {
       },
     } as JsonSchema);
 
-    expect(arrayFieldFactory.getScore(field)).toBe(0);
+    const element = arrayFieldFactory.render(
+      createContext({
+        field,
+        value: ["2026-01-01T10:00:00"],
+        onChange: vi.fn(),
+      }),
+    ) as ArrayFieldElement;
+
+    expect(element.props.mode).toBe("input");
   });
 
   it("does not score object arrays without an explicit editor widget", () => {

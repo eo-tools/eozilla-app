@@ -110,7 +110,7 @@ In the dev console we still have:
 - [x] add/remove/reorder UI
 - [x] separator handling
 - [x] custom separator disables comma fallback
-- [x] date/date-time ranges
+- [ ] date/date-time array 
 - [x] bbox/map editor for WKT strings
 - [ ] bbox/map editor for 4-tuples of floats
 - [ ] URI arrays

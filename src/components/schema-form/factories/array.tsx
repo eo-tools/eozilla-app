@@ -1,4 +1,3 @@
-import { isStringSchema } from "@/utils/json";
 import { ArrayField, type ArrayFieldMode } from "../ArrayField";
 import { isArrayField, isPrimitiveField } from "../fieldUtils";
 import type { FieldFactory } from "../types";
@@ -40,22 +39,11 @@ function isSupportedArrayField(field: Parameters<FieldFactory["getScore"]>[0]) {
     isArrayField(field) &&
     field.widget !== "map" &&
     !field.schema.nullable &&
-    (field.widget === "editor" ||
-      shouldRenderArrayInput(field) ||
-      isDateRangeArray(field) ||
-      isDateTimeRangeArray(field))
+    (field.widget === "editor" || shouldRenderArrayInput(field))
   );
 }
 
 function getArrayFieldMode(field: Parameters<FieldFactory["getScore"]>[0]): ArrayFieldMode {
-  if (isDateRangeArray(field)) {
-    return "date-range";
-  }
-
-  if (isDateTimeRangeArray(field)) {
-    return "date-time-range";
-  }
-
   if (shouldRenderArrayInput(field)) {
     return "input";
   }
@@ -76,39 +64,11 @@ function shouldRenderArrayInput(field: Parameters<FieldFactory["getScore"]>[0]) 
     return false;
   }
 
-  if (
-    isStringSchema(field.items.schema) &&
-    (field.items.schema.format === "date" ||
-      field.items.schema.format === "date-time")
-  ) {
-    return false;
-  }
-
   if (field.items.schema.enum) {
     return false;
   }
 
   return true;
-}
-
-function isDateRangeArray(field: Parameters<FieldFactory["getScore"]>[0]) {
-  return isRangeArray(field, "date");
-}
-
-function isDateTimeRangeArray(field: Parameters<FieldFactory["getScore"]>[0]) {
-  return isRangeArray(field, "date-time");
-}
-
-function isRangeArray(
-  field: Parameters<FieldFactory["getScore"]>[0],
-  format: string,
-) {
-  return isArrayField(field) &&
-    isPrimitiveField(field.items) &&
-    isStringSchema(field.items.schema) &&
-    field.items.schema.format === format &&
-    field.schema.minItems === 2 &&
-    field.schema.maxItems === 2;
 }
 
 function getArraySeparator(
