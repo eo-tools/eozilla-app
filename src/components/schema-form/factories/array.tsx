@@ -15,6 +15,16 @@ export const arrayFieldFactory: FieldFactory = {
       throw new Error(`Unsupported array field '${ctx.field.name}'.`);
     }
 
+    if (arrayField.widget === "editor") {
+      return (
+        <ArrayField
+          ctx={ctx}
+          mode="editor"
+          separator={getArraySeparator(arrayField)}
+        />
+      );
+    }
+
     return (
       <ArrayField
         ctx={ctx}
@@ -26,7 +36,15 @@ export const arrayFieldFactory: FieldFactory = {
 };
 
 function isSupportedArrayField(field: Parameters<FieldFactory["getScore"]>[0]) {
-  return isArrayField(field) && field.widget !== "map" && !field.schema.nullable;
+  return (
+    isArrayField(field) &&
+    field.widget !== "map" &&
+    !field.schema.nullable &&
+    (field.widget === "editor" ||
+      shouldRenderArrayInput(field) ||
+      isDateRangeArray(field) ||
+      isDateTimeRangeArray(field))
+  );
 }
 
 function getArrayFieldMode(field: Parameters<FieldFactory["getScore"]>[0]): ArrayFieldMode {
@@ -42,7 +60,7 @@ function getArrayFieldMode(field: Parameters<FieldFactory["getScore"]>[0]): Arra
     return "input";
   }
 
-  return "editor";
+  throw new Error(`Unsupported array field '${field.name}'.`);
 }
 
 function shouldRenderArrayInput(field: Parameters<FieldFactory["getScore"]>[0]) {

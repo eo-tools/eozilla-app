@@ -68,7 +68,7 @@ describe("arrayFieldFactory", () => {
     expect(element.props.separator).toBe("; ");
   });
 
-  it("renders enum arrays with the structured editor", () => {
+  it("does not score enum arrays without an explicit editor widget", () => {
     const field = getFieldFromSchema("colors", {
       type: "array",
       items: {
@@ -77,15 +77,7 @@ describe("arrayFieldFactory", () => {
       },
     } as JsonSchema);
 
-    const element = arrayFieldFactory.render(
-      createContext({
-        field,
-        value: ["red"],
-        onChange: vi.fn(),
-      }),
-    ) as ArrayFieldElement;
-
-    expect(element.props.mode).toBe("editor");
+    expect(arrayFieldFactory.getScore(field)).toBe(0);
   });
 
   it("renders date tuples as range fields", () => {
@@ -132,7 +124,7 @@ describe("arrayFieldFactory", () => {
     expect(element.props.mode).toBe("date-time-range");
   });
 
-  it("renders date-time item arrays with the structured editor", () => {
+  it("does not score date-time item arrays without an explicit editor widget", () => {
     const field = getFieldFromSchema("datetime_array", {
       type: "array",
       items: {
@@ -141,10 +133,39 @@ describe("arrayFieldFactory", () => {
       },
     } as JsonSchema);
 
+    expect(arrayFieldFactory.getScore(field)).toBe(0);
+  });
+
+  it("does not score object arrays without an explicit editor widget", () => {
+    const field = getFieldFromSchema("objects", {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+        },
+      },
+    } as JsonSchema);
+
+    expect(arrayFieldFactory.getScore(field)).toBe(0);
+  });
+
+  it("renders arrays with an explicit editor widget as editors", () => {
+    const field = getFieldFromSchema("colors", {
+      type: "array",
+      "x-ui": {
+        widget: "editor",
+      },
+      items: {
+        type: "string",
+        enum: ["red", "green"],
+      },
+    } as JsonSchema);
+
     const element = arrayFieldFactory.render(
       createContext({
         field,
-        value: ["2026-01-01T10:00:00"],
+        value: ["red"],
         onChange: vi.fn(),
       }),
     ) as ArrayFieldElement;
