@@ -32,9 +32,12 @@ const defaultFixture = schemaFixtures[0]!;
 const selectedFixtureStorageKey = "schema2ui:selected-fixture";
 
 function Schema2UiPlayground() {
-  const [selectedFixtureId, setSelectedFixtureId] = useState<SchemaFixtureId>(
-    () => loadSelectedFixtureId() ?? defaultFixture.id,
-  );
+  const initialFixtureId = loadSelectedFixtureId() ?? defaultFixture.id;
+  const initialFixture =
+    schemaFixtures.find((fixture) => fixture.id === initialFixtureId) ??
+    defaultFixture;
+  const [selectedFixtureId, setSelectedFixtureId] =
+    useState<SchemaFixtureId>(initialFixture.id);
   const [hideAdvanced, setHideAdvanced] = useState(true);
   const selectedFixture = useMemo(
     () =>
@@ -47,7 +50,7 @@ function Schema2UiPlayground() {
     [selectedFixture],
   );
   const [value, setValue] = useState<JsonValue>(() =>
-    createJsonValueForSchema(defaultFixture.schema),
+    createJsonValueForSchema(initialFixture.schema),
   );
 
   const resetValue = () => {
