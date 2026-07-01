@@ -111,7 +111,7 @@ In the dev console we still have:
 - [] separator handling
 - [] date/date-time ranges
 - [x] bbox/map editor for WKT strings
-- [ ] bbox/map editor for 4-tuples of floats
+- [x] bbox/map editor for 4-tuples of floats
 ### Schema composition:
 - [] oneOf
 - [] anyOf
