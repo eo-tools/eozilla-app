@@ -23,6 +23,7 @@ import {
   type JsonValue,
   type StringSchema,
 } from "@/utils/json";
+import { BytesField } from "../BytesField";
 import { FieldShell } from "../FieldShell";
 import {
   getFieldDescription,
@@ -131,6 +132,10 @@ function renderStringField(ctx: FieldRenderContext) {
     return renderDateTimeField(ctx, value);
   }
 
+  if (schema.format === "bytes") {
+    return renderBytesField(ctx, value);
+  }
+
   if (schema.format === "password" || ctx.field.password) {
     return (
       <PasswordInput
@@ -215,6 +220,10 @@ function renderDateTimeField(ctx: FieldRenderContext, value: string) {
       }}
     />
   );
+}
+
+function renderBytesField(ctx: FieldRenderContext, value: string) {
+  return <BytesField ctx={ctx} value={value} />;
 }
 
 function renderEnumSelect(ctx: FieldRenderContext, value: JsonValue) {
