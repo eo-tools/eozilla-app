@@ -2,12 +2,14 @@ import type { ComponentProps, ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { ArrayField } from "../ArrayField";
+import { MapField } from "../MapField";
 import { getFieldFromSchema } from "@/utils/field";
 import type { JsonSchema } from "@/utils/json";
 import { arrayFieldFactory } from "./array";
 import type { FieldRenderContext } from "../types";
 
 type ArrayFieldElement = ReactElement<ComponentProps<typeof ArrayField>>;
+type MapFieldElement = ReactElement<ComponentProps<typeof MapField>>;
 
 describe("arrayFieldFactory", () => {
   it("scores non-nullable array fields", () => {
@@ -16,10 +18,10 @@ describe("arrayFieldFactory", () => {
       items: { type: "string" },
     } as JsonSchema);
 
-    expect(arrayFieldFactory.getScore(field)).toBe(12);
+    expect(arrayFieldFactory.getScore(field)).toBe(10);
   });
 
-  it("does not score map arrays", () => {
+  it("scores bbox map arrays", () => {
     const field = getFieldFromSchema("bbox", {
       type: "array",
       items: { type: "number" },
@@ -28,7 +30,29 @@ describe("arrayFieldFactory", () => {
       "x-ui-widget": "map",
     } as JsonSchema);
 
-    expect(arrayFieldFactory.getScore(field)).toBe(0);
+    expect(arrayFieldFactory.getScore(field)).toBe(20);
+  });
+
+  it("renders bbox map arrays as bbox map fields", () => {
+    const field = getFieldFromSchema("bbox", {
+      type: "array",
+      items: { type: "number" },
+      minItems: 4,
+      maxItems: 4,
+      "x-ui-widget": "map",
+    } as JsonSchema);
+
+    const element = arrayFieldFactory.render(
+      createContext({
+        field,
+        value: [7, 48, 8, 49],
+        onChange: vi.fn(),
+      }),
+    ) as MapFieldElement;
+
+    expect(element.type).toBe(MapField);
+    expect(element.props.valueType).toBe("bbox");
+    expect(element.props.value).toEqual([7, 48, 8, 49]);
   });
 
   it("renders simple primitive arrays as separator-based input fields", () => {
