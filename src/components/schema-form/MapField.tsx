@@ -68,26 +68,18 @@ export function MapField({
 }: MapFieldProps) {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
-  const valueTypeRef = useRef<MapValueType>(valueType);
-  const onChangeRef = useRef(onChange);
   const vectorSource = useMemo(() => new VectorSource(), []);
-  const isSyncingRef = useRef(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [drawMode, setDrawMode] = useState<DrawMode>("rectangle");
   const hasGeometry = hasMapValue(valueType, value);
   const handleDelete = () => {
     setErrorMessage(null);
     if (valueType === "bbox") {
-      onChangeRef.current([0, 0, 0, 0]);
+      onChange([0, 0, 0, 0]);
       return;
     }
-    onChangeRef.current("");
+    onChange("");
   };
-
-  useEffect(() => {
-    valueTypeRef.current = valueType;
-    onChangeRef.current = onChange;
-  }, [valueType, onChange]);
 
   useEffect(() => {
     if (!mapElementRef.current || mapRef.current) {
@@ -113,25 +105,6 @@ export function MapField({
       }),
     });
 
-    const modify = new Modify({
-      source: source3857,
-    });
-    const handleFeatureChange = (event: { feature?: Parameters<WKT["writeFeature"]>[0] }) => {
-      if (!event.feature) {
-        return;
-      }
-      syncValueFromFeature(
-        event.feature,
-        valueTypeRef,
-        onChangeRef,
-        setErrorMessage,
-        isSyncingRef,
-      );
-    };
-    source3857.on("addfeature", handleFeatureChange);
-    source3857.on("changefeature", handleFeatureChange);
-
-    map.addInteraction(modify);
     mapRef.current = map;
 
     return () => {
@@ -146,34 +119,50 @@ export function MapField({
       return;
     }
 
+    const modify = new Modify({
+      source: vectorSource,
+    });
+    modify.on("modifyend", (event) => {
+      const feature = event.features.item(0);
+      if (!feature) {
+        return;
+      }
+      syncValueFromFeature(feature, valueType, onChange, setErrorMessage);
+    });
+    map.addInteraction(modify);
+
+    return () => {
+      map.removeInteraction(modify);
+    };
+  }, [onChange, valueType, vectorSource]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) {
+      return;
+    }
+
     const draw = createDrawInteraction(
       valueType === "bbox" ? "rectangle" : drawMode,
       vectorSource,
     );
+    draw.on("drawend", (event) => {
+      syncValueFromFeature(event.feature, valueType, onChange, setErrorMessage);
+    });
     map.addInteraction(draw);
 
     return () => {
       map.removeInteraction(draw);
     };
-  }, [drawMode, valueType, vectorSource]);
+  }, [drawMode, onChange, valueType, vectorSource]);
 
   useEffect(() => {
     if (valueType === "bbox") {
-      syncBBoxSourceFromValue(
-        value,
-        vectorSource,
-        setErrorMessage,
-        isSyncingRef,
-      );
+      syncBBoxSourceFromValue(value, vectorSource, setErrorMessage);
       return;
     }
 
-    syncSourceFromValue(
-      value,
-      vectorSource,
-      setErrorMessage,
-      isSyncingRef,
-    );
+    syncSourceFromValue(value, vectorSource, setErrorMessage);
   }, [valueType, value, vectorSource]);
 
   return (
@@ -255,16 +244,13 @@ function syncSourceFromValue(
   value: string | number[],
   source: VectorSource,
   setErrorMessage: (message: string | null) => void,
-  isSyncingRef: { current: boolean },
 ) {
-  isSyncingRef.current = true;
   source.clear();
 
   const trimmedValue = typeof value === "string" ? value.trim() : "";
 
   if (!trimmedValue) {
     setErrorMessage(null);
-    isSyncingRef.current = false;
     return;
   }
 
@@ -276,7 +262,6 @@ function syncSourceFromValue(
     const geometry = feature.getGeometry();
     if (!geometry || geometry.getType() !== "Polygon") {
       setErrorMessage("Map fields currently support one POLYGON WKT value.");
-      isSyncingRef.current = false;
       return;
     }
 
@@ -284,8 +269,6 @@ function syncSourceFromValue(
     setErrorMessage(null);
   } catch {
     setErrorMessage("Invalid geometry string. Expected a POLYGON WKT value.");
-  } finally {
-    isSyncingRef.current = false;
   }
 }
 
@@ -293,20 +276,16 @@ function syncBBoxSourceFromValue(
   value: string | number[],
   source: VectorSource,
   setErrorMessage: (message: string | null) => void,
-  isSyncingRef: { current: boolean },
 ) {
-  isSyncingRef.current = true;
   source.clear();
 
   if (!Array.isArray(value) || !isBBox(value)) {
     setErrorMessage("Expected bbox value [minLon, minLat, maxLon, maxLat].");
-    isSyncingRef.current = false;
     return;
   }
 
   if (!hasArea(value)) {
     setErrorMessage(null);
-    isSyncingRef.current = false;
     return;
   }
 
@@ -320,23 +299,16 @@ function syncBBoxSourceFromValue(
     setErrorMessage(null);
   } catch {
     setErrorMessage("Invalid bbox value [minLon, minLat, maxLon, maxLat].");
-  } finally {
-    isSyncingRef.current = false;
   }
 }
 
 function syncValueFromFeature(
   feature: Parameters<WKT["writeFeature"]>[0],
-  valueTypeRef: { current: MapValueType },
-  onChangeRef: { current: (value: string | BBox) => void },
+  valueType: MapValueType,
+  onChange: (value: string | BBox) => void,
   setErrorMessage: (message: string | null) => void,
-  isSyncingRef: { current: boolean },
 ) {
-  if (isSyncingRef.current) {
-    return;
-  }
-
-  if (valueTypeRef.current === "bbox") {
+  if (valueType === "bbox") {
     const geometry = feature.getGeometry();
     if (!geometry) {
       setErrorMessage("No bbox geometry was drawn.");
@@ -355,12 +327,12 @@ function syncValueFromFeature(
       extent[3],
     ];
     setErrorMessage(null);
-    onChangeRef.current(bbox);
+    onChange(bbox);
     return;
   }
 
   setErrorMessage(null);
-  onChangeRef.current(
+  onChange(
     wktFormat.writeFeature(feature, {
       dataProjection: "EPSG:4326",
       featureProjection: "EPSG:3857",
