@@ -35,7 +35,7 @@ describe("stringFieldFactory", () => {
     ) as MapFieldElement;
 
     expect(element.type).toBe(MapField);
-    expect(element.props.valueType).toBe("wkt");
+    expect(element.props.valueType).toBeUndefined();
     expect(element.props.value).toBe("POLYGON((0 0,1 0,1 1,0 1,0 0))");
 
     element.props.onChange("POLYGON((1 1,2 1,2 2,1 2,1 1))");
