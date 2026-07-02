@@ -27,7 +27,7 @@ In the dev console we still have:
   - the default service provider with its default configuration
   - the app title and icon and URL, which could all be included in
     service provider metadata
-- [ ] Add real UI-generator that generates a UI for a given input schemas. 
+- [x] Add real UI-generator that generates a UI for a given input schemas. 
   We currently use `JSONInput` for all input schemas.
 - [ ] Equip the JOBS and PROCESSES panels with search, sort, and filter features.
 - [ ] Show notification on job termination (success, failed, dismissed)
@@ -124,7 +124,7 @@ In the dev console we still have:
 - [] Additional-properties editor.
 - [] Group titles/styles and group_name.
 - [] TypeScript equivalent of Python FieldFactoryBase.
-- [] Schema playground like Python schema2ui.
+- [x] Schema playground like Python schema2ui.
 - [] Full validation parity with the Python/OpenAPI behavior.
 - [] Exact Python-style initial value behavior.
 
@@ -132,3 +132,10 @@ In the dev console we still have:
   - per schema type and anyOf, oneOf etc
   - per customization through x-ui and format
 - [] grouped schema selection panel, e.g., a tree view, or nested menu
+- [] panels should scroll individually
+- [] color-mode switch for the playground
+- [] array values should not auto-format while typing
+  - provide a small format action on the right side of the label
+- [] date-time input and picker should behave differently
+- [] time picker should be a time input
+- [] nested objects should be visually distinguishable

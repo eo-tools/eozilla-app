@@ -125,9 +125,10 @@ The default registry is defined in `factories/defaultRegistry.ts`, in this
 priority order:
 
 1. nullable
-2. object
-3. primitive
-4. JSON fallback
+2. map
+3. object
+4. primitive
+5. JSON fallback
 
 ### Primitive Factory
 
@@ -141,15 +142,17 @@ Supported mappings:
 - `type: integer` / `type: number`
   - default: Mantine `NumberInput`
   - `x-ui:widget: slider` with finite min/max: Mantine `Slider`
-  - `enum`: Mantine `Select`
-  - `enum` with `x-ui:widget: radio`: Mantine `Radio.Group`
+- `enum`: Mantine `Select`
+  - `enum` with `x-ui:widget: radio`, `radio-column`: Mantine `Radio.Group` in a vertical stack
+  - `enum` with `x-ui:widget: radio-row`: Mantine `Radio.Group` in a horizontal row
   - `enum` with `x-ui:widget: button`: Mantine `SegmentedControl`
 - `type: string`
   - default: Mantine `TextInput`
   - `x-ui:widget: textarea`: Mantine `Textarea`
   - `format: password` or `x-ui:password`: Mantine `PasswordInput`
-  - `enum`: Mantine `Select`
-  - `enum` with `x-ui:widget: radio`: Mantine `Radio.Group`
+- `enum`: Mantine `Select`
+  - `enum` with `x-ui:widget: radio`, `radio-column`: Mantine `Radio.Group` in a vertical stack
+  - `enum` with `x-ui:widget: radio-row`: Mantine `Radio.Group` in a horizontal row
   - `enum` with `x-ui:widget: button`: Mantine `SegmentedControl`
   - `format: date`: Mantine Dates `DatePickerInput`
   - `format: time`: Mantine Dates `TimeInput`
@@ -270,6 +273,30 @@ setProcessInput(name, nextValue);
 
 This keeps the generated form compatible with the existing process request
 storage/update path.
+
+## schema2ui Playground
+
+The developer-facing playground lives in `src/schema2ui/` and is started with:
+
+```bash
+npm run schema2ui
+```
+
+It is intentionally separate from the main app and is meant for manual work on
+schema-driven components.
+
+The current workflow is modeled after the old Python `schema2ui` tool:
+
+- fixtures live in `src/schema2ui/schemas/`
+- each file represents one structure or schema case
+- the playground shows a sidebar of fixtures
+- selecting a fixture resets and renders one generated UI at a time
+- the live JSON value is shown alongside the generated UI
+
+Fixture files are JSON-only in this repo. Where possible, their names mirror the
+older `gavicore/tests/ui/schemas` corpus (for example `string`, `number`,
+`object-layout`, `nullable-required`). React-specific experiments can live beside
+them as additional fixtures, such as `map-wkt`.
 
 ## How To Add A New Specialized Field
 
