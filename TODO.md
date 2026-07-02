@@ -112,8 +112,7 @@ In the dev console we still have:
 - [x] custom separator disables comma fallback
 - [ ] date/date-time array 
 - [x] bbox/map editor for WKT strings
-- [ ] bbox/map editor for 4-tuples of floats
-- [ ] URI arrays
+- [x] bbox/map editor for 4-tuples of floats
 ### Schema composition:
 - [] oneOf
 - [] anyOf
