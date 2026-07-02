@@ -119,7 +119,9 @@ In the dev console we still have:
 - [] discriminator support
 - [] $ref resolution in TypeScript metadata.
 - [] prefixItems / tuple conversion.
-- [] File/bytes inputs and dropper support.
+- [x] File/bytes inputs.
+- [x] File dropper support.
+- [ ] Persist selected filenames for bytes inputs across reloads
 - [] Enum discrete slider for enum + x-ui-widget: slider.
 - [] Additional-properties editor.
 - [] Group titles/styles and group_name.
