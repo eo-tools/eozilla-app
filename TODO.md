@@ -134,3 +134,10 @@ In the dev console we still have:
   - per schema type and anyOf, oneOf etc
   - per customization through x-ui and format
 - [] grouped schema selection panel, e.g., a tree view, or nested menu
+- [] panels should scroll individually
+- [] color-mode switch for the playground
+- [] array values should not auto-format while typing
+  - provide a small format action on the right side of the label
+- [] date-time input and picker should behave differently
+- [] time picker should be a time input
+- [] nested objects should be visually distinguishable
