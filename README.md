@@ -121,6 +121,38 @@ npm run format         # Format source files with Prettier
 npm run preview        # Preview the production build locally
 ```
 
+## Build Versioning
+
+The footer displays the package version plus a release-relative build number:
+
+```text
+v0.1.0-dev.0 build 12
+```
+
+The package version comes from `package.json`. The build number is resolved in
+this order:
+
+1. `VITE_BUILD_NUMBER`
+2. `BUILD_NUMBER`
+3. The number of commits since the latest reachable public release tag
+4. `0`
+
+Public release tags are expected to use the `vX.Y.Z` format, for example
+`v0.1.0`. Development or prerelease tags such as `v0.1.0-rc.1` are ignored for
+the reset point.
+
+To manually override the build number for local testing or deployment, set an
+environment variable before building:
+
+```powershell
+$env:VITE_BUILD_NUMBER="12"
+npm run build
+```
+
+```bash
+VITE_BUILD_NUMBER=12 npm run build
+```
+
 ## Working On The Codebase
 
 - UI work usually belongs in `src/components`.

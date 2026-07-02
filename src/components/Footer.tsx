@@ -1,7 +1,10 @@
 import { Anchor, Box, Group, Text } from "@mantine/core";
 import { openDialog } from "@/store/actions";
 
-const appBuildVersion = `v${import.meta.env.VITE_APP_VERSION}+${import.meta.env.VITE_BUILD_APPENDIX}`;
+const appVersion = import.meta.env.VITE_APP_VERSION;
+const buildNumber = import.meta.env.VITE_BUILD_NUMBER;
+const buildPrefix = buildNumber === "0" ? "" : `, build ${buildNumber}`;
+const appVersionTitle = `Version ${appVersion}${buildPrefix}`;
 
 export default function Footer() {
   return (
@@ -31,7 +34,7 @@ export default function Footer() {
         </Text>
       </Group>
       <Text className="app-footer-version" size="xs" c="dimmed">
-        {appBuildVersion}
+        {appVersionTitle}
       </Text>
     </Box>
   );
