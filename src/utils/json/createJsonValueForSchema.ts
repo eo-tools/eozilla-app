@@ -1,9 +1,13 @@
 import {
+  isAllOfSchema,
+  isAnyOfSchema,
   isArraySchema,
   isBooleanSchema,
   isNumericSchema,
   isObjectSchema,
+  isOneOfSchema,
   isStringSchema,
+  type Discriminator,
   type JsonSchema,
 } from "./schema";
 import type { JsonValue } from "./value";
@@ -28,8 +32,13 @@ export function createJsonValueForSchema(schema: JsonSchema): JsonValue {
       value[key] = createJsonValueForSchema(properties[key]!);
     });
     return value as JsonValue;
+  } else if (isOneOfSchema(schema)) {
+    return createSelectiveValue(schema.oneOf[0], schema.discriminator, 0);
+  } else if (isAnyOfSchema(schema)) {
+    return createSelectiveValue(schema.anyOf[0], schema.discriminator, 0);
+  } else if (isAllOfSchema(schema)) {
+    return createAllOfValue(schema.allOf);
   } else if (schema.nullable) {
-    // TODO: consider oneOf, anyOf, allOf
     return null;
   }
   return 0;
@@ -48,4 +57,79 @@ function createArrayValueForSchema(schema: Extract<JsonSchema, { type: "array" }
   }
 
   return Array.from({ length: n }, () => createJsonValueForSchema(items));
+}
+
+function createSelectiveValue(
+  option: JsonSchema | undefined,
+  discriminator: Discriminator | undefined,
+  optionIndex: number,
+): JsonValue {
+  if (!option) {
+    return 0;
+  }
+
+  return withDiscriminatorValue(
+    createJsonValueForSchema(option),
+    option,
+    discriminator,
+    optionIndex,
+  );
+}
+
+function createAllOfValue(schemas: JsonSchema[]): JsonValue {
+  if (schemas.length === 0) {
+    return 0;
+  }
+
+  const values = schemas.map((schema) => createJsonValueForSchema(schema));
+  if (values.every(isJsonObjectValue)) {
+    return values.reduce<Record<string, JsonValue>>(
+      (acc, value) => ({ ...acc, ...value }),
+      {},
+    ) as JsonValue;
+  }
+
+  return values[0] ?? 0;
+}
+
+function withDiscriminatorValue(
+  value: JsonValue,
+  option: JsonSchema,
+  discriminator: Discriminator | undefined,
+  optionIndex: number,
+): JsonValue {
+  if (!discriminator || !isJsonObjectValue(value)) {
+    return value;
+  }
+
+  return {
+    ...value,
+    [discriminator.propertyName]: getOptionDiscriminatorValue(
+      option,
+      discriminator,
+      optionIndex,
+    ),
+  };
+}
+
+function getOptionDiscriminatorValue(
+  option: JsonSchema,
+  discriminator: Discriminator,
+  optionIndex: number,
+): string {
+  const optionRef = option.ref;
+  if (optionRef && discriminator.mapping) {
+    const mapped = Object.entries(discriminator.mapping).find(
+      ([, ref]) => ref === optionRef,
+    );
+    if (mapped) {
+      return mapped[0];
+    }
+  }
+
+  return optionRef?.split("/").pop() ?? String(optionIndex);
+}
+
+function isJsonObjectValue(value: JsonValue): value is Record<string, JsonValue> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

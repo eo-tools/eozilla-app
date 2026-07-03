@@ -4,12 +4,19 @@ type AdditionalProperty = JsonSchema | JsonSchema[] | JsonValue;
 
 export interface SchemaBase<T extends JsonValue = JsonValue> {
   type?: "boolean" | "integer" | "number" | "string" | "array" | "object";
+  ref?: string;
   nullable?: boolean;
   default?: T;
   enum?: T[];
   title?: string;
   description?: string;
+  discriminator?: Discriminator;
   [additionalProperty: `x-${string}`]: AdditionalProperty | undefined;
+}
+
+export interface Discriminator {
+  propertyName: string;
+  mapping?: Record<string, string>;
 }
 
 export type UntypedSchema = SchemaBase;

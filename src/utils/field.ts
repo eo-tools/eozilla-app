@@ -9,7 +9,10 @@ import {
   type JsonSchema,
   type StringSchema,
   type UntypedSchema,
+  isAllOfSchema,
+  isAnyOfSchema,
   isArraySchema,
+  isOneOfSchema,
   isObjectSchema,
 } from "@/utils/json";
 import { isObject } from "@/utils/common";
@@ -59,7 +62,7 @@ export interface ObjectField extends FieldBase<ObjectSchema> {
 }
 
 export interface OneOfField extends FieldBase<OneOfSchema> {
-  anyOf: Field[];
+  oneOf: Field[];
 }
 
 export interface AnyOfField extends FieldBase<AnyOfSchema> {
@@ -67,7 +70,7 @@ export interface AnyOfField extends FieldBase<AnyOfSchema> {
 }
 
 export interface AllOfField extends FieldBase<AllOfSchema> {
-  anyOf: Field[];
+  allOf: Field[];
 }
 
 export type Field =
@@ -170,6 +173,27 @@ export function getFieldFromSchema(name: string, schema: JsonSchema): Field {
       properties: properties_,
       additionalProperties: additionalProperties_,
     } as ObjectField;
+  } else if (isOneOfSchema(schema)) {
+    return {
+      ...fieldBase,
+      oneOf: schema.oneOf.map((option, index) =>
+        getFieldFromSchema(`${name}Option${index}`, option),
+      ),
+    } as OneOfField;
+  } else if (isAnyOfSchema(schema)) {
+    return {
+      ...fieldBase,
+      anyOf: schema.anyOf.map((option, index) =>
+        getFieldFromSchema(`${name}Option${index}`, option),
+      ),
+    } as AnyOfField;
+  } else if (isAllOfSchema(schema)) {
+    return {
+      ...fieldBase,
+      allOf: schema.allOf.map((part, index) =>
+        getFieldFromSchema(`${name}Part${index}`, part),
+      ),
+    } as AllOfField;
   }
   return fieldBase as Field;
 }

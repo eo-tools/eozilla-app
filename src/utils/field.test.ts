@@ -108,6 +108,49 @@ describe("field helpers", () => {
     });
   });
 
+  it("turns composition schemas into composition fields", () => {
+    const oneOfField = getFieldFromSchema("input", {
+      oneOf: [{ type: "string" }, { type: "number" }],
+    } as JsonSchema);
+    const anyOfField = getFieldFromSchema("input", {
+      anyOf: [{ type: "boolean" }, { type: "integer" }],
+    } as JsonSchema);
+    const allOfField = getFieldFromSchema("input", {
+      allOf: [
+        {
+          type: "object",
+          properties: { bucket: { type: "string" } },
+        },
+        {
+          type: "object",
+          properties: { object: { type: "string" } },
+        },
+      ],
+    } as JsonSchema);
+
+    expect(oneOfField).toMatchObject({
+      name: "input",
+      oneOf: [
+        { name: "inputOption0", schema: { type: "string" } },
+        { name: "inputOption1", schema: { type: "number" } },
+      ],
+    });
+    expect(anyOfField).toMatchObject({
+      name: "input",
+      anyOf: [
+        { name: "inputOption0", schema: { type: "boolean" } },
+        { name: "inputOption1", schema: { type: "integer" } },
+      ],
+    });
+    expect(allOfField).toMatchObject({
+      name: "input",
+      allOf: [
+        { name: "inputPart0" },
+        { name: "inputPart1" },
+      ],
+    });
+  });
+
   it("wraps process descriptions in a top-level inputs field", () => {
     const field = getFieldFromProcessDescriptionInputs({
       inputs: {
