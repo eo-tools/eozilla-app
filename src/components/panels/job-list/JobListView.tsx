@@ -1,27 +1,21 @@
-import { useMemo } from "react";
-
-import type { JobInfo, JobList } from "@/service";
+import type { JobInfo } from "@/service";
 import type { Optional } from "@/utils/common";
 import { UnavailableHint } from "@/components/common/UnavailableHint";
 import { JobItemView } from "./JobItemView";
 
 export interface JobListViewProps {
-  jobList: JobList;
+  jobs: JobInfo[];
   activeJobId?: string;
   activateJob: (jobId: Optional<string>) => void;
   dismissJob: (jobId: string) => void;
 }
 
 export default function JobListView({
-  jobList,
+  jobs,
   activeJobId,
   activateJob,
   dismissJob,
 }: JobListViewProps) {
-  const jobs = useMemo(
-    () => [...jobList.jobs].sort(sortByCreationDate),
-    [jobList],
-  );
   if (jobs.length === 0) {
     return <UnavailableHint message="The list of jobs is empty." />;
   }
@@ -35,10 +29,3 @@ export default function JobListView({
     />
   ));
 }
-
-const sortByCreationDate = (a: JobInfo, b: JobInfo) => {
-  if (a.created && b.created) {
-    return b.created.localeCompare(a.created);
-  }
-  return a.jobID.localeCompare(b.jobID);
-};

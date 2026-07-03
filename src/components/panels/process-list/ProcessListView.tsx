@@ -1,4 +1,5 @@
 import type { ProcessSummary } from "@/service";
+import { UnavailableHint } from "@/components/common/UnavailableHint";
 import ProcessItemView from "./ProcessItemView";
 
 export interface ProcessViewProps {
@@ -12,6 +13,10 @@ export function ProcessListView({
   activeProcessId,
   activateProcess,
 }: ProcessViewProps) {
+  if (processes.length === 0) {
+    return <UnavailableHint message="The list of processes is empty." />;
+  }
+
   return (
     <>
       {processes.map((process) => (
