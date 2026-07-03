@@ -1,5 +1,5 @@
 import { isIntegerSchema } from "@/utils/json";
-import { renderNumericField } from "./numberRenderer";
+import { renderNumericField } from "./number";
 import type { FieldFactory } from "../types";
 
 export const integerFieldFactory: FieldFactory = {
