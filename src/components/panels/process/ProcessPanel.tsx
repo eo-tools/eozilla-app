@@ -54,7 +54,7 @@ export default function ProcessPanel() {
       <Panel.Header
         title={"Process"}
         icon={<IconMathFunction {...styles.panel.header.icon} />}
-        id={processDescription?.id}
+        id={processDescription?.title}
       >
         <ActionIcon.Group>
           <Tooltip label={"Execute process"}>

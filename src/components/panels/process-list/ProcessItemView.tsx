@@ -29,7 +29,7 @@ export default function ProcessItemView({
         <Stack m={0} p={0} gap={2}>
           <Flex justify={"space-between"} align={"center"} {...containerProps}>
             <Text {...styles.text.id1} size={"sm"}>
-              {process.id}
+              {process.title}
             </Text>
             <HoverHelpIcon
               markdownText={process.description}
@@ -37,7 +37,7 @@ export default function ProcessItemView({
             />
           </Flex>
           <Text fw={200} size={"sm"}>
-            {process.title}
+            {process.id}
           </Text>
         </Stack>
       }
