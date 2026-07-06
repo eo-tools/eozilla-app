@@ -6,10 +6,10 @@ import {
   type OneOfField,
 } from "@/utils/field";
 import {
+  mergeAllOfSchemas,
   isAllOfSchema,
   isAnyOfSchema,
   isOneOfSchema,
-  type JsonSchema,
 } from "@/utils/json";
 import { FieldShell } from "../FieldShell";
 import { JsonFallbackField } from "../JsonFallbackField";
@@ -99,44 +99,6 @@ function renderAllOfField(ctx: FieldRenderContext) {
       })}
     </FieldShell>
   );
-}
-
-function mergeAllOfSchemas(schemas: JsonSchema[]): JsonSchema {
-  const merged: Record<string, unknown> = {};
-  const properties: Record<string, JsonSchema> = {};
-  const required = new Set<string>();
-
-  for (const schema of schemas) {
-    const schemaObject = schema as Record<string, unknown>;
-    if (schemaObject.type !== undefined && merged.type === undefined) {
-      merged.type = schemaObject.type;
-    }
-    if (schemaObject.title !== undefined && merged.title === undefined) {
-      merged.title = schemaObject.title;
-    }
-    if (schemaObject.description !== undefined && merged.description === undefined) {
-      merged.description = schemaObject.description;
-    }
-    if (schemaObject.properties && typeof schemaObject.properties === "object") {
-      Object.assign(properties, schemaObject.properties);
-    }
-    if (Array.isArray(schemaObject.required)) {
-      for (const propertyName of schemaObject.required) {
-        if (typeof propertyName === "string") {
-          required.add(propertyName);
-        }
-      }
-    }
-  }
-
-  if (Object.keys(properties).length > 0) {
-    merged.properties = properties;
-  }
-  if (required.size > 0) {
-    merged.required = [...required];
-  }
-
-  return merged as JsonSchema;
 }
 
 function isOneOfField(field: Field): field is OneOfField {

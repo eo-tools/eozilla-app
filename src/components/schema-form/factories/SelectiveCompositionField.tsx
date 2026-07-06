@@ -3,6 +3,9 @@ import { useState } from "react";
 
 import {
   createJsonValueForSchema,
+  getCompositionOptionDiscriminatorValue,
+  isJsonObjectValue,
+  withCompositionDiscriminatorValue,
   validateJsonValue,
   type Discriminator,
   type JsonValue,
@@ -20,11 +23,10 @@ export function SelectiveCompositionField({
   options: Field[];
 }) {
   const discriminator = ctx.field.schema.discriminator;
-  const initialIndex = findActiveOptionIndex(ctx.value, options, discriminator);
-  const [activeIndex, setActiveIndex] = useState(initialIndex);
+  const activeIndex = findActiveOptionIndex(ctx.value, options, discriminator);
   const [optionValues, setOptionValues] = useState<JsonValue[]>(() =>
     options.map((option, index) =>
-      index === initialIndex && ctx.value !== undefined
+      index === activeIndex && ctx.value !== undefined
         ? ctx.value
         : createJsonValueForSchema(option.schema),
     ),
@@ -42,13 +44,12 @@ export function SelectiveCompositionField({
         onChange={(value) => {
           const nextIndex = Number(value ?? "0");
           const nextOption = options[nextIndex] ?? options[0]!;
-          const nextValue = withDiscriminatorValue(
+          const nextValue = withCompositionDiscriminatorValue(
             optionValues[nextIndex] ?? createJsonValueForSchema(nextOption.schema),
-            nextOption,
+            nextOption.schema,
             discriminator,
             nextIndex,
           );
-          setActiveIndex(nextIndex);
           setOptionValues((current) => {
             const next = [...current];
             next[nextIndex] = nextValue;
@@ -102,7 +103,11 @@ function findActiveOptionIndex(
     if (typeof discriminatorValue === "string") {
       const index = options.findIndex(
         (option, optionIndex) =>
-          getOptionDiscriminatorValue(option, discriminator, optionIndex) ===
+          getCompositionOptionDiscriminatorValue(
+            option.schema,
+            discriminator,
+            optionIndex,
+          ) ===
           discriminatorValue,
       );
       if (index >= 0) {
@@ -120,46 +125,4 @@ function findActiveOptionIndex(
     }
   });
   return index >= 0 ? index : 0;
-}
-
-function withDiscriminatorValue(
-  value: JsonValue,
-  option: Field,
-  discriminator: Discriminator | undefined,
-  optionIndex: number,
-): JsonValue {
-  if (!discriminator || !isJsonObjectValue(value)) {
-    return value;
-  }
-
-  return {
-    ...value,
-    [discriminator.propertyName]: getOptionDiscriminatorValue(
-      option,
-      discriminator,
-      optionIndex,
-    ),
-  };
-}
-
-function getOptionDiscriminatorValue(
-  option: Field,
-  discriminator: Discriminator,
-  optionIndex: number,
-): string {
-  const optionRef = option.schema.ref;
-  if (optionRef && discriminator.mapping) {
-    const mapped = Object.entries(discriminator.mapping).find(
-      ([, ref]) => ref === optionRef,
-    );
-    if (mapped) {
-      return mapped[0];
-    }
-  }
-
-  return optionRef?.split("/").pop() ?? String(optionIndex);
-}
-
-function isJsonObjectValue(value: JsonValue): value is Record<string, JsonValue> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

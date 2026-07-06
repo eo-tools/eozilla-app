@@ -68,6 +68,7 @@ describe("compositionFieldFactory", () => {
       allOf: [
         {
           type: "object",
+          additionalProperties: false,
           properties: {
             bucket: { type: "string" },
           },
@@ -75,6 +76,7 @@ describe("compositionFieldFactory", () => {
         },
         {
           type: "object",
+          additionalProperties: false,
           properties: {
             object: { type: "string" },
           },
@@ -101,6 +103,7 @@ describe("compositionFieldFactory", () => {
           object: expect.anything(),
         }),
         schema: expect.objectContaining({
+          additionalProperties: false,
           required: ["bucket", "object"],
         }),
       }),
