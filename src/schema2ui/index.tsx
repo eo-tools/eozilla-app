@@ -16,8 +16,10 @@ import {
   Stack,
   Switch,
   Text,
+  useComputedColorScheme,
+  useMantineColorScheme,
 } from "@mantine/core";
-import { IconRefresh } from "@tabler/icons-react";
+import { IconMoon, IconRefresh, IconSun } from "@tabler/icons-react";
 
 import { JsonCode } from "@/components/common/JsonCode";
 import { SchemaForm } from "@/components/schema-form";
@@ -32,6 +34,9 @@ const defaultFixture = schemaFixtures[0]!;
 const selectedFixtureStorageKey = "schema2ui:selected-fixture";
 
 function Schema2UiPlayground() {
+  const { toggleColorScheme } = useMantineColorScheme();
+  const colorScheme = useComputedColorScheme();
+  const ColorSchemeIcon = colorScheme === "dark" ? IconSun : IconMoon;
   const initialFixtureId = loadSelectedFixtureId() ?? defaultFixture.id;
   const initialFixture =
     schemaFixtures.find((fixture) => fixture.id === initialFixtureId) ??
@@ -97,6 +102,14 @@ function Schema2UiPlayground() {
               onClick={resetValue}
             >
               <IconRefresh size={14} />
+            </ActionIcon>
+            <ActionIcon
+              size="sm"
+              variant="default"
+              aria-label="Toggle color scheme"
+              onClick={() => toggleColorScheme()}
+            >
+              <ColorSchemeIcon size={14} />
             </ActionIcon>
           </Group>
         </Group>
@@ -191,7 +204,7 @@ export default Schema2UiPlayground;
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <MantineProvider>
+    <MantineProvider defaultColorScheme="auto">
       <Schema2UiPlayground />
     </MantineProvider>
   </StrictMode>,
