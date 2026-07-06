@@ -11,10 +11,10 @@ import {
   isAnyOfSchema,
   isOneOfSchema,
 } from "@/utils/json";
+import { SelectiveCompositionField } from "../SelectiveCompositionField";
 import { FieldShell } from "../FieldShell";
 import { JsonFallbackField } from "../JsonFallbackField";
 import type { FieldFactory, FieldRenderContext } from "../types";
-import { SelectiveCompositionField } from "./SelectiveCompositionField";
 
 export const compositionFieldFactory: FieldFactory = {
   getScore(field) {

@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { SelectiveCompositionField } from "../SelectiveCompositionField";
+import { findActiveOptionIndex } from "../selectiveCompositionUtils";
 import { getFieldFromSchema } from "@/utils/field";
 import type { JsonSchema } from "@/utils/json";
 import { compositionFieldFactory } from "./composition";
-import { SelectiveCompositionField } from "./SelectiveCompositionField";
 import type { FieldRenderContext } from "../types";
 
 describe("compositionFieldFactory", () => {
@@ -150,6 +151,38 @@ describe("compositionFieldFactory", () => {
       (element.props as { options: { schema: { ref?: string } }[] }).options[1]
         ?.schema.ref,
     ).toBe("#/components/schemas/LineString");
+  });
+
+  it("picks the matching anyOf option when other options disallow extra properties", () => {
+    const field = getFieldFromSchema("source", {
+      anyOf: [
+        {
+          type: "object",
+          title: "S3 Object",
+          additionalProperties: false,
+          properties: {
+            bucket: { type: "string" },
+            object: { type: "string" },
+          },
+        },
+        {
+          type: "object",
+          title: "Inline Text",
+          additionalProperties: false,
+          properties: {
+            text: { type: "string" },
+          },
+        },
+      ],
+    } as JsonSchema);
+
+    expect(
+      findActiveOptionIndex(
+        { text: "manual input" },
+        "anyOf" in field ? field.anyOf : [],
+        undefined,
+      ),
+    ).toBe(1);
   });
 });
 

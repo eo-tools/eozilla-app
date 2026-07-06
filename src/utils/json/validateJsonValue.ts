@@ -108,8 +108,17 @@ export function validateJsonValue(
           );
         }
       });
+
+      if (schema.additionalProperties === false) {
+        Object.keys(value).forEach((propertyName) => {
+          if (!(propertyName in propertySchemas)) {
+            throw new SchemaValidationError(
+              `${name} must not contain unexpected property '${propertyName}'`,
+            );
+          }
+        });
+      }
     }
-    // TODO: use schema.additionalProperties
     // ok
   } else if (isOneOfSchema(schema)) {
     const { count, errors, empty } = applySchemas(name, value, schema.oneOf);

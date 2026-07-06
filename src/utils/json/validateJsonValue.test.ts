@@ -87,6 +87,19 @@ describe("validateJsonValue", () => {
     ).toThrowError("payload is missing required property 'age'");
   });
 
+  it("rejects unexpected object properties when additionalProperties is false", () => {
+    expect(() =>
+      validateJsonValue("payload", { text: "manual input" }, {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          bucket: { type: "string" },
+          object: { type: "string" },
+        },
+      } as JsonSchema),
+    ).toThrowError("payload must not contain unexpected property 'text'");
+  });
+
   it("supports oneOf, anyOf, and allOf", () => {
     expect(() =>
       validateJsonValue("value", "ok", {
