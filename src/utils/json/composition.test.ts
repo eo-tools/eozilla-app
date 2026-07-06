@@ -52,45 +52,22 @@ describe("json composition helpers", () => {
         {
           type: "object",
           title: "A",
-          properties: { bucket: { type: "string" } },
+          description: "First part",
+          additionalProperties: false,
           required: ["bucket"],
-        },
-        {
-          type: "object",
-          description: "B",
-          properties: { object: { type: "string" } },
-          required: ["object"],
-        },
-      ] as JsonSchema[]),
-    ).toMatchObject({
-      type: "object",
-      title: "A",
-      description: "B",
-      properties: {
-        bucket: { type: "string" },
-        object: { type: "string" },
-      },
-      required: ["bucket", "object"],
-    });
-  });
-
-  it("preserves additionalProperties=false in allOf merges", () => {
-    expect(
-      mergeAllOfSchemas([
-        {
-          type: "object",
-          additionalProperties: false,
           properties: { bucket: { type: "string" } },
         },
         {
           type: "object",
+          title: "B",
+          description: "Second part",
           additionalProperties: false,
+          required: ["object"],
           properties: { object: { type: "string" } },
         },
       ] as JsonSchema[]),
     ).toMatchObject({
       type: "object",
-      additionalProperties: false,
       properties: {
         bucket: { type: "string" },
         object: { type: "string" },

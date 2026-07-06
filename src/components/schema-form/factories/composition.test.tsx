@@ -69,19 +69,23 @@ describe("compositionFieldFactory", () => {
       allOf: [
         {
           type: "object",
+          title: "Product",
+          description: "Product settings",
           additionalProperties: false,
+          required: ["bucket"],
           properties: {
             bucket: { type: "string" },
           },
-          required: ["bucket"],
         },
         {
           type: "object",
+          title: "Processing",
+          description: "Processing settings",
           additionalProperties: false,
+          required: ["object"],
           properties: {
             object: { type: "string" },
           },
-          required: ["object"],
         },
       ],
     } as JsonSchema);
@@ -104,8 +108,7 @@ describe("compositionFieldFactory", () => {
           object: expect.anything(),
         }),
         schema: expect.objectContaining({
-          additionalProperties: false,
-          required: ["bucket", "object"],
+          type: "object",
         }),
       }),
       {},

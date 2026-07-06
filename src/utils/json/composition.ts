@@ -48,42 +48,19 @@ export function withCompositionDiscriminatorValue(
 export function mergeAllOfSchemas(schemas: JsonSchema[]): JsonSchema {
   const merged: Record<string, unknown> = {};
   const properties: Record<string, JsonSchema> = {};
-  const required = new Set<string>();
 
   for (const schema of schemas) {
     const schemaObject = schema as Record<string, unknown>;
     if (schemaObject.type !== undefined && merged.type === undefined) {
       merged.type = schemaObject.type;
     }
-    if (schemaObject.title !== undefined && merged.title === undefined) {
-      merged.title = schemaObject.title;
-    }
-    if (schemaObject.description !== undefined && merged.description === undefined) {
-      merged.description = schemaObject.description;
-    }
-    if (
-      schemaObject.additionalProperties !== undefined &&
-      merged.additionalProperties === undefined
-    ) {
-      merged.additionalProperties = schemaObject.additionalProperties;
-    }
     if (schemaObject.properties && typeof schemaObject.properties === "object") {
       Object.assign(properties, schemaObject.properties);
-    }
-    if (Array.isArray(schemaObject.required)) {
-      for (const propertyName of schemaObject.required) {
-        if (typeof propertyName === "string") {
-          required.add(propertyName);
-        }
-      }
     }
   }
 
   if (Object.keys(properties).length > 0) {
     merged.properties = properties;
-  }
-  if (required.size > 0) {
-    merged.required = [...required];
   }
 
   return merged as JsonSchema;
