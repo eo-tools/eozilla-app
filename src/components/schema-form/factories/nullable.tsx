@@ -1,9 +1,8 @@
 import { Collapse, Stack, Switch } from "@mantine/core";
 
 import { createJsonValueForSchema } from "@/utils/json";
+import { FieldShell } from "../FieldShell";
 import {
-  getFieldDescription,
-  getFieldLabel,
   getNonNullableField,
 } from "../fieldUtils";
 import type { FieldFactory } from "../types";
@@ -21,27 +20,27 @@ export const nullableFieldFactory: FieldFactory = {
         : ctx.value;
 
     return (
-      <Stack gap="xs">
-        <Switch
-          label={ctx.hideLabel ? undefined : getFieldLabel(ctx.field)}
-          description={getFieldDescription(ctx.field)}
-          checked={enabled}
-          onChange={(event) => {
-            ctx.onChange(
-              event.currentTarget.checked
-                ? createJsonValueForSchema(innerField.schema)
-                : null,
-            );
-          }}
-        />
-        <Collapse expanded={enabled}>
-          {ctx.generator.renderField(innerField, innerValue, ctx.onChange, {
-            hideLabel: true,
-            hideAdvanced: ctx.hideAdvanced,
-            path: ctx.path,
-          })}
-        </Collapse>
-      </Stack>
+      <FieldShell field={ctx.field} hideLabel={ctx.hideLabel}>
+        <Stack gap={4}>
+          <Switch
+            checked={enabled}
+            onChange={(event) => {
+              ctx.onChange(
+                event.currentTarget.checked
+                  ? createJsonValueForSchema(innerField.schema)
+                  : null,
+              );
+            }}
+          />
+          <Collapse expanded={enabled}>
+            {ctx.generator.renderField(innerField, innerValue, ctx.onChange, {
+              hideLabel: true,
+              hideAdvanced: ctx.hideAdvanced,
+              path: ctx.path,
+            })}
+          </Collapse>
+        </Stack>
+      </FieldShell>
     );
   },
 };

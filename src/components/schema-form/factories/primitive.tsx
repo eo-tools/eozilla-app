@@ -240,15 +240,25 @@ function renderEnumSelect(ctx: FieldRenderContext, value: JsonValue) {
         }}
       >
         {layout === "row" ? (
-          <Group gap="sm" mt="xs">
+          <Group gap="xs" mt="xs">
             {data.map((item) => (
-              <Radio key={item.value} value={item.value} label={item.label} />
+              <Radio
+                key={item.value}
+                value={item.value}
+                label={item.label}
+                size="xs"
+              />
             ))}
           </Group>
         ) : (
           <Stack gap="xs" mt="xs">
             {data.map((item) => (
-              <Radio key={item.value} value={item.value} label={item.label} />
+              <Radio
+                key={item.value}
+                value={item.value}
+                label={item.label}
+                size="xs"
+              />
             ))}
           </Stack>
         )}

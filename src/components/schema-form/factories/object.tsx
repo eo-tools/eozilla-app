@@ -34,7 +34,10 @@ export const objectFieldFactory: FieldFactory = {
     const children = layoutObjectChildren(objectField, childrenByName);
 
     return (
-      <FieldShell field={objectField} hideLabel={ctx.hideLabel}>
+      <FieldShell
+        field={objectField}
+        hideLabel={ctx.hideLabel || (objectField.name === "root" && !objectField.schema.title)}
+      >
         {children}
       </FieldShell>
     );

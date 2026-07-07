@@ -1,14 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Alert,
-  Box,
-  Stack,
-} from "@mantine/core";
-import {
-  IconPolygon,
-  IconRectangle,
-  IconTrash,
-} from "@tabler/icons-react";
+import { Alert, Box, Stack, useComputedColorScheme } from "@mantine/core";
+import { IconPolygon, IconRectangle, IconTrash } from "@tabler/icons-react";
 
 import Feature from "ol/Feature";
 import Map from "ol/Map";
@@ -19,6 +11,7 @@ import Modify from "ol/interaction/Modify";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
 import OSM from "ol/source/OSM";
+import XYZ from "ol/source/XYZ";
 import VectorSource from "ol/source/Vector";
 import WKT from "ol/format/WKT";
 import { transformExtent } from "ol/proj";
@@ -68,9 +61,14 @@ export function MapField({
 }: MapFieldProps) {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
+  const backgroundLayerRef = useRef<ReturnType<
+    typeof createBackgroundLayer
+  > | null>(null);
   const vectorSource = useMemo(() => new VectorSource(), []);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [drawMode, setDrawMode] = useState<DrawMode>("rectangle");
+  const colorScheme = useComputedColorScheme();
+  const backgroundTheme = colorScheme === "dark" ? "dark" : "light";
   const hasGeometry = hasMapValue(valueType, value);
   const handleDelete = () => {
     setErrorMessage(null);
@@ -91,27 +89,31 @@ export function MapField({
       source: source3857,
       style: polygonStyle,
     });
+    const backgroundLayer = createBackgroundLayer(backgroundTheme);
     const map = new Map({
       target: mapElementRef.current,
-      layers: [
-        new TileLayer({
-          source: new OSM(),
-        }),
-        layer,
-      ],
+      layers: [backgroundLayer, layer],
       view: new View({
         center: [0, 0],
         zoom: 2,
       }),
     });
 
+    backgroundLayerRef.current = backgroundLayer;
     mapRef.current = map;
 
     return () => {
       map.setTarget(undefined);
+      backgroundLayerRef.current = null;
       mapRef.current = null;
     };
   }, [vectorSource]);
+
+  useEffect(() => {
+    backgroundLayerRef.current?.setSource(
+      createBackgroundSource(backgroundTheme),
+    );
+  }, [backgroundTheme]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -173,8 +175,6 @@ export function MapField({
             ref={mapElementRef}
             style={{
               height: 320,
-              border: "1px solid var(--mantine-color-gray-4)",
-              borderRadius: "var(--mantine-radius-sm)",
               overflow: "hidden",
             }}
           />
@@ -240,6 +240,22 @@ export function MapField({
   );
 }
 
+function createBackgroundLayer(theme: "light" | "dark") {
+  return new TileLayer({
+    source: createBackgroundSource(theme),
+  });
+}
+
+function createBackgroundSource(theme: "light" | "dark") {
+  return theme === "dark"
+    ? new XYZ({
+        attributions: "© OpenStreetMap contributors © CARTO",
+        attributionsCollapsible: false,
+        url: "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+      })
+    : new OSM();
+}
+
 function syncSourceFromValue(
   value: string | number[],
   source: VectorSource,
@@ -291,9 +307,7 @@ function syncBBoxSourceFromValue(
 
   try {
     const feature = new Feature({
-      geometry: fromExtent(
-        transformExtent(value, "EPSG:4326", "EPSG:3857"),
-      ),
+      geometry: fromExtent(transformExtent(value, "EPSG:4326", "EPSG:3857")),
     });
     source.addFeature(feature);
     setErrorMessage(null);
@@ -320,12 +334,7 @@ function syncValueFromFeature(
       "EPSG:3857",
       "EPSG:4326",
     );
-    const bbox: BBox = [
-      extent[0],
-      extent[1],
-      extent[2],
-      extent[3],
-    ];
+    const bbox: BBox = [extent[0], extent[1], extent[2], extent[3]];
     setErrorMessage(null);
     onChange(bbox);
     return;
@@ -355,10 +364,7 @@ function hasArea([minLon, minLat, maxLon, maxLat]: BBox) {
   return minLon !== maxLon && minLat !== maxLat;
 }
 
-function createDrawInteraction(
-  drawMode: DrawMode,
-  source: VectorSource,
-) {
+function createDrawInteraction(drawMode: DrawMode, source: VectorSource) {
   const draw = new Draw(
     drawMode === "rectangle"
       ? {
