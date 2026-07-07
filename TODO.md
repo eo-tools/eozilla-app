@@ -138,3 +138,5 @@ In the dev console we still have:
 - [] date-time input and picker should behave differently
 - [] time picker should be a time input
 - [] nested objects should be visually distinguishable
+- [] handle default map settings with `x-ui` tags. e.g. `x-ui-bg_layer_url`, `x-ui-bg_layer_url_dark`, `x-ui-bg_layer_url_light`
+

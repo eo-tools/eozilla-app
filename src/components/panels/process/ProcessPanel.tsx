@@ -59,7 +59,7 @@ export default function ProcessPanel() {
       <Panel.Header
         title={"Process"}
         icon={<IconMathFunction {...styles.panel.header.icon} />}
-        id={processDescription?.id}
+        id={processDescription?.title}
       >
         <ProcessRequestActions
           processId={processId}
@@ -77,15 +77,15 @@ export default function ProcessPanel() {
             <Stack>
               <ProcessDescriptionView processDescription={processDescription} />
               <SubPanel values={openedSubPanels} setValues={setOpenedSubPanels}>
-                <ProcessInputsSubPanel
-                  processDescription={processDescription}
-                  processInputs={activeProcessInputs || {}}
-                  setProcessInput={setProcessRequestInput}
-                />
                 <ProcessOutputsSubPanel
                   processDescription={processDescription}
                   processOutputs={activeProcessOutputs || {}}
                   setProcessOutput={setProcessRequestOutput}
+                />
+                <ProcessInputsSubPanel
+                  processDescription={processDescription}
+                  processInputs={activeProcessInputs || {}}
+                  setProcessInput={setProcessRequestInput}
                 />
               </SubPanel>
             </Stack>
