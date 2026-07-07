@@ -77,15 +77,15 @@ export default function ProcessPanel() {
             <Stack>
               <ProcessDescriptionView processDescription={processDescription} />
               <SubPanel values={openedSubPanels} setValues={setOpenedSubPanels}>
-                <ProcessOutputsSubPanel
-                  processDescription={processDescription}
-                  processOutputs={activeProcessOutputs || {}}
-                  setProcessOutput={setProcessRequestOutput}
-                />
                 <ProcessInputsSubPanel
                   processDescription={processDescription}
                   processInputs={activeProcessInputs || {}}
                   setProcessInput={setProcessRequestInput}
+                />
+                <ProcessOutputsSubPanel
+                  processDescription={processDescription}
+                  processOutputs={activeProcessOutputs || {}}
+                  setProcessOutput={setProcessRequestOutput}
                 />
               </SubPanel>
             </Stack>
