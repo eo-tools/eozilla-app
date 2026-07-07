@@ -41,7 +41,7 @@ interface JobResultDialogData {
 function isJobResultDialogData(data: unknown): data is JobResultDialogData {
   return (
     isObject(data) &&
-    "outputName" in data &&
+    "id" in data &&
     isString(data.outputName) &&
     "jobResult" in data
   );
