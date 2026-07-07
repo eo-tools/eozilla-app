@@ -85,7 +85,17 @@ export default function ProcessRequestActions({
 
   return (
     <>
-      <Box component="span" {...containerProps}>
+      <Box
+        component="span"
+        {...containerProps}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          flex: 1,
+          minWidth: 0,
+        }}
+      >
         <ActionIcon.Group style={revealStyle}>
           <Tooltip label={"Import process request"}>
             <ActionIcon
@@ -109,18 +119,19 @@ export default function ProcessRequestActions({
               <IconDownload {...styles.icon.sm} />
             </ActionIcon>
           </Tooltip>
-          <Tooltip label={"Execute process"}>
-            <ActionIcon
-              {...styles.actionIcon.sm}
-              variant="filled"
-              onClick={onExecute}
-              loading={isSubmitting}
-              disabled={!canExecute}
-            >
-              <IconPlayerPlayFilled {...styles.icon.sm} />
-            </ActionIcon>
-          </Tooltip>
         </ActionIcon.Group>
+        <Tooltip label={"Execute process"}>
+          <ActionIcon
+            {...styles.actionIcon.sm}
+            variant="filled"
+            onClick={onExecute}
+            loading={isSubmitting}
+            disabled={!canExecute}
+            ml={4}
+          >
+            <IconPlayerPlayFilled {...styles.icon.sm} />
+          </ActionIcon>
+        </Tooltip>
       </Box>
       <input
         ref={requestFileInputRef}
