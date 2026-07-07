@@ -35,6 +35,7 @@ export interface XUi {
   minimum?: number;
   maximum?: number;
   step?: number;
+  separator?: string;
 }
 
 export interface FieldBase<S extends JsonSchema> extends XUi {

@@ -33,6 +33,13 @@ describe("createJsonValueForSchema", () => {
     expect(
       createJsonValueForSchema({
         type: "array",
+        items: { type: "string", default: "ABC" },
+      } as JsonSchema),
+    ).toEqual(["ABC"]);
+
+    expect(
+      createJsonValueForSchema({
+        type: "array",
         minItems: 2,
         items: { type: "string", default: "item" },
       } as JsonSchema),
