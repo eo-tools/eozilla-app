@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo } from "react";
 import useSWR from "swr";
 
 import {
-  type ProcessDescription,
   type ProcessInputs,
   type ProcessOutputs,
   getServiceProvider,
@@ -15,8 +14,6 @@ import { swrKeys } from "@/service/swr";
 import { getAppState, getAppStore } from "@/store/store";
 import type { AppState, DialogId } from "@/state/types";
 
-import { createJsonValueForSchema } from "@/utils/json";
-import { getSchemaFromProcessDescriptionInputs } from "@/utils/field";
 import {
   activateJob,
   activateProcess,
@@ -26,10 +23,17 @@ import {
 import { storage } from "@/state/storage";
 import { useRemoteStateClient, useRemoteStateValue } from "remotestate";
 import type { ProcessRequestsService } from "@/store/remotestate";
+import {
+  createInitialProcessInputs,
+  createInitialProcessOutputs,
+  ensureInitialProcessRequest,
+} from "@/store/processRequests";
 
 const selectServiceProviderId = (state: AppState) => state.serviceProviderId;
 const selectService = (state: AppState) => state.service;
 const selectProcessId = (state: AppState) => state.processId;
+const selectProcessInputEditorMode = (state: AppState) =>
+  state.processInputEditorMode;
 const selectProcessExecution = (state: AppState) => state.processExecution;
 const selectJobId = (state: AppState) => state.jobId;
 const selectConfirmation = (state: AppState) => state.confirmation;
@@ -89,6 +93,10 @@ export function useService() {
 
 export function useActiveProcessId() {
   return useAppState(selectProcessId);
+}
+
+export function useProcessInputEditorMode() {
+  return useAppState(selectProcessInputEditorMode);
 }
 
 export function useProcessRequests() {
@@ -163,7 +171,7 @@ export function useActiveProcessOutputs(): ProcessOutputs | null {
     if (processOutputs) {
       return processOutputs;
     }
-    return {};
+    return createInitialProcessOutputs(processDescription);
   }, [processRequests, processDescription]);
 }
 
@@ -204,6 +212,7 @@ export function useProcessExecution() {
 export function useActiveProcessDescription() {
   const setProcessRequest = useSetProcessRequest();
   const activeProcessId = useActiveProcessId();
+  const processRequests = useProcessRequests();
   const service = useService();
   const processesState = useSWR(
     swrKeys.processDescription(service, activeProcessId),
@@ -212,12 +221,17 @@ export function useActiveProcessDescription() {
   const processDescription = processesState.data;
   // Ensure we have initial input values
   useEffect(() => {
-    if (processDescription) {
+    if (processDescription && processRequests) {
       const processId = processDescription.id;
-      const processRequest = createInitialProcessRequest(processDescription);
-      setProcessRequest(processId, processRequest);
+      const processRequest = ensureInitialProcessRequest(
+        processRequests,
+        processDescription,
+      );
+      if (processRequest !== processRequests[processId]) {
+        setProcessRequest(processId, processRequest);
+      }
     }
-  }, [processDescription, setProcessRequest]);
+  }, [processDescription, processRequests, setProcessRequest]);
   return {
     ...processesState,
     processDescription,
@@ -259,7 +273,7 @@ export function useActiveJobInfo() {
     async () => await service!.getJob(activeJobId!),
     {
       // TODO: make configurable
-      refreshInterval: 500 /*ms*/,
+      refreshInterval: 1000 /*ms*/,
     },
   );
   const jobInfo = jobInfoState.data;
@@ -279,33 +293,4 @@ export function useActiveJobResults() {
 
 export function useDialogOpened(dialogId: DialogId) {
   return useAppState((state: AppState) => state.dialogId === dialogId);
-}
-
-// --- Helpers
-
-function createInitialProcessRequest(
-  processDescription: ProcessDescription,
-): ProcessRequest {
-  return {
-    inputs: createInitialProcessInputs(processDescription),
-    outputs: createInitialProcessOutputs(processDescription),
-  };
-}
-
-function createInitialProcessInputs(processDescription: ProcessDescription) {
-  const objectSchema =
-    getSchemaFromProcessDescriptionInputs(processDescription);
-  return createJsonValueForSchema(objectSchema) as ProcessInputs;
-}
-
-function createInitialProcessOutputs(processDescription: ProcessDescription) {
-  const processOutputs: ProcessOutputs = {};
-  Object.keys(processDescription.outputs || {}).forEach((outputName) => {
-    processOutputs[outputName] = {
-      transmissionMode: processDescription?.outputTransmission?.length
-        ? processDescription?.outputTransmission[0]
-        : undefined,
-    };
-  });
-  return processOutputs;
 }

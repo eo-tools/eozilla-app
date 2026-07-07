@@ -57,8 +57,8 @@ Useful entry points when exploring the code:
 ### Prerequisites
 
 - Node.js and npm
-- Optional: [Pixi](https://pixi.sh/) and a sibling checkout of
-  `../eozilla` if you want to run the local Dev Service backend
+- Optional: [Pixi](https://pixi.sh/) and a checkout of
+  `eozilla` if you want to run the local Eozilla Dev-Service backend
 
 ### Install Dependencies
 
@@ -74,42 +74,83 @@ npm run dev
 
 ### Run With The Local Dev Service
 
-The `dev-server` script expects the `eozilla` backend repository next to this
-project at `../eozilla`.
+The `eozilla:dev` script expects the `eozilla-app` repository to be checked out into the
+`eozilla` Python repository.
 
-1. Clone the backend repository next to this one.
-2. Install backend dependencies:
+First do
 
 ```bash
-cd ../eozilla
+git clone https://github.com/eo-tools/eozilla.git`
+cd eozilla
 pixi install
 ```
 
-3. Start the backend service from this repository:
+then
 
 ```bash
-npm run dev-server
+git clone https://github.com/eo-tools/eozilla.app.git`
+cd eozilla-app
+npm install
 ```
 
-4. In a second terminal, start the frontend:
+and finally
+
+```bash
+npm run eozilla:dev
+```
+
+and in a second terminal
 
 ```bash
 npm run dev
 ```
 
-5. In the app, select the `Dev Service` provider.
+In the app, select the `Dev Service` provider.
 
 ## Useful Scripts
 
 ```bash
-npm run dev         # Start the Vite dev server
-npm run dev-server  # Start the local wraptile-backed service
-npm run test        # Run the Vitest suite
-npm run typecheck   # TypeScript type check without emitting files
-npm run lint        # Run ESLint
-npm run format      # Format source files with Prettier
-npm run build       # Type-check and build production assets
-npm run preview     # Preview the production build locally
+npm run dev            # Start the Vite dev server
+npm run eozilla:dev    # Start the local wraptile API server for testing
+npm run build          # Type-check and build production assets
+npm run eozilla:build  # Type-check and build production assets into eozilla cuiman
+npm run test           # Run the Vitest suite
+npm run typecheck      # TypeScript type check without emitting files
+npm run lint           # Run ESLint
+npm run format         # Format source files with Prettier
+npm run preview        # Preview the production build locally
+```
+
+## Build Versioning
+
+The footer displays the package version plus a release-relative build number:
+
+```text
+v0.1.0-dev.0 build 12
+```
+
+The package version comes from `package.json`. The build number is resolved in
+this order:
+
+1. `VITE_BUILD_NUMBER`
+2. `BUILD_NUMBER`
+3. The number of commits since the latest reachable public release tag
+4. `0`
+
+Public release tags are expected to use the `vX.Y.Z` format, for example
+`v0.1.0`. Development or prerelease tags such as `v0.1.0-rc.1` are ignored for
+the reset point.
+
+To manually override the build number for local testing or deployment, set an
+environment variable before building:
+
+```powershell
+$env:VITE_BUILD_NUMBER="12"
+npm run build
+```
+
+```bash
+VITE_BUILD_NUMBER=12 npm run build
 ```
 
 ## Working On The Codebase

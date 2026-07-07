@@ -1,0 +1,122 @@
+{
+  "type": "object",
+  "title": "Discriminator",
+  "description": "Playground cases for oneOf branches that write a discriminator property when the active tab changes.",
+  "additionalProperties": false,
+  "properties": {
+    "discriminator_without_mapping": {
+      "title": "Discriminator: Schema Name Values",
+      "description": "Without an explicit mapping, the discriminator value is derived from the referenced schema name.",
+      "oneOf": [
+        {
+          "$ref": "#/components/schemas/Point"
+        },
+        {
+          "$ref": "#/components/schemas/LineString"
+        },
+        {
+          "$ref": "#/components/schemas/Polygon"
+        }
+      ],
+      "discriminator": {
+        "propertyName": "type"
+      }
+    },
+    "discriminator_with_mapping": {
+      "title": "Discriminator: Explicit Mapping",
+      "description": "With a mapping, the selected tab writes the mapped discriminator value.",
+      "oneOf": [
+        {
+          "$ref": "#/components/schemas/Point"
+        },
+        {
+          "$ref": "#/components/schemas/LineString"
+        },
+        {
+          "$ref": "#/components/schemas/Polygon"
+        }
+      ],
+      "discriminator": {
+        "propertyName": "type",
+        "mapping": {
+          "pt": "#/components/schemas/Point",
+          "ls": "#/components/schemas/LineString",
+          "pg": "#/components/schemas/Polygon"
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Coordinate": {
+        "type": "array",
+        "title": "Coordinate",
+        "items": {
+          "type": "number"
+        },
+        "minItems": 2,
+        "maxItems": 3
+      },
+      "Point": {
+        "type": "object",
+        "title": "Point",
+        "additionalProperties": false,
+        "required": ["type", "coordinates"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "coordinates": {
+            "$ref": "#/components/schemas/Coordinate"
+          }
+        }
+      },
+      "LineString": {
+        "type": "object",
+        "title": "LineString",
+        "additionalProperties": false,
+        "required": ["type", "coordinates"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "coordinates": {
+            "type": "array",
+            "title": "Coordinates",
+            "items": {
+              "$ref": "#/components/schemas/Coordinate"
+            },
+            "minItems": 2
+          }
+        }
+      },
+      "Polygon": {
+        "type": "object",
+        "title": "Polygon",
+        "additionalProperties": false,
+        "required": ["type", "coordinates"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "coordinates": {
+            "type": "array",
+            "title": "Rings",
+            "items": {
+              "type": "array",
+              "title": "Ring",
+              "items": {
+                "$ref": "#/components/schemas/Coordinate"
+              },
+              "minItems": 3
+            },
+            "minItems": 1
+          }
+        }
+      }
+    }
+  }
+}

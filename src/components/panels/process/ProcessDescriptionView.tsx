@@ -11,20 +11,28 @@ interface ProcessDescriptionViewProps {
 export default function ProcessDescriptionView({
   processDescription,
 }: ProcessDescriptionViewProps) {
-  const title = processDescription.title;
   const version = processDescription.version;
   const description = processDescription.description;
   return (
     <Stack>
-      <Flex justify={"space-between"} align={"center"}>
-        <Group>
-          {title && (
-            <Text fw={200} size="sm">
-              {title}
+      <Flex justify="space-between" align="center" gap="md">
+        <Typography
+          style={{
+            flex: 1,
+            fontSize: "var(--mantine-font-size-sm)",
+            color: "var(--mantine-color-dimmed)",
+          }}
+        >
+          {description ? (
+            <ReactMarkdown>{description}</ReactMarkdown>
+          ) : (
+            <Text {...styles.text.unavailable}>
+              No process description available.
             </Text>
           )}
-        </Group>
-        <Group>
+        </Typography>
+
+        <Group gap="xs" style={{ flexShrink: 0 }}>
           <Text fw={500} size="sm">
             Version:
           </Text>
@@ -39,21 +47,6 @@ export default function ProcessDescriptionView({
           )}
         </Group>
       </Flex>
-      <Typography
-        style={{
-          fontSize: "var(--mantine-font-size-sm)",
-          // frontWeight: "var(--mantine-font-weight-200)",
-          color: "var(--mantine-color-dimmed)",
-        }}
-      >
-        {description ? (
-          <ReactMarkdown>{description}</ReactMarkdown>
-        ) : (
-          <Text {...styles.text.unavailable}>
-            {"No process description available."}
-          </Text>
-        )}
-      </Typography>
     </Stack>
   );
 }

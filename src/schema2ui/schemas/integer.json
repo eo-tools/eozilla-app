@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "simple": {
+      "type": "integer"
+    },
+    "select": {
+      "type": "integer",
+      "enum": [10, 25, 50, 75, 100]
+    },
+    "radio_column": {
+      "type": "integer",
+      "enum": [10, 25, 50, 75, 100],
+      "x-ui-widget": "radio-column"
+    },
+    "radio_row": {
+      "type": "integer",
+      "enum": [10, 25, 50, 75, 100],
+      "x-ui-widget": "radio-row"
+    },
+    "slider": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "x-ui:widget": "slider"
+    },
+    "discrete_slider": {
+      "type": "integer",
+      "enum": [10, 25, 50, 75, 100],
+      "x-ui:widget": "slider"
+    }
+  }
+}

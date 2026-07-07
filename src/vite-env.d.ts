@@ -2,7 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_APP_VERSION: string;
-  readonly VITE_BUILD_APPENDIX: string;
+  readonly VITE_BUILD_NUMBER: string;
 }
 
 interface ImportMeta {

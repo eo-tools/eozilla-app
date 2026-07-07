@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ActionIcon, Stack, Tooltip } from "@mantine/core";
-import { IconMathFunction, IconPlayerPlayFilled } from "@tabler/icons-react";
+import { Stack } from "@mantine/core";
+import { IconMathFunction } from "@tabler/icons-react";
 
 import {
   useActiveProcessInputs,
@@ -9,6 +9,7 @@ import {
   useProcessExecution,
   useActiveProcessId,
   useActiveProcessRequestsActions,
+  useSetProcessRequest,
   useProcessRequests,
 } from "@/store/hooks";
 import type { ProcessDescription } from "@/service";
@@ -20,11 +21,13 @@ import styles from "@/components/common/styles";
 import { SubPanel } from "@/components/common/SubPanel";
 import ProcessInputsSubPanel from "@/components/panels/process/ProcessInputsSubPanel";
 import ProcessOutputsSubPanel from "@/components/panels/process/ProcessOutputsSubPanel";
+import ProcessRequestActions from "@/components/panels/process/ProcessRequestActions";
 
 export default function ProcessPanel() {
   const processesState = useActiveProcessDescription();
   const { processDescription } = processesState;
   const processRequests = useProcessRequests();
+  const setProcessRequest = useSetProcessRequest();
   const activeProcessInputs = useActiveProcessInputs();
   const activeProcessOutputs = useActiveProcessOutputs();
   const { setProcessRequestInput, setProcessRequestOutput } =
@@ -32,6 +35,8 @@ export default function ProcessPanel() {
   const processId = useActiveProcessId();
   const processExecution = useProcessExecution();
   const [openedSubPanels, setOpenedSubPanels] = useState(["inputs", "outputs"]);
+  const currentProcessRequest =
+    processId && processRequests ? processRequests[processId] : undefined;
   const isSubmitting = Boolean(
     processExecution &&
     processExecution.processId === processId &&
@@ -54,21 +59,17 @@ export default function ProcessPanel() {
       <Panel.Header
         title={"Process"}
         icon={<IconMathFunction {...styles.panel.header.icon} />}
-        id={processDescription?.id}
+        id={processDescription?.title}
       >
-        <ActionIcon.Group>
-          <Tooltip label={"Execute process"}>
-            <ActionIcon
-              {...styles.actionIcon.sm}
-              variant="filled"
-              onClick={handleExecuteProcess}
-              loading={isSubmitting}
-              disabled={!canExecute}
-            >
-              <IconPlayerPlayFilled {...styles.icon.sm} />
-            </ActionIcon>
-          </Tooltip>
-        </ActionIcon.Group>
+        <ProcessRequestActions
+          processId={processId}
+          processDescription={processDescription}
+          currentProcessRequest={currentProcessRequest}
+          isSubmitting={isSubmitting}
+          canExecute={canExecute}
+          onExecute={handleExecuteProcess}
+          setProcessRequest={setProcessRequest}
+        />
       </Panel.Header>
       <Panel.Section grow scroll>
         <ResourceView {...processesState} nullText="No process selected.">
@@ -76,15 +77,15 @@ export default function ProcessPanel() {
             <Stack>
               <ProcessDescriptionView processDescription={processDescription} />
               <SubPanel values={openedSubPanels} setValues={setOpenedSubPanels}>
-                <ProcessInputsSubPanel
-                  processDescription={processDescription}
-                  processInputs={activeProcessInputs || {}}
-                  setProcessInput={setProcessRequestInput}
-                />
                 <ProcessOutputsSubPanel
                   processDescription={processDescription}
                   processOutputs={activeProcessOutputs || {}}
                   setProcessOutput={setProcessRequestOutput}
+                />
+                <ProcessInputsSubPanel
+                  processDescription={processDescription}
+                  processInputs={activeProcessInputs || {}}
+                  setProcessInput={setProcessRequestInput}
                 />
               </SubPanel>
             </Stack>

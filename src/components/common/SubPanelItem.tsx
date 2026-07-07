@@ -25,8 +25,12 @@ export function SubPanelItem({
         <Accordion.Control>{titleText}</Accordion.Control>
       ) : (
         <Flex align={"center"} gap={"xs"}>
-          <Accordion.Control style={{ flex: 1 }}>{titleText}</Accordion.Control>
-          <Flex align={"center"}>{actions}</Flex>
+          <Accordion.Control style={{ flex: 1, minWidth: 0 }}>
+            {titleText}
+          </Accordion.Control>
+          <Flex align={"center"} style={{ flexShrink: 0 }}>
+            {actions}
+          </Flex>
         </Flex>
       )}
       <Accordion.Panel keepMounted={keepMounted}>{children}</Accordion.Panel>

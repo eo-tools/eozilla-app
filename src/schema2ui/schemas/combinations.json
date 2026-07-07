@@ -1,0 +1,128 @@
+{
+  "type": "object",
+  "title": "Schema Composition",
+  "description": "Playground cases for oneOf, anyOf, and allOf rendering.",
+  "additionalProperties": false,
+  "properties": {
+    "one_of_data_source": {
+      "title": "oneOf: Data Source",
+      "description": "Exactly one source shape is selected. The UI matches the Python schema2ui behavior and renders one active tab.",
+      "oneOf": [
+        {
+          "type": "object",
+          "title": "S3 Object",
+          "additionalProperties": false,
+          "required": ["bucket", "object"],
+          "properties": {
+            "bucket": {
+              "type": "string",
+              "default": "eox-data"
+            },
+            "object": {
+              "type": "string",
+              "default": "products/S2A.tif"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "title": "File Upload",
+          "additionalProperties": false,
+          "required": ["local_path"],
+          "properties": {
+            "local_path": {
+              "type": "string",
+              "title": "File",
+              "x-ui:widget": "fileupload"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "title": "Inline JSON",
+          "additionalProperties": false,
+          "required": ["json_value"],
+          "properties": {
+            "json_value": {
+              "type": "string",
+              "title": "JSON Value",
+              "default": "{\"name\":\"demo\"}",
+              "x-ui:widget": "textarea"
+            }
+          }
+        }
+      ]
+    },
+    "any_of_data_source": {
+      "title": "anyOf: Data Source",
+      "description": "At least one source shape is valid. Like the Python schema2ui app, the UI still renders this as a single active branch selector.",
+      "anyOf": [
+        {
+          "type": "object",
+          "title": "S3 Object",
+          "additionalProperties": false,
+          "properties": {
+            "bucket": {
+              "type": "string",
+              "default": "eox-data"
+            },
+            "object": {
+              "type": "string",
+              "default": "products/S2B.tif"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "title": "Inline Text",
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "type": "string",
+              "default": "manual input",
+              "x-ui:widget": "textarea"
+            }
+          }
+        }
+      ]
+    },
+    "all_of_request": {
+      "title": "allOf: Merged Request",
+      "description": "All parts are merged into a single object form.",
+      "allOf": [
+        {
+          "type": "object",
+          "title": "Product",
+          "additionalProperties": false,
+          "required": ["product_id"],
+          "properties": {
+            "product_id": {
+              "type": "string",
+              "title": "Product ID",
+              "default": "S2A_20260703"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "title": "Processing",
+          "additionalProperties": false,
+          "required": ["resolution"],
+          "properties": {
+            "resolution": {
+              "type": "integer",
+              "title": "Resolution",
+              "default": 10,
+              "enum": [10, 20, 60]
+            },
+            "clip_to_aoi": {
+              "type": "boolean",
+              "title": "Clip to AOI",
+              "default": true
+            }
+          }
+        }
+      ]
+    }
+  }
+}

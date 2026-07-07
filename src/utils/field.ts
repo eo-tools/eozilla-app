@@ -9,18 +9,36 @@ import {
   type JsonSchema,
   type StringSchema,
   type UntypedSchema,
+  isAllOfSchema,
+  isAnyOfSchema,
   isArraySchema,
+  isOneOfSchema,
   isObjectSchema,
 } from "@/utils/json";
 import { isObject } from "@/utils/common";
 import type { InputDescription, ProcessDescription } from "@/service";
 
+export interface FieldGroup {
+  type: "row" | "column";
+  items?: (FieldGroup | string)[];
+  name?: string;
+  title?: string;
+}
+
+export type FieldLayout = "row" | "column" | FieldGroup;
+
 export interface XUi {
   widget?: string;
-  layout?: "row" | "column";
+  layout?: FieldLayout;
   order?: number;
   advanced?: boolean;
   hidden?: boolean;
+  placeholder?: string;
+  password?: boolean;
+  minimum?: number;
+  maximum?: number;
+  step?: number;
+  separator?: string;
 }
 
 export interface FieldBase<S extends JsonSchema> extends XUi {
@@ -44,7 +62,7 @@ export interface ObjectField extends FieldBase<ObjectSchema> {
 }
 
 export interface OneOfField extends FieldBase<OneOfSchema> {
-  anyOf: Field[];
+  oneOf: Field[];
 }
 
 export interface AnyOfField extends FieldBase<AnyOfSchema> {
@@ -52,7 +70,7 @@ export interface AnyOfField extends FieldBase<AnyOfSchema> {
 }
 
 export interface AllOfField extends FieldBase<AllOfSchema> {
-  anyOf: Field[];
+  allOf: Field[];
 }
 
 export type Field =
@@ -89,8 +107,7 @@ export function getVisibleInputFields(
       const bHasOrder = Number.isFinite(b.field.order);
       if (aHasOrder && bHasOrder) {
         return (
-          (a.field.order as number) -
-            (b.field.order as number) ||
+          (a.field.order as number) - (b.field.order as number) ||
           a.index - b.index
         );
       }
@@ -111,11 +128,16 @@ export function getFieldFromSchema(name: string, schema: JsonSchema): Field {
     "x-ui" in schemaObject && isObject(schemaObject["x-ui"])
       ? { ...schemaObject["x-ui"] }
       : {};
-  Object.keys(schemaObject).forEach((name) => {
-    if (name.startsWith("x-ui-")) {
-      xUi[name.substring(5)] = schemaObject[name];
-    } else if (name.startsWith("x-")) {
-      xUi[name.substring(2)] = schemaObject[name];
+  Object.keys(schemaObject).forEach((key) => {
+    if (key === "x-ui") {
+      return;
+    }
+    if (key.startsWith("x-ui-") || key.startsWith("x-ui:")) {
+      xUi[key.substring(5)] = schemaObject[key];
+    } else if (key.startsWith("ui-") || key.startsWith("ui:")) {
+      xUi[key.substring(3)] = schemaObject[key];
+    } else if (key.startsWith("x-")) {
+      xUi[key.substring(2)] = schemaObject[key];
     }
   });
 
@@ -151,6 +173,27 @@ export function getFieldFromSchema(name: string, schema: JsonSchema): Field {
       properties: properties_,
       additionalProperties: additionalProperties_,
     } as ObjectField;
+  } else if (isOneOfSchema(schema)) {
+    return {
+      ...fieldBase,
+      oneOf: schema.oneOf.map((option, index) =>
+        getFieldFromSchema(`${name}Option${index}`, option),
+      ),
+    } as OneOfField;
+  } else if (isAnyOfSchema(schema)) {
+    return {
+      ...fieldBase,
+      anyOf: schema.anyOf.map((option, index) =>
+        getFieldFromSchema(`${name}Option${index}`, option),
+      ),
+    } as AnyOfField;
+  } else if (isAllOfSchema(schema)) {
+    return {
+      ...fieldBase,
+      allOf: schema.allOf.map((part, index) =>
+        getFieldFromSchema(`${name}Part${index}`, part),
+      ),
+    } as AllOfField;
   }
   return fieldBase as Field;
 }

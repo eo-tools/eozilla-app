@@ -1,11 +1,18 @@
 import {
+  isAllOfSchema,
+  isAnyOfSchema,
   isArraySchema,
   isBooleanSchema,
   isNumericSchema,
   isObjectSchema,
+  isOneOfSchema,
   isStringSchema,
   type JsonSchema,
 } from "./schema";
+import {
+  mergeAllOfSchemas,
+  withCompositionDiscriminatorValue,
+} from "./composition";
 import type { JsonValue } from "./value";
 
 export function createJsonValueForSchema(schema: JsonSchema): JsonValue {
@@ -20,10 +27,7 @@ export function createJsonValueForSchema(schema: JsonSchema): JsonValue {
   } else if (isStringSchema(schema)) {
     return "";
   } else if (isArraySchema(schema)) {
-    const items = schema.items || {};
-    const n = schema.minItems || 0;
-    const value: JsonValue[] = Array.from({ length: n });
-    return value.map(() => createJsonValueForSchema(items)) as JsonValue;
+    return createArrayValueForSchema(schema);
   } else if (isObjectSchema(schema)) {
     const properties = schema.properties || {};
     const value: Record<string, JsonValue> = {};
@@ -31,9 +35,46 @@ export function createJsonValueForSchema(schema: JsonSchema): JsonValue {
       value[key] = createJsonValueForSchema(properties[key]!);
     });
     return value as JsonValue;
+  } else if (isOneOfSchema(schema)) {
+    return createSelectiveValue(schema.oneOf[0], schema.discriminator, 0);
+  } else if (isAnyOfSchema(schema)) {
+    return createSelectiveValue(schema.anyOf[0], schema.discriminator, 0);
+  } else if (isAllOfSchema(schema)) {
+    return createJsonValueForSchema(mergeAllOfSchemas(schema.allOf));
   } else if (schema.nullable) {
-    // TODO: consider oneOf, anyOf, allOf
     return null;
   }
   return 0;
+}
+
+function createArrayValueForSchema(schema: Extract<JsonSchema, { type: "array" }>) {
+  const items = schema.items || {};
+  const itemDefault =
+    typeof items.default !== "undefined"
+      ? createJsonValueForSchema(items)
+      : undefined;
+  const n = schema.minItems || 0;
+
+  if (n === 0) {
+    return itemDefault !== undefined ? [itemDefault] : [];
+  }
+
+  return Array.from({ length: n }, () => createJsonValueForSchema(items));
+}
+
+function createSelectiveValue(
+  option: JsonSchema | undefined,
+  discriminator: JsonSchema["discriminator"] | undefined,
+  optionIndex: number,
+): JsonValue {
+  if (!option) {
+    return 0;
+  }
+
+  return withCompositionDiscriminatorValue(
+    createJsonValueForSchema(option),
+    option,
+    discriminator,
+    optionIndex,
+  );
 }
