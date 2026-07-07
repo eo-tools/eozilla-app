@@ -71,7 +71,9 @@ function isMapArrayField(field: Parameters<FieldFactory["getScore"]>[0]) {
   );
 }
 
-function getArrayFieldMode(field: Parameters<FieldFactory["getScore"]>[0]): ArrayFieldMode {
+function getArrayFieldMode(
+  field: Parameters<FieldFactory["getScore"]>[0],
+): ArrayFieldMode {
   if (shouldRenderArrayInput(field)) {
     return "input";
   }
@@ -79,29 +81,18 @@ function getArrayFieldMode(field: Parameters<FieldFactory["getScore"]>[0]): Arra
   throw new Error(`Unsupported array field '${field.name}'.`);
 }
 
-function shouldRenderArrayInput(field: Parameters<FieldFactory["getScore"]>[0]) {
-  if (!isArrayField(field)) {
-    return false;
-  }
-
-  if (field.widget === "editor") {
-    return false;
-  }
-
-  if (!isPrimitiveField(field.items)) {
-    return false;
-  }
-
-  if (field.items.schema.enum) {
-    return false;
-  }
-
-  return true;
-}
-
-function getArraySeparator(
+function shouldRenderArrayInput(
   field: Parameters<FieldFactory["getScore"]>[0],
 ) {
+  return (
+    isArrayField(field) &&
+    field.widget !== "editor" &&
+    isPrimitiveField(field.items) &&
+    !field.items.schema.enum
+  );
+}
+
+function getArraySeparator(field: Parameters<FieldFactory["getScore"]>[0]) {
   return field.separator ?? defaultSeparator;
 }
 

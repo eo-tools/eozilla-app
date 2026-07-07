@@ -41,6 +41,7 @@
     },
     "string_array_with_custom_separator": {
       "type": "array",
+      "description": "Use semicolon as separator",
       "x-ui-separator": ";",
       "items": {
         "type": "string"
