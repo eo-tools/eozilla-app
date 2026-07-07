@@ -1,7 +1,12 @@
 {
   "type": "object",
+  "title": "Discriminator",
+  "description": "Playground cases for oneOf branches that write a discriminator property when the active tab changes.",
+  "additionalProperties": false,
   "properties": {
     "discriminator_without_mapping": {
+      "title": "Discriminator: Schema Name Values",
+      "description": "Without an explicit mapping, the discriminator value is derived from the referenced schema name.",
       "oneOf": [
         {
           "$ref": "#/components/schemas/Point"
@@ -18,6 +23,8 @@
       }
     },
     "discriminator_with_mapping": {
+      "title": "Discriminator: Explicit Mapping",
+      "description": "With a mapping, the selected tab writes the mapped discriminator value.",
       "oneOf": [
         {
           "$ref": "#/components/schemas/Point"
@@ -42,60 +49,73 @@
   "components": {
     "schemas": {
       "Coordinate": {
+        "type": "array",
+        "title": "Coordinate",
         "items": {
           "type": "number"
         },
-        "maxItems": 3,
         "minItems": 2,
-        "type": "array"
+        "maxItems": 3
+      },
+      "Point": {
+        "type": "object",
+        "title": "Point",
+        "additionalProperties": false,
+        "required": ["type", "coordinates"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "coordinates": {
+            "$ref": "#/components/schemas/Coordinate"
+          }
+        }
       },
       "LineString": {
+        "type": "object",
+        "title": "LineString",
+        "additionalProperties": false,
+        "required": ["type", "coordinates"],
         "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
           "coordinates": {
+            "type": "array",
+            "title": "Coordinates",
             "items": {
               "$ref": "#/components/schemas/Coordinate"
             },
-            "minItems": 2,
-            "type": "array"
-          },
-          "type": {
-            "type": "string"
+            "minItems": 2
           }
-        },
-        "required": ["type", "coordinates"],
-        "type": "object"
-      },
-      "Point": {
-        "properties": {
-          "coordinates": {
-            "$ref": "#/components/schemas/Coordinate"
-          },
-          "type": {
-            "type": "string"
-          }
-        },
-        "required": ["type", "coordinates"],
-        "type": "object"
+        }
       },
       "Polygon": {
+        "type": "object",
+        "title": "Polygon",
+        "additionalProperties": false,
+        "required": ["type", "coordinates"],
         "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
           "coordinates": {
+            "type": "array",
+            "title": "Rings",
             "items": {
+              "type": "array",
+              "title": "Ring",
               "items": {
                 "$ref": "#/components/schemas/Coordinate"
               },
-              "minItems": 3,
-              "type": "array"
+              "minItems": 3
             },
-            "minItems": 1,
-            "type": "array"
-          },
-          "type": {
-            "type": "string"
+            "minItems": 1
           }
-        },
-        "required": ["type", "coordinates"],
-        "type": "object"
+        }
       }
     }
   }

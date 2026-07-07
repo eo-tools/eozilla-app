@@ -1,6 +1,7 @@
 import { FieldFactoryRegistry } from "../generator";
 import { arrayFieldFactory } from "./array";
 import { booleanFieldFactory } from "./boolean";
+import { compositionFieldFactory } from "./composition";
 import { integerFieldFactory } from "./integer";
 import { jsonFallbackFieldFactory } from "./jsonFallback";
 import { nullableFieldFactory } from "./nullable";
@@ -17,6 +18,7 @@ export function createDefaultFieldFactoryRegistry(): FieldFactoryRegistry {
     stringFieldFactory,
     arrayFieldFactory,
     objectFieldFactory,
+    compositionFieldFactory,
     jsonFallbackFieldFactory,
   ]);
 }

@@ -1,56 +1,93 @@
 {
   "type": "object",
   "properties": {
-    "property_1": {
-      "type": "string"
-    },
-    "property_2": {
-      "type": "string"
-    },
-    "property_3": {
-      "type": "boolean"
-    },
-    "property_4": {
-      "type": "boolean"
-    },
-    "property_5": {
-      "type": "boolean"
-    },
-    "property_6": {
-      "type": "boolean"
-    },
-    "property_7": {
-      "type": "string"
-    },
-    "property_8": {
-      "type": "string"
-    }
-  },
-  "x-ui:layout": {
-    "type": "row",
-    "items": [
-      {
-        "type": "column",
+    "layout_1": {
+      "type": "object",
+      "properties": {
+        "property_1": {
+          "type": "string"
+        },
+        "property_2": {
+          "type": "string"
+        },
+        "property_3": {
+          "type": "boolean"
+        },
+        "property_4": {
+          "type": "boolean"
+        },
+        "property_5": {
+          "type": "boolean"
+        },
+        "property_6": {
+          "type": "boolean"
+        },
+        "property_7": {
+          "type": "string"
+        },
+        "property_8": {
+          "type": "string"
+        }
+      },
+      "x-ui:layout": {
+        "type": "row",
         "items": [
-          "property_1",
-          "property_2",
           {
-            "type": "row",
-            "items": ["property_3", "property_4"]
+            "type": "column",
+            "items": [
+              "property_1",
+              "property_2",
+              {
+                "type": "row",
+                "items": ["property_3", "property_4"]
+              }
+            ]
+          },
+          {
+            "type": "column",
+            "items": [
+              {
+                "type": "row",
+                "items": ["property_5", "property_6"]
+              },
+              "property_7",
+              "property_8"
+            ]
           }
         ]
-      },
-      {
-        "type": "column",
-        "items": [
-          {
-            "type": "row",
-            "items": ["property_5", "property_6"]
-          },
-          "property_7",
-          "property_8"
-        ]
       }
-    ]
+    },
+    "layout_2": {
+      "type": "object",
+      "properties": {
+        "m0": {
+          "x-ui-layout": "row",
+          "type": "object",
+          "properties": {
+            "m00": { "type": "number" },
+            "m01": { "type": "number" },
+            "m02": { "type": "number" }
+          }
+        },
+        "m1": {
+          "x-ui-layout": "row",
+          "type": "object",
+          "properties": {
+            "m10": { "type": "number" },
+            "m11": { "type": "number" },
+            "m12": { "type": "number" }
+          }
+        },
+        "m2": {
+          "x-ui-layout": "row",
+          "type": "object",
+          "properties": {
+            "m20": { "type": "number" },
+            "m21": { "type": "number" },
+            "m22": { "type": "number" }
+          }
+        }
+      }
+    }
   }
 }

@@ -112,10 +112,10 @@ In the dev console we still have:
 - [x] bbox/map editor for WKT strings
 - [x] bbox/map editor for 4-tuples of floats
 ### Schema composition:
-- [] oneOf
-- [] anyOf
-- [] allOf
-- [] discriminator support
+- [x] oneOf
+- [x] anyOf
+- [x] allOf
+- [x] discriminator support
 - [] $ref resolution in TypeScript metadata.
 - [] prefixItems / tuple conversion.
 - [] File/bytes inputs and dropper support.

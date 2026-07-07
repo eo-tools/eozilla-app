@@ -23,7 +23,12 @@ import { IconMoon, IconRefresh, IconSun } from "@tabler/icons-react";
 
 import { JsonCode } from "@/components/common/JsonCode";
 import { SchemaForm } from "@/components/schema-form";
-import { getFieldFromSchema } from "@/utils/field";
+import {
+  getFieldFromSchema,
+  getVisibleInputFields,
+  type Field,
+  type ObjectField,
+} from "@/utils/field";
 import { createJsonValueForSchema, type JsonValue } from "@/utils/json";
 
 import { schemaFixtures } from "./schemaFixtures";
@@ -186,18 +191,71 @@ function Schema2UiPlayground() {
                   live controlled form
                 </Text>
               </Group>
-              <SchemaForm
-                field={field}
-                value={value}
-                onChange={setValue}
-                hideAdvanced={hideAdvanced}
-              />
+              {renderSchemaCases(field, value, setValue, hideAdvanced)}
             </Stack>
           </Paper>
         </SimpleGrid>
       </AppShell.Main>
     </AppShell>
   );
+}
+
+function renderSchemaCases(
+  field: Field,
+  value: JsonValue,
+  setValue: (value: JsonValue) => void,
+  hideAdvanced: boolean,
+) {
+  if (!isRootObjectField(field)) {
+    return (
+      <SchemaForm
+        field={field}
+        value={value}
+        onChange={setValue}
+        hideAdvanced={hideAdvanced}
+      />
+    );
+  }
+
+  const objectValue = isJsonObjectValue(value) ? value : {};
+  const propertyFields = getVisibleInputFields(field, { hideAdvanced });
+  if (propertyFields.length === 0) {
+    return null;
+  }
+
+  return (
+    <Stack gap="lg">
+      {propertyFields.map((propertyField, index) => (
+        <Stack key={propertyField.name} gap="sm">
+          <Divider
+            label={`Case ${index + 1}`}
+            labelPosition="left"
+          />
+          <SchemaForm
+            field={propertyField}
+            value={objectValue[propertyField.name]}
+            onChange={(propertyValue) => {
+              setValue({
+                ...objectValue,
+                [propertyField.name]: propertyValue,
+              });
+            }}
+            hideAdvanced={hideAdvanced}
+          />
+        </Stack>
+      ))}
+    </Stack>
+  );
+}
+
+function isRootObjectField(field: Field): field is ObjectField {
+  return field.schema.type === "object" && "properties" in field;
+}
+
+function isJsonObjectValue(
+  value: JsonValue,
+): value is Record<string, JsonValue> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export default Schema2UiPlayground;
