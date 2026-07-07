@@ -1,16 +1,22 @@
 import { FieldFactoryRegistry } from "../generator";
+import { arrayFieldFactory } from "./array";
+import { booleanFieldFactory } from "./boolean";
+import { integerFieldFactory } from "./integer";
 import { jsonFallbackFieldFactory } from "./jsonFallback";
-import { mapFieldFactory } from "./map";
 import { nullableFieldFactory } from "./nullable";
+import { numberFieldFactory } from "./number";
 import { objectFieldFactory } from "./object";
-import { primitiveFieldFactory } from "./primitive";
+import { stringFieldFactory } from "./string";
 
 export function createDefaultFieldFactoryRegistry(): FieldFactoryRegistry {
   return new FieldFactoryRegistry([
     nullableFieldFactory,
-    mapFieldFactory,
+    booleanFieldFactory,
+    integerFieldFactory,
+    numberFieldFactory,
+    stringFieldFactory,
+    arrayFieldFactory,
     objectFieldFactory,
-    primitiveFieldFactory,
     jsonFallbackFieldFactory,
   ]);
 }

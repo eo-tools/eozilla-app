@@ -103,11 +103,12 @@ In the dev console we still have:
 
 # Generator TODOs
 ### Array support
-- [] array text input
-- [] array editor
-- [] add/remove/reorder UI
-- [] separator handling
-- [] date/date-time ranges
+- [x] array text input
+- [x] array editor
+- [x] add/remove/reorder UI
+- [x] separator handling
+- [x] custom separator disables comma fallback
+- [ ] date/date-time array 
 - [x] bbox/map editor for WKT strings
 - [x] bbox/map editor for 4-tuples of floats
 ### Schema composition:
@@ -131,7 +132,7 @@ In the dev console we still have:
   - per customization through x-ui and format
 - [] grouped schema selection panel, e.g., a tree view, or nested menu
 - [] panels should scroll individually
-- [] color-mode switch for the playground
+- [x] color-mode switch for the playground
 - [] array values should not auto-format while typing
   - provide a small format action on the right side of the label
 - [] date-time input and picker should behave differently

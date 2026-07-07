@@ -16,12 +16,35 @@
         "enum": ["yellow", "green", "blue", "red"]
       }
     },
-    "datetime_array": {
+    "date_array": {
       "type": "array",
+      "x-ui-widget": "editor",
       "items": {
         "type": "string",
-        "format": "datetime",
-        "x-ui-widget": "input"
+        "format": "date"
+      }
+    },
+    "datetime_array": {
+      "type": "array",
+      "x-ui-widget": "editor",
+      "items": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "object_array": {
+      "type": "array",
+      "x-ui-widget": "editor",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        }
       }
     },
     "uri_array": {
