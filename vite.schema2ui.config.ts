@@ -37,6 +37,11 @@ function schema2UiIndexPlugin(): Plugin {
 
 export default defineConfig({
   plugins: [react(), schema2UiIndexPlugin()],
+  build: {
+    // Keep any schema2ui production build separate from the main app output.
+    outDir: "dist/schema2ui",
+    emptyOutDir: true,
+  },
   resolve: {
     dedupe: ["react", "react-dom"],
     alias: {
