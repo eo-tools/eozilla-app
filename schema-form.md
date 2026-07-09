@@ -6,28 +6,28 @@ who need to continue the work without rediscovering the design.
 
 ## Goal
 
-The schema-form generator turns OpenAPI/JSON schema-derived input field metadata
-into a controlled React form that uses Mantine components. It is inspired by the
-Python implementation in `gavicore/src/gavicore/ui`, but it is not a 1:1 port.
+The schema-form generator turns OpenAPI/JSON-schema-derived process input
+metadata into a controlled React form built from Mantine components.
 
-The React version keeps the best reusable ideas from the Python design:
+The design keeps a few core ideas from the older Python `schema2ui` work:
 
-- normalized field metadata
+- normalized `Field` metadata extracted from schemas
 - a scored field factory registry
 - a render context that can recursively render child fields
-- a universal JSON fallback for unsupported schemas
+- a JSON fallback for unsupported or partially supported shapes
 
-It deliberately does not port the Python `ViewModel` tree. React state is
-modeled with controlled `value` / `onChange` props.
+The React version does not mirror the Python view-model tree. State is modeled
+as controlled `value` / `onChange` props plus small local draft state where
+needed for editing text before it becomes valid JSON or array input.
 
 ## User-Facing Integration
 
 The process inputs panel supports two editor modes:
 
-- `Form`: generated Mantine input controls
+- `Form`: generated controls from `SchemaForm`
 - `JSON`: the existing raw JSON input table
 
-The mode is app-global, not process-local:
+This mode is app-global, not process-local:
 
 - state type: `ProcessInputEditorMode`
 - app state property: `processInputEditorMode`
@@ -44,32 +44,38 @@ Relevant files:
 - `src/components/panels/process/GeneratedProcessInputsView.tsx`
 - `src/components/panels/process/ProcessInputsView.tsx`
 
-Important: `ProcessInputsView.tsx` is the legacy/raw JSON editor and should stay
-as a valid alternative display. Do not remove it while developing the generated
-form.
+`ProcessInputsView.tsx` must remain a valid fallback path. The generated form is
+an additional UI, not a replacement for raw JSON editing.
 
 ## Main Package Layout
 
-The reusable generator lives in:
-
 ```text
 src/components/schema-form/
-  SchemaForm.tsx
+  ArrayField.tsx
   FieldShell.tsx
   JsonFallbackField.tsx
+  MapField.tsx
+  SchemaForm.tsx
+  SelectiveCompositionField.tsx
   fieldUtils.ts
   generator.ts
+  selectiveCompositionUtils.ts
   types.ts
-  index.ts
   factories/
+    array.tsx
+    boolean.tsx
+    composition.tsx
     defaultRegistry.ts
+    enum.tsx
+    integer.tsx
     jsonFallback.tsx
     nullable.tsx
+    number.tsx
     object.tsx
-    primitive.tsx
+    string.tsx
 ```
 
-Supporting schema/field metadata helpers live in:
+Supporting schema and value helpers live in:
 
 ```text
 src/utils/field.ts
@@ -90,132 +96,67 @@ The public component is `SchemaForm`:
 />
 ```
 
-The generator uses a registry of `FieldFactory` objects:
+`SchemaForm` memoizes a `DefaultSchemaFormGenerator`, which asks the registry for
+the highest-scoring `FieldFactory` and renders through that factory.
 
-```ts
-export interface FieldFactory {
-  getScore: (field: Field) => number;
-  render: (ctx: FieldRenderContext) => ReactElement;
-}
+```mermaid
+flowchart TD
+  A[SchemaForm] --> B[DefaultSchemaFormGenerator]
+  B --> C[FieldFactoryRegistry.lookup]
+  C --> D[Best scoring FieldFactory]
+  D --> E[render ctx]
+  E --> F{Needs child fields?}
+  F -- yes --> B
+  F -- no --> G[Mantine or custom field]
 ```
 
-The registry chooses the factory with the highest positive score. This mirrors
-the Python `FieldFactoryRegistry.lookup()` design.
+### Type-Level Model
 
-The render context contains:
+```mermaid
+classDiagram
+  class SchemaFormGenerator {
+    +renderField(field, value, onChange, options) ReactElement
+  }
 
-```ts
-export interface FieldRenderContext {
-  field: Field;
-  path: string[];
-  value: JsonValue | undefined;
-  onChange: (value: JsonValue) => void;
-  generator: SchemaFormGenerator;
-  hideLabel?: boolean;
-  hideAdvanced?: boolean;
-}
+  class FieldFactoryRegistry {
+    -factories: FieldFactory[]
+    +lookup(field) FieldFactory
+  }
+
+  class FieldFactory {
+    +getScore(field) number
+    +render(ctx) ReactElement
+  }
+
+  class FieldRenderContext {
+    +field: Field
+    +path: string[]
+    +value: JsonValue | undefined
+    +onChange(value)
+    +hideLabel?: boolean
+    +hideAdvanced?: boolean
+  }
+
+  SchemaFormGenerator --> FieldFactoryRegistry
+  FieldFactoryRegistry --> FieldFactory
+  FieldFactory --> FieldRenderContext
 ```
-
-Factories render controlled React elements. A child field is rendered by calling
-`ctx.generator.renderField(...)`.
-
-## Current Factory Behavior
-
-The default registry is defined in `factories/defaultRegistry.ts`, in this
-priority order:
-
-1. nullable
-2. map
-3. object
-4. primitive
-5. JSON fallback
-
-### Primitive Factory
-
-File: `src/components/schema-form/factories/primitive.tsx`
-
-Supported mappings:
-
-- `type: boolean`
-  - default: Mantine `Checkbox`
-  - `x-ui:widget: switch`: Mantine `Switch`
-- `type: integer` / `type: number`
-  - default: Mantine `NumberInput`
-  - `x-ui:widget: slider` with finite min/max: Mantine `Slider`
-- `enum`: Mantine `Select`
-  - `enum` with `x-ui:widget: radio`, `radio-column`: Mantine `Radio.Group` in a vertical stack
-  - `enum` with `x-ui:widget: radio-row`: Mantine `Radio.Group` in a horizontal row
-  - `enum` with `x-ui:widget: button`: Mantine `SegmentedControl`
-- `type: string`
-  - default: Mantine `TextInput`
-  - `x-ui:widget: textarea`: Mantine `Textarea`
-  - `format: password` or `x-ui:password`: Mantine `PasswordInput`
-- `enum`: Mantine `Select`
-  - `enum` with `x-ui:widget: radio`, `radio-column`: Mantine `Radio.Group` in a vertical stack
-  - `enum` with `x-ui:widget: radio-row`: Mantine `Radio.Group` in a horizontal row
-  - `enum` with `x-ui:widget: button`: Mantine `SegmentedControl`
-  - `format: date`: Mantine Dates `DatePickerInput`
-  - `format: time`: Mantine Dates `TimeInput`
-  - `format: date-time`: Mantine Dates `DateTimePicker`
-
-Date/time value behavior:
-
-- date emits `YYYY-MM-DD`
-- time emits `HH:mm:ss`
-- date-time emits `YYYY-MM-DDTHH:mm:ss`
-
-The app imports `@mantine/dates/styles.css` in `src/main.tsx`.
-
-### Object Factory
-
-File: `src/components/schema-form/factories/object.tsx`
-
-Objects render nested generated forms for visible properties.
-
-It respects:
-
-- `hidden`
-- `advanced`
-- `hideAdvanced`
-- `order`
-- `layout`
-
-Unstructured object schemas, or objects with `x-ui:widget: editor`, are left to
-the JSON fallback.
-
-Layout can be:
-
-- `"column"`
-- `"row"`
-- a group object with `{ type, items }`
-
-The object factory is the first place to inspect if root-level process input
-layout is not behaving as expected.
-
-### Nullable Factory
-
-File: `src/components/schema-form/factories/nullable.tsx`
-
-Nullable fields render a Mantine `Switch`. When enabled, the factory renders a
-non-nullable copy of the same field below the switch. When disabled, the value is
-`null`.
-
-### JSON Fallback Factory
-
-File: `src/components/schema-form/factories/jsonFallback.tsx`
-
-This factory always returns score `1`, so it catches anything that no more
-specific factory handles. It uses `JsonFallbackField`, which wraps Mantine
-`JsonInput` and validates values with `validateJsonValue()`.
-
-This fallback is essential. Keep it available while adding new specialized
-fields.
 
 ## Field Metadata
 
-The generator uses `Field` metadata from `src/utils/field.ts`.
+The generator does not work directly on raw schemas. It first builds a `Field`
+tree in `src/utils/field.ts`.
 
-The current metadata extraction supports:
+Supported field variants:
+
+- primitive fields
+- arrays
+- objects
+- `oneOf`
+- `anyOf`
+- `allOf`
+
+UI metadata is collected from these schema conventions:
 
 - grouped `x-ui`
 - `x-ui-*`
@@ -223,6 +164,20 @@ The current metadata extraction supports:
 - `ui-*`
 - `ui:*`
 - generic `x-*` fallback
+
+Recognized UI hints currently include:
+
+- `widget`
+- `layout`
+- `order`
+- `advanced`
+- `hidden`
+- `placeholder`
+- `password`
+- `minimum`
+- `maximum`
+- `step`
+- `separator`
 
 Examples:
 
@@ -246,63 +201,406 @@ Examples:
 }
 ```
 
-The current `Field` type is not a full clone of Python `FieldMeta`, but it is
-where UI metadata should be added when the generator needs more schema hints.
+## Value Initialization Rules
+
+`createJsonValueForSchema()` defines the initial controlled value when a field
+does not yet have one.
+
+Current priority:
+
+1. explicit schema `default`
+2. first `enum` value
+3. primitive defaults: `false`, `0`, `""`
+4. arrays based on `minItems` and item defaults
+5. objects with all declared properties initialized
+6. `oneOf` / `anyOf`: first option, with discriminator injected if needed
+7. `allOf`: merged schema value
+8. nullable fallback: `null`
+9. untyped fallback: `0`
+
+Important behavior:
+
+- object defaults are eager: every declared property gets an initial value
+- arrays with `minItems: 0` still start with one item when the item schema has a
+  default
+- discriminator values are written automatically for the active selective
+  composition option
+
+## Factory Registry
+
+The default registry order is:
+
+1. `nullableFieldFactory`
+2. `booleanFieldFactory`
+3. `integerFieldFactory`
+4. `numberFieldFactory`
+5. `stringFieldFactory`
+6. `arrayFieldFactory`
+7. `objectFieldFactory`
+8. `compositionFieldFactory`
+9. `jsonFallbackFieldFactory`
+
+This order matters because the registry picks the highest positive score.
+
+Current score strategy:
+
+- nullable: `100`
+- string-backed map fields and bbox map arrays: `20`
+- standard typed handlers: `10`
+- untyped composition: `5`
+- JSON fallback: catch-all lowest positive score
+
+## Current Factory Behavior
+
+### Nullable Factory
+
+File: `src/components/schema-form/factories/nullable.tsx`
+
+Nullable fields render as:
+
+- a wrapper `FieldShell`
+- a `Switch` that toggles `null` vs non-null
+- a collapsed inner child field when enabled
+
+When enabled, the inner value is re-created from the non-nullable schema with
+`createJsonValueForSchema()`.
+
+### Boolean Factory
+
+File: `src/components/schema-form/factories/boolean.tsx`
+
+Supported mappings:
+
+- default: Mantine `Checkbox`
+- `widget: switch`: Mantine `Switch`
+
+### Integer And Number Factories
+
+Files:
+
+- `src/components/schema-form/factories/integer.tsx`
+- `src/components/schema-form/factories/number.tsx`
+
+Supported mappings:
+
+- default: Mantine `NumberInput`
+- `widget: slider` with finite min/max and `min < max`: Mantine `Slider`
+- enums: delegated to shared enum rendering
+
+Notes:
+
+- integer values are normalized with `Math.round()`
+- min/max/step can come from either the schema or UI metadata overrides
+
+### Enum Rendering
+
+File: `src/components/schema-form/factories/enum.tsx`
+
+Enum rendering is shared by string and numeric factories.
+
+Supported mappings:
+
+- default: Mantine `Select`
+- `widget: radio` or `radio-column`: vertical `Radio.Group`
+- `widget: radio-row`: horizontal `Radio.Group`
+- `widget: button`: `SegmentedControl`
+
+Enum values are serialized through `JSON.stringify()` so non-string enum values
+can round-trip through UI controls.
+
+### String Factory
+
+File: `src/components/schema-form/factories/string.tsx`
+
+Supported mappings:
+
+- default: Mantine `TextInput`
+- `widget: textarea`: Mantine `Textarea`
+- `format: password` or `password: true`: Mantine `PasswordInput`
+- string enums: shared enum rendering
+- `format: date`: Mantine `DatePickerInput`
+- `format: time`: Mantine `TimeInput`
+- `format: date-time`: Mantine `DateTimePicker`
+- `widget: map`: custom `MapField` for WKT polygon editing
+
+Date/time behavior:
+
+- date values are stored as `YYYY-MM-DD`
+- time values are stored as `HH:mm:ss`
+- date-time values are stored as `YYYY-MM-DDTHH:mm:ss`
+- invalid incoming date/time strings are shown as empty UI values
+- date and date-time pickers are clearable only when the schema is nullable
+
+The app imports `@mantine/dates/styles.css` in `src/main.tsx` and in the
+standalone `schema2ui` entry point.
+
+### Array Factory
+
+Files:
+
+- `src/components/schema-form/factories/array.tsx`
+- `src/components/schema-form/ArrayField.tsx`
+
+Arrays now have real support. This is one of the biggest gaps in the old doc.
+
+Supported modes:
+
+- separator-based text input for primitive non-enum item arrays
+- explicit array editor for `widget: editor`
+- bbox map editor for 4-number arrays with `widget: map`
+
+Input mode behavior:
+
+- default separator: `", "`
+- custom separators supported via `separator`
+- primitive item parsing supports `string`, `number`, `integer`, `boolean`
+- parse errors stay local as warning state until the text becomes valid
+
+Editor mode behavior:
+
+- renders one child field per item
+- supports add, remove, move up, move down
+- respects `minItems` and `maxItems`
+- new items are created via `createJsonValueForSchema(items)`
+
+Important limitations:
+
+- primitive arrays with `enum` items do not use the simple input mode
+- object arrays require `widget: editor`
+- date/date-time arrays are currently plain separator-based text input, not
+  specialized pickers
+
+### Object Factory
+
+File: `src/components/schema-form/factories/object.tsx`
+
+Objects render nested generated forms for visible properties.
+
+It respects:
+
+- `hidden`
+- `advanced`
+- `hideAdvanced`
+- `order`
+- `layout`
+
+Layout can be:
+
+- `"column"`
+- `"row"`
+- nested layout groups of `{ type, items }`
+
+Object rendering notes:
+
+- root labels are hidden automatically for root objects without a schema title
+- visible fields are ordered by explicit `order` first, then original property
+  order
+- advanced fields can animate in via `input-row-appear`
+
+Fallback behavior:
+
+- `widget: editor` objects go to JSON fallback
+- objects with no declared properties only render as structured forms when
+  `additionalProperties === false`
+- loose or schema-less objects therefore stay in the JSON fallback path
+
+### Composition Factory
+
+Files:
+
+- `src/components/schema-form/factories/composition.tsx`
+- `src/components/schema-form/SelectiveCompositionField.tsx`
+- `src/components/schema-form/selectiveCompositionUtils.ts`
+
+Composition support now exists for:
+
+- `oneOf`
+- `anyOf`
+- `allOf`
+
+Behavior:
+
+- only untyped composition fields score here; typed schemas should stay with
+  their stronger type-specific factory
+- `oneOf` and `anyOf` with multiple options render as Mantine `Tabs`
+- the active option is inferred from discriminator values first, then schema
+  validation
+- each option keeps its own draft value in local component state
+- switching options writes discriminator values when the schema defines one
+- single-option compositions collapse directly to the child renderer
+- empty compositions fall back to JSON
+
+`allOf` behavior:
+
+- multiple `allOf` parts are merged before rendering
+- current merge logic is intentionally shallow and only combines:
+  - first defined `type`
+  - object `properties`
+
+This is important: `allOf` is supported, but not as a full JSON Schema merger.
+
+### Map Support
+
+File: `src/components/schema-form/MapField.tsx`
+
+Map editing is now a first-class specialized field.
+
+Supported variants:
+
+- string `widget: map`: WKT polygon editor
+- 4-number array `widget: map`: bbox editor
+
+Current WKT behavior:
+
+- uses OpenLayers
+- supports drawing a rectangle or free polygon
+- only accepts one `POLYGON` geometry
+- stores values as WKT in `EPSG:4326`
+- delete clears to `""`
+
+Current bbox behavior:
+
+- value shape: `[minLon, minLat, maxLon, maxLat]`
+- editing happens through a rectangle draw interaction
+- zero-area bbox hides geometry and control affordances
+- delete resets to `[0, 0, 0, 0]`
+
+The component also switches its basemap for Mantine light/dark color scheme.
+
+### JSON Fallback
+
+Files:
+
+- `src/components/schema-form/factories/jsonFallback.tsx`
+- `src/components/schema-form/JsonFallbackField.tsx`
+
+This remains the safety net for unsupported shapes.
+
+Behavior:
+
+- renders Mantine `JsonInput`
+- pretty-prints current value
+- validates both JSON syntax and schema compatibility
+- keeps local text draft state so invalid intermediate edits do not break the
+  controlled outer value
+
+Keep this path intact when extending the generator.
 
 ## Process Input Integration
 
-`GeneratedProcessInputsView.tsx` renders one generated root object form for all
-process inputs:
+Process descriptions are converted into one root object field by
+`getFieldFromProcessDescriptionInputs()`.
 
-```tsx
-<SchemaForm
-  field={inputsField}
-  value={processInputs}
-  onChange={handleChange}
-  hideLabel
-  hideAdvanced={hideAdvanced}
-/>
+The conversion rules from process input metadata are worth documenting because
+they affect generated UI shape:
+
+- `minOccurs === 1` marks the input as required
+- `maxOccurs >= 1` turns the input into an array with `minItems`/`maxItems`
+- `maxOccurs === "unbounded"` also becomes an array
+- root process inputs always become `type: object` with
+  `additionalProperties: false`
+
+`GeneratedProcessInputsView.tsx` renders one root form and then diffs the
+top-level object back into the existing request store via `setProcessInput()`.
+
+```mermaid
+sequenceDiagram
+  participant P as ProcessDescription
+  participant F as getFieldFromProcessDescriptionInputs
+  participant S as SchemaForm
+  participant G as GeneratedProcessInputsView
+  participant Z as Zustand store
+
+  P->>F: inputs
+  F->>S: root ObjectField
+  S->>G: onChange(nextInputs)
+  G->>G: compare top-level values
+  G->>Z: setProcessInput(name, value)
 ```
 
-When the generated root object changes, it compares changed top-level input
-values and calls:
+Important consequence:
 
-```ts
-setProcessInput(name, nextValue);
-```
-
-This keeps the generated form compatible with the existing process request
-storage/update path.
+- updates are applied per top-level input name
+- equality is checked through `JSON.stringify()`
+- non-object root updates are ignored
 
 ## schema2ui Playground
 
-The developer-facing playground lives in `src/schema2ui/` and is started with:
+The developer playground lives in `src/schema2ui/` and starts with:
 
 ```bash
 npm run schema2ui
 ```
 
-It is intentionally separate from the main app and is meant for manual work on
-schema-driven components.
+It is intentionally separate from the main app and is the primary place for
+manual UI-generation work.
 
-The current workflow is modeled after the old Python `schema2ui` tool:
+Current features:
 
-- fixtures live in `src/schema2ui/schemas/`
-- each file represents one structure or schema case
-- the playground shows a sidebar of fixtures
-- selecting a fixture resets and renders one generated UI at a time
-- the live JSON value is shown alongside the generated UI
+- fixture sidebar with one schema case per file
+- persisted selected fixture in `localStorage`
+- hide-advanced toggle
+- reset current generated value
+- light/dark theme toggle
+- live controlled value preview
+- raw schema preview
+- local `$ref` resolution from `components.schemas`
 
-Fixture files are JSON-only in this repo. Where possible, their names mirror the
-older `gavicore/tests/ui/schemas` corpus (for example `string`, `number`,
-`object-layout`, `nullable-required`). React-specific experiments can live beside
-them as additional fixtures, such as `map-wkt`.
+Current fixture corpus:
+
+- `any`
+- `array-bbox`
+- `array-datetime`
+- `array-editor`
+- `array-input`
+- `boolean`
+- `combinations`
+- `discriminator`
+- `integer`
+- `map-wkt`
+- `nullable-only`
+- `nullable-required`
+- `number`
+- `object-additional-props`
+- `object-layout`
+- `object-nested`
+- `string`
+
+For root object fixtures, the playground intentionally renders each visible
+property as a separate case so maintainers can inspect multiple variations from
+one file side by side.
+
+## Test Coverage Worth Knowing
+
+The generator now has direct tests for the areas that were previously only
+planned work:
+
+- registry dispatch
+- field metadata extraction
+- value creation rules
+- array modes
+- map controls
+- object fallback behavior
+- composition rendering and discriminator writes
+- schema fixture `$ref` resolution
+
+Useful test files:
+
+- `src/components/schema-form/generator.test.ts`
+- `src/components/schema-form/MapField.test.tsx`
+- `src/components/schema-form/factories/array.test.tsx`
+- `src/components/schema-form/factories/composition.test.tsx`
+- `src/components/schema-form/factories/object.test.ts`
+- `src/components/schema-form/factories/string.test.tsx`
+- `src/utils/field.test.ts`
+- `src/utils/json/createJsonValueForSchema.test.ts`
+- `src/schema2ui/schemaFixtures.test.ts`
 
 ## How To Add A New Specialized Field
 
 Add a new factory under `src/components/schema-form/factories/`.
 
-Example shape:
+Example:
 
 ```tsx
 import type { FieldFactory } from "../types";
@@ -317,51 +615,26 @@ export const bboxFieldFactory: FieldFactory = {
 };
 ```
 
-Then register it before broader factories in `defaultRegistry.ts`:
+Then register it in `defaultRegistry.ts` ahead of broader handlers when it is a
+more specific match.
 
-```ts
-return new FieldFactoryRegistry([
-  nullableFieldFactory,
-  mapFieldFactory,
-  objectFieldFactory,
-  primitiveFieldFactory,
-  jsonFallbackFieldFactory,
-]);
-```
+Guidelines:
 
-Use a score higher than the default primitive/object score (`10`) if the factory
-is a more specific handler for an otherwise supported schema. Use `100` for
-strong semantic matches such as a future `BBoxEditor`.
-
-The same approach now applies to the map field: a specialized factory can
-match a widget hint such as `x-ui-widget: map` for a supported schema type,
-then render a controlled React map component while still using the schema
-field's existing title and description. The current implementation uses that
-general bucket for string-backed map fields and handles polygon WKT values first.
-
-## Likely Next Extensions
-
-Good next tasks:
-
-- Add an array editor factory.
-- Add specialized date/date-time range array handling.
-- Add a BBox editor factory for numeric 4-tuples with `format: bbox` or
-  `x-ui:widget: map`.
-- Extend the current WKT map field beyond single `POLYGON` support if needed.
-- Add `oneOf` / `anyOf` support with Mantine `Tabs` or `SegmentedControl`.
-- Add `allOf` merging support, likely in field metadata utilities.
-- Improve enum rendering with radio groups or segmented controls based on
-  `x-ui:widget`.
-- Add browser/component tests for generated form interactions.
+- beat the generic typed score if you are specializing an existing supported
+  type
+- keep the component controlled
+- preserve JSON fallback for unsupported cases
+- add a `schema2ui` fixture for the new behavior
+- add focused tests for factory scoring and rendering
 
 ## Notes And Caveats
 
-- The generator is controlled. Do not introduce hidden local state for committed
-  field values unless it is only a draft state like `JsonFallbackField`.
-- Keep `JsonFallbackField` as the safe default while expanding support.
-- Avoid making unsupported schemas fail visibly; prefer fallback JSON editing.
-- Keep `ProcessInputsView.tsx` as the raw JSON alternative.
+- The generator is controlled. Do not hide committed field state inside child
+  components unless it is transient draft state.
+- `JsonFallbackField` and array text input intentionally keep local draft state
+  so invalid intermediate text does not destroy the outer value.
+- `allOf` support is shallow, not a complete schema merge engine.
+- Unstructured objects still rely on JSON fallback by design.
+- WKT map support is currently limited to one polygon.
+- Bbox map support assumes `[minLon, minLat, maxLon, maxLat]` in `EPSG:4326`.
 - `processInputEditorMode` is app-global by design.
-- Date/time inputs currently preserve empty string defaults unless the schema has
-  an explicit default. This avoids silently changing initial process request
-  payloads.
