@@ -29,11 +29,11 @@ function isEmptyDraftValue(value: DraftValue): boolean {
 }
 
 function getInitialDraftValue(schema: ServiceOptionSchema): DraftValue {
-  if (schema.nullable) {
-    return null;
-  }
   if (schema.default !== undefined) {
     return schema.default;
+  }
+  if (schema.nullable) {
+    return null;
   }
   if (schema.type === "boolean") {
     return false;
@@ -63,16 +63,17 @@ function normalizeDraft(
   Object.entries(provider.optionsSchema ?? {}).forEach(([key, schema]) => {
     const value = draft[key];
 
-    if (schema.type === "boolean") {
-      if (value === null || value === undefined) {
-        if (schema.default !== undefined) {
-          options[key] = schema.default;
-          return;
-        }
-        if (schema.nullable) {
-          return;
-        }
+    if (value === null || value === undefined) {
+      if (schema.default !== undefined) {
+        options[key] = schema.default;
+        return;
       }
+      if (schema.nullable) {
+        return;
+      }
+    }
+
+    if (schema.type === "boolean") {
       options[key] = Boolean(value);
       return;
     }
@@ -126,15 +127,10 @@ function getOptionsField(
     return null;
   }
 
-  const required = Object.entries(properties)
-    .filter(([, schema]) => !schema.nullable && schema.default === undefined)
-    .map(([key]) => key);
-
   return getFieldFromSchema("root", {
     type: "object",
     properties: properties as Record<string, JsonSchema>,
     additionalProperties: false,
-    required,
   }) as ObjectField;
 }
 
