@@ -1,10 +1,6 @@
-import { Collapse, Stack, Switch } from "@mantine/core";
-
+import { Collapse, Input, Stack, Switch } from "@mantine/core";
 import { createJsonValueForSchema } from "@/utils/json";
-import { FieldShell } from "../FieldShell";
-import {
-  getNonNullableField,
-} from "../fieldUtils";
+import { getFieldLabel, getNonNullableField } from "../fieldUtils";
 import type { FieldFactory } from "../types";
 
 export const nullableFieldFactory: FieldFactory = {
@@ -18,29 +14,34 @@ export const nullableFieldFactory: FieldFactory = {
       ctx.value === null || ctx.value === undefined
         ? createJsonValueForSchema(innerField.schema)
         : ctx.value;
+    const handleToggle = (checked: boolean) => {
+      ctx.onChange(
+        checked ? createJsonValueForSchema(innerField.schema) : null,
+      );
+    };
 
     return (
-      <FieldShell field={ctx.field} hideLabel={ctx.hideLabel}>
-        <Stack gap={4}>
-          <Switch
-            checked={enabled}
-            onChange={(event) => {
-              ctx.onChange(
-                event.currentTarget.checked
-                  ? createJsonValueForSchema(innerField.schema)
-                  : null,
-              );
-            }}
-          />
-          <Collapse expanded={enabled}>
-            {ctx.generator.renderField(innerField, innerValue, ctx.onChange, {
-              hideLabel: true,
-              hideAdvanced: ctx.hideAdvanced,
-              path: ctx.path,
-            })}
-          </Collapse>
-        </Stack>
-      </FieldShell>
+      <Stack gap={4}>
+        <Switch
+          label={
+            ctx.hideLabel ? undefined : (
+              <Input.Label component="span">
+                {getFieldLabel(ctx.field)}
+              </Input.Label>
+            )
+          }
+          size="xs"
+          checked={enabled}
+          onChange={(event) => handleToggle(event.currentTarget.checked)}
+        />
+        <Collapse expanded={enabled}>
+          {ctx.generator.renderField(innerField, innerValue, ctx.onChange, {
+            hideLabel: true,
+            hideAdvanced: ctx.hideAdvanced,
+            path: ctx.path,
+          })}
+        </Collapse>
+      </Stack>
     );
   },
 };
