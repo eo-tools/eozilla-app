@@ -16,7 +16,7 @@ import {
 import { parseAppBootstrapConfig } from "@/config/bootstrap";
 import { CustomServiceProvider } from "@/service/providers/custom";
 import { DevServiceProvider } from "@/service/providers/dev";
-import { TestServiceProvider } from "@/service/providers/test";
+import { TestingServiceProvider } from "@/service/providers/testing";
 import { storage } from "@/state/storage";
 import { initAppStore } from "@/store/store";
 import App from "@/components/App";
@@ -32,7 +32,7 @@ initAppStore(() => {
   const providers: ServiceProvider<ServiceOptions>[] = [
     new CustomServiceProvider(),
     new DevServiceProvider(),
-    new TestServiceProvider(),
+    new TestingServiceProvider(),
   ];
 
   const serviceProvider = bootstrapConfig.service;

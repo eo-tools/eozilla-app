@@ -1,7 +1,7 @@
 import type { Service } from "./service";
 
 export interface ServiceProviderMeta {
-  type: "test" | "dev" | "custom" | "system";
+  type: "testing" | "dev" | "custom" | "system";
   title: string;
   description?: string;
   disabled?: boolean;

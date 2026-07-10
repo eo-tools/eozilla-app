@@ -20,7 +20,7 @@ export function ServiceProviderList({
             <Button
               key={id}
               leftSection={
-                meta.type === "test" ? (
+                meta.type === "testing" ? (
                   <IconFlask2 stroke={1} />
                 ) : meta.type === "dev" ? (
                   <IconCloudOff stroke={1} />
