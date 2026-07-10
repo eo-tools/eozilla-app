@@ -34,6 +34,11 @@ interface MapFieldProps {
 }
 
 type DrawMode = "polygon" | "rectangle";
+type DrawSketchState = {
+  sketchFeature_: unknown;
+  sketchPoint_: unknown;
+  updateSketchFeatures_: () => void;
+};
 
 const wktFormat = new WKT();
 
@@ -69,6 +74,7 @@ export function MapField({
   const [drawMode, setDrawMode] = useState<DrawMode>("rectangle");
   const colorScheme = useComputedColorScheme();
   const backgroundTheme = colorScheme === "dark" ? "dark" : "light";
+  const initialBackgroundThemeRef = useRef<"dark" | "light">(backgroundTheme);
   const hasGeometry = hasMapValue(valueType, value);
   const handleDelete = () => {
     setErrorMessage(null);
@@ -89,7 +95,9 @@ export function MapField({
       source: source3857,
       style: polygonStyle,
     });
-    const backgroundLayer = createBackgroundLayer(backgroundTheme);
+    const backgroundLayer = createBackgroundLayer(
+      initialBackgroundThemeRef.current,
+    );
     const map = new Map({
       target: mapElementRef.current,
       layers: [backgroundLayer, layer],
@@ -153,7 +161,13 @@ export function MapField({
     });
     map.addInteraction(draw);
 
+    const cleanupHoverPointerHandlers = setupHoverPointerHandlers(
+      draw,
+      map,
+    );
+
     return () => {
+      cleanupHoverPointerHandlers();
       map.removeInteraction(draw);
     };
   }, [drawMode, onChange, valueType, vectorSource]);
@@ -383,4 +397,50 @@ function createDrawInteraction(drawMode: DrawMode, source: VectorSource) {
   });
 
   return draw;
+}
+
+function setupHoverPointerHandlers(draw: Draw, map: Map) {
+  // OpenLayers keeps this pointer in the draw sketch overlay, not DOM cursor state.
+  const hoverPointerSource = draw.getOverlay().getSource();
+  const drawSketchState = getDrawSketchState(draw);
+  const targetElement = map.getTargetElement();
+
+  const handlePointerLeave = () => {
+    if (!hoverPointerSource || isDrawInProgress(drawSketchState)) {
+      return;
+    }
+
+    // Otherwise the idle hover pointer stays visible outside the map.
+    hoverPointerSource.clear(true);
+  };
+
+  const handlePointerEnter = () => {
+    if (!hasHoverPointer(drawSketchState)) {
+      return;
+    }
+
+    // Otherwise it stays hidden until OpenLayers updates the sketch again.
+    drawSketchState.updateSketchFeatures_();
+  };
+
+  targetElement.addEventListener("mouseleave", handlePointerLeave);
+  targetElement.addEventListener("mouseenter", handlePointerEnter);
+
+  return () => {
+    targetElement.removeEventListener("mouseleave", handlePointerLeave);
+    targetElement.removeEventListener("mouseenter", handlePointerEnter);
+    hoverPointerSource?.clear(true);
+  };
+}
+
+function isDrawInProgress(draw: DrawSketchState) {
+  return Boolean(draw.sketchFeature_);
+}
+
+function hasHoverPointer(draw: DrawSketchState) {
+  return !isDrawInProgress(draw) && Boolean(draw.sketchPoint_);
+}
+
+function getDrawSketchState(draw: Draw) {
+  return draw as unknown as DrawSketchState;
 }
