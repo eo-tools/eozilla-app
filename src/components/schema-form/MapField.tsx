@@ -34,6 +34,11 @@ interface MapFieldProps {
 }
 
 type DrawMode = "polygon" | "rectangle";
+type DrawSketchState = {
+  sketchFeature_: unknown;
+  sketchPoint_: unknown;
+  updateSketchFeatures_: () => void;
+};
 
 const wktFormat = new WKT();
 
@@ -153,7 +158,13 @@ export function MapField({
     });
     map.addInteraction(draw);
 
+    const cleanupHoverPointerHandlers = setupHoverPointerHandlers(
+      draw,
+      map,
+    );
+
     return () => {
+      cleanupHoverPointerHandlers();
       map.removeInteraction(draw);
     };
   }, [drawMode, onChange, valueType, vectorSource]);
@@ -383,4 +394,47 @@ function createDrawInteraction(drawMode: DrawMode, source: VectorSource) {
   });
 
   return draw;
+}
+
+function setupHoverPointerHandlers(draw: Draw, map: Map) {
+  const hoverPointerSource = draw.getOverlay().getSource();
+  const drawSketchState = getDrawSketchState(draw);
+  const targetElement = map.getTargetElement();
+
+  const handlePointerLeave = () => {
+    if (!hoverPointerSource || isDrawInProgress(drawSketchState)) {
+      return;
+    }
+
+    hoverPointerSource.clear(true);
+  };
+
+  const handlePointerEnter = () => {
+    if (!hasHoverPointer(drawSketchState)) {
+      return;
+    }
+
+    drawSketchState.updateSketchFeatures_();
+  };
+
+  targetElement.addEventListener("mouseleave", handlePointerLeave);
+  targetElement.addEventListener("mouseenter", handlePointerEnter);
+
+  return () => {
+    targetElement.removeEventListener("mouseleave", handlePointerLeave);
+    targetElement.removeEventListener("mouseenter", handlePointerEnter);
+    hoverPointerSource?.clear(true);
+  };
+}
+
+function isDrawInProgress(draw: DrawSketchState) {
+  return Boolean(draw.sketchFeature_);
+}
+
+function hasHoverPointer(draw: DrawSketchState) {
+  return !isDrawInProgress(draw) && Boolean(draw.sketchPoint_);
+}
+
+function getDrawSketchState(draw: Draw) {
+  return draw as unknown as DrawSketchState;
 }
