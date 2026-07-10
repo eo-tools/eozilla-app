@@ -400,6 +400,7 @@ function createDrawInteraction(drawMode: DrawMode, source: VectorSource) {
 }
 
 function setupHoverPointerHandlers(draw: Draw, map: Map) {
+  // OpenLayers keeps this pointer in the draw sketch overlay, not DOM cursor state.
   const hoverPointerSource = draw.getOverlay().getSource();
   const drawSketchState = getDrawSketchState(draw);
   const targetElement = map.getTargetElement();
@@ -409,6 +410,7 @@ function setupHoverPointerHandlers(draw: Draw, map: Map) {
       return;
     }
 
+    // Otherwise the idle hover pointer stays visible outside the map.
     hoverPointerSource.clear(true);
   };
 
@@ -417,6 +419,7 @@ function setupHoverPointerHandlers(draw: Draw, map: Map) {
       return;
     }
 
+    // Otherwise it stays hidden until OpenLayers updates the sketch again.
     drawSketchState.updateSketchFeatures_();
   };
 
