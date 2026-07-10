@@ -74,6 +74,7 @@ export function MapField({
   const [drawMode, setDrawMode] = useState<DrawMode>("rectangle");
   const colorScheme = useComputedColorScheme();
   const backgroundTheme = colorScheme === "dark" ? "dark" : "light";
+  const initialBackgroundThemeRef = useRef<"dark" | "light">(backgroundTheme);
   const hasGeometry = hasMapValue(valueType, value);
   const handleDelete = () => {
     setErrorMessage(null);
@@ -94,7 +95,9 @@ export function MapField({
       source: source3857,
       style: polygonStyle,
     });
-    const backgroundLayer = createBackgroundLayer(backgroundTheme);
+    const backgroundLayer = createBackgroundLayer(
+      initialBackgroundThemeRef.current,
+    );
     const map = new Map({
       target: mapElementRef.current,
       layers: [backgroundLayer, layer],
