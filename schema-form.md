@@ -336,8 +336,6 @@ Files:
 - `src/components/schema-form/factories/array.tsx`
 - `src/components/schema-form/ArrayField.tsx`
 
-Arrays now have real support. This is one of the biggest gaps in the old doc.
-
 Supported modes:
 
 - separator-based text input for primitive non-enum item arrays
