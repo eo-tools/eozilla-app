@@ -23,7 +23,7 @@ function createJsonResponse<T>(
 }
 
 describe("UrlService", () => {
-  const root: ServiceMetadata = {
+  const meta: ServiceMetadata = {
     title: "API",
     description: "Test API",
   };
@@ -41,12 +41,12 @@ describe("UrlService", () => {
     vi.restoreAllMocks();
   });
 
-  it("loads root metadata from the API root", async () => {
-    fetchMock.mockResolvedValueOnce(createJsonResponse(root));
+  it("loads metadata from the API root", async () => {
+    fetchMock.mockResolvedValueOnce(createJsonResponse(meta));
 
     await expect(
       loadServiceRootMetadata("https://example.com/api/"),
-    ).resolves.toEqual(root);
+    ).resolves.toEqual(meta);
     expect(fetchMock).toHaveBeenCalledWith("https://example.com/api/", {
       method: undefined,
       headers: undefined,
@@ -54,14 +54,14 @@ describe("UrlService", () => {
     });
   });
 
-  it("loads root metadata with default headers", async () => {
-    fetchMock.mockResolvedValueOnce(createJsonResponse(root));
+  it("loads metadata with default headers", async () => {
+    fetchMock.mockResolvedValueOnce(createJsonResponse(meta));
 
     await expect(
       loadServiceRootMetadata("https://example.com/api/", {
         "X-Auth-Token": "secret",
       }),
-    ).resolves.toEqual(root);
+    ).resolves.toEqual(meta);
 
     expect(fetchMock).toHaveBeenCalledWith("https://example.com/api/", {
       method: undefined,
@@ -75,7 +75,7 @@ describe("UrlService", () => {
       "custom",
       "https://example.com/api/",
       user,
-      root,
+      meta,
     );
 
     const processes: ProcessList = { processes: [], links: [] };
@@ -144,7 +144,7 @@ describe("UrlService", () => {
       "custom",
       "https://example.com/api/",
       user,
-      root,
+      meta,
       { Authorization: "Bearer secret" },
     );
 

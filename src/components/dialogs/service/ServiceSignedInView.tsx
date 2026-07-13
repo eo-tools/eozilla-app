@@ -24,10 +24,10 @@ export function ServiceSignedInView({
             <Text size="sm" fw={700} tt="uppercase" c="dimmed">
               Server
             </Text>
-            <Title order={4}>{service.root.title || service.providerId}</Title>
-            {service.root.description ? (
+            <Title order={4}>{service.meta.title || service.providerId}</Title>
+            {service.meta.description ? (
               <Text size="sm" c="dimmed">
-                {service.root.description}
+                {service.meta.description}
               </Text>
             ) : (
               <Text size="sm" c="dimmed">
@@ -39,7 +39,7 @@ export function ServiceSignedInView({
               <Text size="sm" fw={600}>
                 Capabilities
               </Text>
-              {renderCapabilities(service.root.capabilities)}
+              {renderCapabilities(service.meta.capabilities)}
             </Stack>
           </Stack>
         </Paper>

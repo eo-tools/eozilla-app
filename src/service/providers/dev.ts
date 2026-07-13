@@ -25,7 +25,7 @@ export class DevServiceProvider implements ServiceProvider {
   createService(_options: NoServiceOptions): Promise<UrlService> {
     const apiUrl = `http://localhost:8008`;
     return loadServiceRootMetadata(apiUrl).then(
-      (root) =>
+      (meta) =>
         new UrlService(
           "dev",
           apiUrl,
@@ -33,7 +33,7 @@ export class DevServiceProvider implements ServiceProvider {
             id: "unknown",
             displayName: "anonymous User",
           },
-          root,
+          meta,
         ),
     );
   }

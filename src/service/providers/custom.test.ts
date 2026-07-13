@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const root = {
+const meta = {
   title: "Root",
   description: "Custom server",
 };
@@ -10,7 +10,7 @@ vi.mock("@/service/services/url", async (importOriginal) => {
     await importOriginal<typeof import("@/service/services/url")>();
   return {
     ...actual,
-    loadServiceRootMetadata: vi.fn(async () => root),
+    loadServiceRootMetadata: vi.fn(async () => meta),
   };
 });
 
@@ -53,7 +53,7 @@ describe("CustomServiceProvider", () => {
     expect(service).toBeInstanceOf(UrlService);
     expect(service.providerId).toBe("custom");
     expect(service.apiUrl).toBe("https://example.com/api/");
-    expect(service.root).toBe(root);
+    expect(service.meta).toBe(meta);
   });
 
   it("falls back to the default api url", async () => {
