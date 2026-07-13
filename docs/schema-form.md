@@ -22,7 +22,6 @@ The process inputs panel supports two editor modes:
 - `Form`: generated controls from `SchemaForm`
 - `JSON`: unstyled and tabular, raw JSON input fields
 
-The editor-mode setting is app-global, not process-local:
 
 - state type: `ProcessInputEditorMode`
 - app state property: `processInputEditorMode`
