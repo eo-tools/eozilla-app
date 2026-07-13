@@ -130,6 +130,10 @@ the user authenticated.
 
 ## Selection and Sign-In Flow
 
+The full flow is easier to read as a few smaller diagrams:
+
+### Part 1: Provider Selection and Sign-In
+
 ```mermaid
 sequenceDiagram
     actor User
@@ -139,10 +143,6 @@ sequenceDiagram
     participant Registry as Service Provider Registry
     participant Provider as ServiceProvider
     participant Auth as External Sign-In Page
-    participant Startup as createInitialAppState
-    participant Hooks as useLoadService
-    participant AppState as App State
-    participant Service as Service
 
     User->>Dialog: Select provider
     Dialog->>Dialog: Render options form from provider.optionsSchema
@@ -159,15 +159,40 @@ sequenceDiagram
     else Provider redirects or opens external sign-in
         Provider->>Auth: Redirect user to sign-in page
         Note over Actions,Auth: App execution may stop here
-        Auth-->>Startup: Redirect back to Eozilla
     end
+```
 
+### Part 2: App Startup Restores Selection
+
+```mermaid
+sequenceDiagram
+    participant Auth as External Sign-In Page
+    participant Storage as localStorage
+    participant Startup as createInitialAppState
+    participant Hooks as useLoadService
+    participant Registry as Service Provider Registry
+    participant Provider as ServiceProvider
+
+    Auth-->>Startup: Redirect back to Eozilla
     Startup->>Storage: Restore stored provider selection
     Startup->>Hooks: App starts or resumes with serviceProviderId
     Hooks->>Registry: getServiceProvider(serviceProviderId)
     Registry-->>Hooks: provider
     Hooks->>Storage: Read stored options
     Hooks->>Provider: createService(options)
+```
+
+### Part 3: Service Creation and UI Reconnect
+
+```mermaid
+sequenceDiagram
+    participant Provider as ServiceProvider
+    participant Service as Service
+    participant Hooks as useLoadService
+    participant AppState as App State
+    participant Dialog as Service Dialog
+    actor User
+
     Provider->>Provider: Collect sign-in result and user identity
     Provider->>Service: Create connected Service(user, meta, auth state)
     Provider-->>Hooks: Service instance
@@ -240,5 +265,3 @@ mapping the authenticated principal to `UserIdentity`.
 The service owns backend operations after authentication. UI code should call
 the `Service` methods and avoid depending on how the provider authenticated the
 user.
-
-
