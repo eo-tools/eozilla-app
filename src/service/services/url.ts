@@ -26,20 +26,20 @@ export class UrlService implements Service {
   readonly providerId: string;
   readonly apiUrl: string;
   readonly user: UserIdentity;
-  readonly root: ServiceMetadata;
+  readonly meta: ServiceMetadata;
   readonly defaultHeaders: ApiHeaders;
 
   constructor(
     providerId: string,
     apiUrl: string,
     user: UserIdentity,
-    root: ServiceMetadata,
+    meta: ServiceMetadata,
     defaultHeaders: ApiHeaders = {},
   ) {
     this.providerId = providerId;
     this.apiUrl = apiUrl;
     this.user = user;
-    this.root = root;
+    this.meta = meta;
     this.defaultHeaders = defaultHeaders;
   }
 

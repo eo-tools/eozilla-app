@@ -11,7 +11,7 @@ import type {
 export interface Service {
   providerId: string;
   user: UserIdentity;
-  root: ServiceMetadata;
+  meta: ServiceMetadata;
   getProcesses(): Promise<ProcessList>;
   getProcess(processId: string): Promise<ProcessDescription>;
   executeProcess(

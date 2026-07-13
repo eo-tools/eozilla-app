@@ -74,7 +74,7 @@ function assertValidJobId(jobId: string) {
 
 export class TestService implements Service {
   private readonly delay: number;
-  readonly root: ServiceMetadata = {
+  readonly meta: ServiceMetadata = {
     title: "Test Server",
     description: "In-memory test server used for local development.",
     capabilities: ["processes", "jobs"],
