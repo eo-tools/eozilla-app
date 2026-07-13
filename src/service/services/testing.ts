@@ -10,11 +10,10 @@ import type {
   UserIdentity,
 } from "@/service";
 import { ServiceError } from "@/service/errors";
-
-type ProcessFn = (inputs: Record<string, unknown>) => JobResults;
+import type { JsonValue } from "@/utils/json";
 
 interface Process extends ProcessDescription {
-  fn: ProcessFn;
+  run: (job: Job, inputs: Record<string, unknown>) => void;
 }
 
 interface Job extends JobInfo {
@@ -80,31 +79,68 @@ const L3B_PROCESS: Process = {
   },
   outputs: {
     return_value: {
-      title: "stacitemsfile",
+      title: "JSON result",
       schema: {
-        type: "string",
-        format: "uri",
+        type: "object",
         nullable: false,
       },
     },
   },
-  fn(inputs): JobResults {
+  run(job, inputs): void {
+    startJob(job);
     const result = Object.fromEntries(
       Object.entries(inputs).filter(([, value]) => value != null),
-    );
-    const json = JSON.stringify(result);
-    return {
-      return_value: `data:application/json,${encodeURIComponent(json)}`,
-    };
+    ) as Record<string, JsonValue>;
+    endJob(job, "successful", "Ended processing", {
+      return_value: result,
+    });
   },
 };
 
-const PROCESSES: Process[] = [L3B_PROCESS];
+const SLEEP_A_WHILE_PROCESS: Process = {
+  id: "sleep_a_while",
+  title: "Sleep Processor",
+  version: "1.0.0",
+  description: "Sleeps for `duration` seconds; fails at 50% when `fail` is true.",
+  inputs: {
+    duration: {
+      title: "Duration",
+      schema: {
+        type: "number",
+        nullable: false,
+        default: 10,
+        "x-ui-order": 10,
+      },
+    },
+    fail: {
+      title: "Fail",
+      schema: {
+        type: "boolean",
+        nullable: false,
+        default: false,
+        "x-ui-order": 20,
+      },
+    },
+  },
+  outputs: {
+    return_value: {
+      title: "Sleep duration",
+      schema: {
+        type: "number",
+        nullable: false,
+      },
+    },
+  },
+  run(job, inputs): void {
+    runSleepJob(job, inputs);
+  },
+};
+
+const PROCESSES: Process[] = [L3B_PROCESS, SLEEP_A_WHILE_PROCESS];
 const PROCESS_MAP = new Map(PROCESSES.map((process) => [process.id, process]));
 
 export class TestingService implements Service {
   private readonly delay: number;
-  private readonly jobDuration: number;
   private readonly jobs = new Map<string, Job>();
   private nextJobId = 0;
 
@@ -114,9 +150,8 @@ export class TestingService implements Service {
     capabilities: ["processes", "jobs"],
   };
 
-  constructor(delay: number = 500, jobDuration: number = 5000) {
+  constructor(delay: number = 500) {
     this.delay = delay;
-    this.jobDuration = jobDuration;
   }
 
   get providerId() {
@@ -130,7 +165,7 @@ export class TestingService implements Service {
   async getProcesses(): Promise<ProcessList> {
     return await delayed(this.delay, () => ({
       processes: PROCESSES.map(
-        ({ inputs: _inputs, outputs: _outputs, fn: _fn, ...summary }) =>
+        ({ inputs: _inputs, outputs: _outputs, run: _run, ...summary }) =>
           summary,
       ),
       links: [],
@@ -140,7 +175,7 @@ export class TestingService implements Service {
   async getProcess(processId: string): Promise<ProcessDescription> {
     return await delayed(this.delay, () => {
       const process = this.getKnownProcess(processId);
-      const { fn: _fn, ...description } = process;
+      const { run: _run, ...description } = process;
       return description;
     });
   }
@@ -149,7 +184,7 @@ export class TestingService implements Service {
     processId: string,
     processRequest: ProcessRequest,
   ): Promise<JobInfo> {
-    const { fn } = this.getKnownProcess(processId);
+    const process = this.getKnownProcess(processId);
     this.nextJobId += 1;
     const job: Job = {
       jobID: this.nextJobId.toString(),
@@ -162,7 +197,7 @@ export class TestingService implements Service {
     };
     this.jobs.set(job.jobID, job);
     const acceptedJob = toJobInfo(job);
-    this.runJob(job, fn, processRequest.inputs ?? {});
+    this.runJob(job, process, processRequest.inputs ?? {});
     return await delayed(this.delay, () => acceptedJob);
   }
 
@@ -237,39 +272,10 @@ export class TestingService implements Service {
 
   private runJob(
     job: Job,
-    fn: ProcessFn,
+    process: Process,
     inputs: Record<string, unknown>,
   ): void {
-    const steps = 10;
-    let completedSteps = 0;
-    job.status = "running";
-    job.message = "Started processing";
-    job.started = timestamp();
-    job.updated = job.started;
-
-    job.timer = setInterval(
-      () => {
-        completedSteps += 1;
-        job.progress = Math.min(completedSteps * 10, 100);
-        job.updated = timestamp();
-        if (completedSteps < steps) {
-          return;
-        }
-
-        stopJobTimer(job);
-        try {
-          job.result = fn(inputs);
-          job.status = "successful";
-          job.message = "Ended processing";
-        } catch (error) {
-          job.status = "failed";
-          job.message = error instanceof Error ? error.message : String(error);
-        }
-        job.finished = timestamp();
-        job.updated = job.finished;
-      },
-      this.jobDuration / steps,
-    );
+    process.run(job, inputs);
   }
 }
 
@@ -289,6 +295,63 @@ function stopJobTimer(job: Job): void {
     clearInterval(job.timer);
     delete job.timer;
   }
+}
+
+function startJob(job: Job): void {
+  job.status = "running";
+  job.message = "Started processing";
+  job.started = timestamp();
+  job.updated = job.started;
+  job.progress = 0;
+}
+
+function endJob(
+  job: Job,
+  status: "successful" | "failed",
+  message: string,
+  result?: JobResults,
+): void {
+  stopJobTimer(job);
+  if (result !== undefined) {
+    job.result = result;
+  }
+  job.status = status;
+  job.message = message;
+  job.finished = timestamp();
+  job.updated = job.finished;
+}
+
+function runSleepJob(job: Job, inputs: Record<string, unknown>): void {
+  const duration =
+    typeof inputs.duration === "number" && Number.isFinite(inputs.duration)
+      ? inputs.duration
+      : 10;
+  const fail = inputs.fail === true;
+  const startedAt = Date.now();
+
+  startJob(job);
+
+  const stepDuration = (duration * 1000) / 100;
+  let completedSteps = 0;
+
+  job.timer = setInterval(() => {
+    completedSteps += 1;
+    job.progress = Math.min(completedSteps, 100);
+    job.updated = timestamp();
+
+    if (fail && completedSteps === 50) {
+      endJob(job, "failed", "Woke up too early");
+      return;
+    }
+
+    if (completedSteps < 100) {
+      return;
+    }
+
+    endJob(job, "successful", "Ended processing", {
+      return_value: (Date.now() - startedAt) / 1000,
+    });
+  }, stepDuration);
 }
 
 function toJobInfo({ result: _result, timer: _timer, ...job }: Job): JobInfo {
