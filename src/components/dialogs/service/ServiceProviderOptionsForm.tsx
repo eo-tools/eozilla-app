@@ -1,17 +1,8 @@
 import { useMemo, useState, type SubmitEvent } from "react";
 
-import {
-  Box,
-  Button,
-  Checkbox,
-  Group,
-  NumberInput,
-  Select,
-  Stack,
-  Text,
-  TextInput,
-} from "@mantine/core";
+import { Box, Button, Group, Stack, Text } from "@mantine/core";
 
+import { SchemaForm } from "@/components/schema-form";
 import type {
   ServiceOptionSchema,
   ServiceOptions,
@@ -19,7 +10,9 @@ import type {
   ServiceProvider,
 } from "@/service";
 import { ResetOnKey } from "@/components/common/ResetOnKey";
+import { getFieldFromSchema, type ObjectField } from "@/utils/field";
 import { getErrorMessage } from "@/utils/common";
+import { isJsonObject, type JsonSchema, type JsonValue } from "@/utils/json";
 
 type DraftValue = string | number | boolean | null | undefined;
 type DraftOptions = Record<string, DraftValue>;
@@ -38,6 +31,9 @@ function isEmptyDraftValue(value: DraftValue): boolean {
 function getInitialDraftValue(schema: ServiceOptionSchema): DraftValue {
   if (schema.default !== undefined) {
     return schema.default;
+  }
+  if (schema.nullable) {
+    return null;
   }
   if (schema.type === "boolean") {
     return false;
@@ -66,6 +62,16 @@ function normalizeDraft(
 
   Object.entries(provider.optionsSchema ?? {}).forEach(([key, schema]) => {
     const value = draft[key];
+
+    if (value === null || value === undefined) {
+      if (schema.default !== undefined) {
+        options[key] = schema.default;
+        return;
+      }
+      if (schema.nullable) {
+        return;
+      }
+    }
 
     if (schema.type === "boolean") {
       options[key] = Boolean(value);
@@ -113,98 +119,19 @@ function normalizeDraft(
   return options;
 }
 
-function getOptionInputKind(
-  schema: ServiceOptionSchema,
-): "boolean" | "select" | "number" | "text" {
-  if (schema.type === "boolean") {
-    return "boolean";
-  }
-  if (schema.enum) {
-    return "select";
-  }
-  if (schema.type === "number" || schema.type === "integer") {
-    return "number";
-  }
-  return "text";
-}
-
-function OptionField({
-  schema,
-  value,
-  onChange,
-}: {
-  schema: ServiceOptionSchema;
-  value: DraftValue;
-  onChange: (value: DraftValue) => void;
-}) {
-  const description = schema.description ? (
-    <Text size="sm" c="dimmed">
-      {schema.description}
-    </Text>
-  ) : null;
-
-  if (schema.type === "boolean") {
-    return (
-      <Stack gap={4}>
-        <Checkbox
-          checked={Boolean(value)}
-          label={schema.title}
-          onChange={(event) => onChange(event.currentTarget.checked)}
-        />
-        {description}
-      </Stack>
-    );
+function getOptionsField(
+  provider: ServiceProvider<ServiceOptions>,
+): ObjectField | null {
+  const properties = provider.optionsSchema;
+  if (!properties || Object.keys(properties).length === 0) {
+    return null;
   }
 
-  const inputKind = getOptionInputKind(schema);
-
-  if (inputKind === "select") {
-    const options = schema.enum ?? [];
-    return (
-      <Stack gap={4}>
-        <Select
-          clearable={schema.nullable}
-          data={options.map((option) => ({
-            value: String(option),
-            label: String(option),
-          }))}
-          label={schema.title}
-          onChange={(nextValue) => onChange(nextValue)}
-          value={isEmptyDraftValue(value) ? null : String(value)}
-        />
-        {description}
-      </Stack>
-    );
-  }
-
-  if (inputKind === "number") {
-    return (
-      <Stack gap={4}>
-        <NumberInput
-          label={schema.title}
-          onChange={(nextValue) => onChange(nextValue)}
-          step={schema.type === "integer" ? 1 : 0.1}
-          value={
-            typeof value === "number" || typeof value === "string"
-              ? value
-              : undefined
-          }
-        />
-        {description}
-      </Stack>
-    );
-  }
-
-  return (
-    <Stack gap={4}>
-      <TextInput
-        label={schema.title}
-        onChange={(event) => onChange(event.currentTarget.value)}
-        value={typeof value === "string" ? value : ""}
-      />
-      {description}
-    </Stack>
-  );
+  return getFieldFromSchema("root", {
+    type: "object",
+    properties: properties as Record<string, JsonSchema>,
+    additionalProperties: false,
+  }) as ObjectField;
 }
 
 function ServiceProviderOptionsFormFields({
@@ -214,6 +141,7 @@ function ServiceProviderOptionsFormFields({
   onSubmit,
 }: ServiceProviderOptionsFormProps) {
   const initialDraft = useMemo(() => createInitialDraft(provider), [provider]);
+  const optionsField = useMemo(() => getOptionsField(provider), [provider]);
   const [draftOptions, setDraftOptions] = useState<DraftOptions>(initialDraft);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -249,23 +177,18 @@ function ServiceProviderOptionsFormFields({
               No additional options are required for this service.
             </Text>
           ) : (
-            <Stack gap="sm">
-              {Object.entries(provider.optionsSchema ?? {}).map(
-                ([key, schema]) => (
-                  <OptionField
-                    key={key}
-                    schema={schema}
-                    value={draftOptions[key]}
-                    onChange={(nextValue) =>
-                      setDraftOptions((currentDraft) => ({
-                        ...currentDraft,
-                        [key]: nextValue,
-                      }))
-                    }
-                  />
-                ),
-              )}
-            </Stack>
+            optionsField && (
+              <SchemaForm
+                field={optionsField}
+                value={draftOptions as unknown as JsonValue}
+                onChange={(nextValue) => {
+                  if (isJsonObject(nextValue)) {
+                    setDraftOptions(nextValue as DraftOptions);
+                  }
+                }}
+                hideLabel
+              />
+            )
           )}
         </Stack>
 
