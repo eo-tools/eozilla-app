@@ -9,25 +9,20 @@ who need to continue the work without rediscovering the design.
 The schema-form generator turns OpenAPI/JSON-schema-derived process input
 metadata into a controlled React form built from Mantine components.
 
-The design keeps a few core ideas from the older Python `schema2ui` work:
-
+The generator is built around a few core ideas:
 - normalized `Field` metadata extracted from schemas
 - a scored field factory registry
 - a render context that can recursively render child fields
 - a JSON fallback for unsupported or partially supported shapes
-
-The React version does not mirror the Python view-model tree. State is modeled
-as controlled `value` / `onChange` props plus small local draft state where
-needed for editing text before it becomes valid JSON or array input.
 
 ## User-Facing Integration
 
 The process inputs panel supports two editor modes:
 
 - `Form`: generated controls from `SchemaForm`
-- `JSON`: the existing raw JSON input table
+- `JSON`: unstyled and tabular, raw JSON input fields
 
-This mode is app-global, not process-local:
+The editor-mode setting is app-global, not process-local:
 
 - state type: `ProcessInputEditorMode`
 - app state property: `processInputEditorMode`
