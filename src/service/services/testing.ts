@@ -144,7 +144,7 @@ export class TestingService implements Service {
   private readonly jobs = new Map<string, Job>();
   private nextJobId = 0;
 
-  readonly root: ServiceMetadata = {
+  readonly meta: ServiceMetadata = {
     title: "Testing Server",
     description: "In-memory testing server used for local development.",
     capabilities: ["processes", "jobs"],
