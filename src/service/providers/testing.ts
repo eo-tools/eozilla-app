@@ -4,13 +4,13 @@ import type {
   ServiceProvider,
   ServiceProviderMeta,
 } from "@/service";
-import { TestService } from "@/service/services/test";
+import { TestingService } from "@/service/services/testing";
 
-export class TestServiceProvider implements ServiceProvider {
-  readonly id: string = "test";
+export class TestingServiceProvider implements ServiceProvider {
+  readonly id: string = "testing";
   readonly meta: ServiceProviderMeta = {
-    type: "test",
-    title: "Test Server (in-memory)",
+    type: "testing",
+    title: "Testing Server (in-memory)",
   };
   readonly optionsSchema = {};
 
@@ -23,6 +23,6 @@ export class TestServiceProvider implements ServiceProvider {
   }
 
   createService(_options: NoServiceOptions): Promise<Service> {
-    return Promise.resolve(new TestService());
+    return Promise.resolve(new TestingService());
   }
 }

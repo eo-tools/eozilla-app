@@ -101,7 +101,7 @@ function parseServiceProviderMeta(value: unknown): ServiceProviderMeta | null {
     return null;
   }
   if (
-    value.type !== "test" &&
+    value.type !== "testing" &&
     value.type !== "dev" &&
     value.type !== "custom" &&
     value.type !== "system"
