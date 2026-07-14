@@ -32,8 +32,7 @@ import {
 const selectServiceProviderId = (state: AppState) => state.serviceProviderId;
 const selectService = (state: AppState) => state.service;
 const selectProcessId = (state: AppState) => state.processId;
-const selectProcessInputEditorMode = (state: AppState) =>
-  state.processInputEditorMode;
+const selectProcessEditorMode = (state: AppState) => state.processEditorMode;
 const selectProcessExecution = (state: AppState) => state.processExecution;
 const selectJobId = (state: AppState) => state.jobId;
 const selectConfirmation = (state: AppState) => state.confirmation;
@@ -95,8 +94,8 @@ export function useActiveProcessId() {
   return useAppState(selectProcessId);
 }
 
-export function useProcessInputEditorMode() {
-  return useAppState(selectProcessInputEditorMode);
+export function useProcessEditorMode() {
+  return useAppState(selectProcessEditorMode);
 }
 
 export function useProcessRequests() {

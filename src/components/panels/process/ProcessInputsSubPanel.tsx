@@ -10,8 +10,8 @@ import ProcessInputsView from "@/components/panels/process/ProcessInputsView";
 import GeneratedProcessInputsView from "@/components/panels/process/GeneratedProcessInputsView";
 import { SubPanel } from "@/components/common/SubPanel";
 import type { Input, ProcessDescription, ProcessInputs } from "@/service";
-import { setProcessInputEditorMode } from "@/store/actions";
-import { useProcessInputEditorMode } from "@/store/hooks";
+import { setProcessEditorMode } from "@/store/actions";
+import { useProcessEditorMode } from "@/store/hooks";
 import {
   getFieldFromProcessDescriptionInputs,
   getVisibleInputFields,
@@ -31,7 +31,7 @@ export default function ProcessInputsSubPanel({
   setProcessInput,
 }: ProcessInputsSubPanelProps) {
   const [showAdvancedInputs, setShowAdvancedInputs] = useState(false);
-  const inputEditorMode = useProcessInputEditorMode();
+  const processEditorMode = useProcessEditorMode();
 
   const inputsField: ObjectField = useMemo(
     () => getFieldFromProcessDescriptionInputs(processDescription),
@@ -65,10 +65,10 @@ export default function ProcessInputsSubPanel({
           aria-label="Use raw JSON-value input fields"
           {...styles.actionIcon.md}
           mr={10}
-          variant={inputEditorMode === "json" ? "filled" : "subtle"}
-          onClick={() =>
-            setProcessInputEditorMode(
-              inputEditorMode === "json" ? "form" : "json",
+            variant={processEditorMode === "json" ? "filled" : "subtle"}
+            onClick={() =>
+            setProcessEditorMode(
+              processEditorMode === "json" ? "form" : "json",
             )
           }
         >
@@ -79,7 +79,7 @@ export default function ProcessInputsSubPanel({
   );
   return (
     <SubPanel.Item value={"inputs"} title={"Inputs"} actions={inputsActions}>
-      {inputEditorMode === "form" ? (
+      {processEditorMode === "form" ? (
         <GeneratedProcessInputsView
           processInputs={processInputs || {}}
           setProcessInput={setProcessInput}

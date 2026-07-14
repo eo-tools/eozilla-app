@@ -29,11 +29,11 @@ The process inputs panel supports two editor modes:
 
 The mode is app-global, not process-local:
 
-- state type: `ProcessInputEditorMode`
-- app state property: `processInputEditorMode`
+- state type: `ProcessEditorMode`
+- app state property: `processEditorMode`
 - default: `"form"`
-- action: `setProcessInputEditorMode()`
-- hook: `useProcessInputEditorMode()`
+- action: `setProcessEditorMode()`
+- hook: `useProcessEditorMode()`
 
 Relevant files:
 
@@ -361,7 +361,7 @@ Good next tasks:
 - Keep `JsonFallbackField` as the safe default while expanding support.
 - Avoid making unsupported schemas fail visibly; prefer fallback JSON editing.
 - Keep `ProcessInputsView.tsx` as the raw JSON alternative.
-- `processInputEditorMode` is app-global by design.
+- `processEditorMode` is app-global by design.
 - Date/time inputs currently preserve empty string defaults unless the schema has
   an explicit default. This avoids silently changing initial process request
   payloads.
