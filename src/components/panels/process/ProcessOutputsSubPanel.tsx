@@ -1,4 +1,5 @@
 import type { Output, ProcessDescription, ProcessOutputs } from "@/service";
+import { useProcessEditorMode } from "@/store/hooks";
 import ProcessOutputsView from "@/components/panels/process/ProcessOutputsView";
 import { SubPanel } from "@/components/common/SubPanel";
 
@@ -13,12 +14,15 @@ export default function ProcessOutputsSubPanel({
   processOutputs,
   setProcessOutput,
 }: ProcessOutputsSubPanelProps) {
+  const processEditorMode = useProcessEditorMode();
+
   return (
     <SubPanel.Item value={"outputs"} title={"Outputs"}>
       <ProcessOutputsView
         processDescription={processDescription}
         processOutputs={processOutputs}
         setProcessOutput={setProcessOutput}
+        formMode={processEditorMode === "form"}
       />
     </SubPanel.Item>
   );

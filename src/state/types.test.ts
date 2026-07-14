@@ -19,9 +19,9 @@ describe("createInitialAppState", () => {
     vi.restoreAllMocks();
   });
 
-  it("defaults process inputs to form mode", async () => {
+  it("defaults the process editor to form mode", async () => {
     const { createInitialAppState } = await import("./types");
 
-    expect(createInitialAppState().processInputEditorMode).toBe("form");
+    expect(createInitialAppState().processEditorMode).toBe("form");
   });
 });

@@ -3,7 +3,7 @@ import { notifications } from "@mantine/notifications";
 import { getAppState, setAppState } from "@/store/store";
 import {
   type DialogId,
-  type ProcessInputEditorMode,
+  type ProcessEditorMode,
   createInitialAppState,
 } from "@/state/types";
 import {
@@ -69,8 +69,8 @@ export function copyTextToClipboard(text: string) {
     });
 }
 
-export function setProcessInputEditorMode(mode: ProcessInputEditorMode) {
-  setAppState({ processInputEditorMode: mode });
+export function setProcessEditorMode(mode: ProcessEditorMode) {
+  setAppState({ processEditorMode: mode });
 }
 
 ////////////////////////////////////////

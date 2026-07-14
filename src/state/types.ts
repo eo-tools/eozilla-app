@@ -33,12 +33,12 @@ export interface ProcessExecution {
 
 export type DialogId = "service" | "traceback" | "job-result" | "privacy";
 
-export type ProcessInputEditorMode = "form" | "json";
+export type ProcessEditorMode = "form" | "json";
 
 export interface AppState {
   serviceProviderId: string | null;
   service: Service | null;
-  processInputEditorMode: ProcessInputEditorMode;
+  processEditorMode: ProcessEditorMode;
   processId?: string;
   processRequests: Record<string, ProcessRequest>;
   processExecution?: ProcessExecution;
@@ -58,7 +58,7 @@ export function createInitialAppState(): AppState {
   return {
     serviceProviderId,
     service: null,
-    processInputEditorMode: "form",
+    processEditorMode: "form",
     dialogId: !serviceProviderId ? "service" : null,
     processId: undefined,
     processRequests: {},

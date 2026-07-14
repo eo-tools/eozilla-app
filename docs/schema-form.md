@@ -23,11 +23,11 @@ The process inputs panel supports two editor modes:
 - `JSON`: unstyled and tabular, raw JSON input fields
 
 
-- state type: `ProcessInputEditorMode`
-- app state property: `processInputEditorMode`
+- state type: `ProcessEditorMode`
+- app state property: `processEditorMode`
 - default: `"form"`
-- action: `setProcessInputEditorMode()`
-- hook: `useProcessInputEditorMode()`
+- action: `setProcessEditorMode()`
+- hook: `useProcessEditorMode()`
 
 Relevant files:
 
@@ -629,4 +629,4 @@ Guidelines:
 - Unstructured objects still rely on JSON fallback by design.
 - WKT map support is currently limited to one polygon.
 - Bbox map support assumes `[minLon, minLat, maxLon, maxLat]` in `EPSG:4326`.
-- `processInputEditorMode` is app-global by design.
+- `processEditorMode` is app-global by design.

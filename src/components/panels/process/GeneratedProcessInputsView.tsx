@@ -1,9 +1,11 @@
 import { Stack } from "@mantine/core";
 
+import { UnavailableHint } from "@/components/common/UnavailableHint";
 import { SchemaForm } from "@/components/schema-form";
 import type { Input, ProcessInputs } from "@/service";
 import type { ObjectField } from "@/utils/field";
 import { isJsonObject, type JsonObject, type JsonValue } from "@/utils/json";
+import { getVisibleInputFields } from "@/utils/field";
 
 interface GeneratedProcessInputsViewProps {
   processInputs: ProcessInputs;
@@ -18,6 +20,12 @@ export default function GeneratedProcessInputsView({
   setProcessInput,
   hideAdvanced,
 }: GeneratedProcessInputsViewProps) {
+  const visibleFields = getVisibleInputFields(inputsField, { hideAdvanced });
+
+  if (visibleFields.length === 0) {
+    return <UnavailableHint message="No inputs available." />;
+  }
+
   const handleChange = (nextValue: JsonValue) => {
     if (!isJsonObject(nextValue)) {
       return;
