@@ -87,7 +87,7 @@ export function JobItemView({
               </Text>
             )}
             {status === "running" && isNumber(progress) && (
-              <Progress value={progress} size={"sm"} color="orange" />
+              <Progress value={progress} size={"sm"} color="teal" />
             )}
           </Stack>
         </Flex>

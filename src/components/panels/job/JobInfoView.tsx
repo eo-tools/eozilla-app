@@ -44,7 +44,7 @@ export default function JobInfoView({
             <Table.Td>
               {isNumber(jobInfo.progress) ? (
                 <Progress.Root size={"lg"} w={120}>
-                  <Progress.Section value={jobInfo.progress} color="orange">
+                  <Progress.Section value={jobInfo.progress} color="teal">
                     <Progress.Label>{jobInfo.progress} %</Progress.Label>
                   </Progress.Section>
                 </Progress.Root>
