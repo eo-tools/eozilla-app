@@ -47,7 +47,7 @@ export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions>
       "http://localhost:8008";
     const authHeaders = createTokenAuthHeaders(options);
     return loadServiceRootMetadata(apiUrl, authHeaders).then(
-      (root) => new UrlService(this.id, apiUrl, user, root, authHeaders),
+      (meta) => new UrlService(this.id, apiUrl, user, meta, authHeaders),
     );
   }
 }
