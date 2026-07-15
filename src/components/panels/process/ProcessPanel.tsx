@@ -1,9 +1,6 @@
 import { useMemo, useState } from "react";
-import { ActionIcon, Divider, Stack, Tooltip } from "@mantine/core";
+import { Divider, Stack } from "@mantine/core";
 import {
-  IconBrightnessAuto,
-  IconBrightnessAutoFilled,
-  IconJson,
   IconMathFunction,
 } from "@tabler/icons-react";
 
@@ -82,38 +79,6 @@ export default function ProcessPanel() {
       executeActiveProcess(processRequests);
     }
   };
-  const inputActions = processDescription ? (
-    <>
-      {hasAdvancedInputs ? (
-        <Tooltip label={"Show advanced inputs"}>
-          <ActionIcon
-            aria-label="Show advanced"
-            {...styles.actionIcon.sm}
-            variant={showAdvancedInputs ? "filled" : "subtle"}
-            onClick={() => setShowAdvancedInputs(!showAdvancedInputs)}
-          >
-            {showAdvancedInputs ? (
-              <IconBrightnessAutoFilled {...styles.icon.sm} />
-            ) : (
-              <IconBrightnessAuto {...styles.icon.sm} />
-            )}
-          </ActionIcon>
-        </Tooltip>
-      ) : null}
-      <Tooltip label={"Use raw JSON-value input fields"}>
-        <ActionIcon
-          aria-label="Use raw JSON-value input fields"
-          {...styles.actionIcon.sm}
-          variant={processEditorMode === "json" ? "filled" : "subtle"}
-          onClick={() =>
-            setProcessEditorMode(processEditorMode === "json" ? "form" : "json")
-          }
-        >
-          <IconJson {...styles.icon.sm} />
-        </ActionIcon>
-      </Tooltip>
-    </>
-  ) : null;
   return (
     <Panel>
       <Panel.Header
@@ -129,7 +94,13 @@ export default function ProcessPanel() {
           canExecute={canExecute}
           onExecute={handleExecuteProcess}
           setProcessRequest={setProcessRequest}
-          inputActions={inputActions}
+          processEditorMode={processEditorMode}
+          onSetProcessEditorMode={setProcessEditorMode}
+          hasAdvancedInputs={hasAdvancedInputs}
+          showAdvancedInputs={showAdvancedInputs}
+          onToggleAdvancedInputs={() =>
+            setShowAdvancedInputs(!showAdvancedInputs)
+          }
         />
       </Panel.Header>
       <Panel.Section grow scroll>
