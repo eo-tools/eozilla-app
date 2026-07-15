@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent } from "react";
+import { useRef, type ChangeEvent, type ReactNode } from "react";
 import { ActionIcon, Box, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
@@ -23,7 +23,11 @@ interface ProcessRequestActionsProps {
   isSubmitting: boolean;
   canExecute: boolean;
   onExecute: () => void;
-  setProcessRequest: (processId: string, processRequest: ProcessRequest) => void;
+  setProcessRequest: (
+    processId: string,
+    processRequest: ProcessRequest,
+  ) => void;
+  inputActions?: ReactNode;
 }
 
 export default function ProcessRequestActions({
@@ -34,6 +38,7 @@ export default function ProcessRequestActions({
   canExecute,
   onExecute,
   setProcessRequest,
+  inputActions,
 }: ProcessRequestActionsProps) {
   const requestFileInputRef = useRef<HTMLInputElement>(null);
   const { containerProps, revealStyle } = useHoverReveal(200, 0.05, 1);
@@ -72,9 +77,12 @@ export default function ProcessRequestActions({
       return;
     }
 
-    const blob = new Blob([stringifyProcessRequestJson(currentProcessRequest)], {
-      type: "application/json",
-    });
+    const blob = new Blob(
+      [stringifyProcessRequestJson(currentProcessRequest)],
+      {
+        type: "application/json",
+      },
+    );
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -96,7 +104,15 @@ export default function ProcessRequestActions({
           minWidth: 0,
         }}
       >
-        <ActionIcon.Group style={revealStyle}>
+        <Box
+          component="span"
+          style={{
+            ...revealStyle,
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+          }}
+        >
           <Tooltip label={"Import process request"}>
             <ActionIcon
               {...styles.actionIcon.sm}
@@ -119,7 +135,16 @@ export default function ProcessRequestActions({
               <IconDownload {...styles.icon.sm} />
             </ActionIcon>
           </Tooltip>
-        </ActionIcon.Group>
+        </Box>
+        {inputActions ? (
+          <Box
+            component="span"
+            ml={4}
+            style={{ display: "flex", alignItems: "center", gap: 4 }}
+          >
+            {inputActions}
+          </Box>
+        ) : null}
         <Tooltip label={"Execute process"}>
           <ActionIcon
             {...styles.actionIcon.sm}
