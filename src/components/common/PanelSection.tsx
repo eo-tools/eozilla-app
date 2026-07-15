@@ -23,8 +23,14 @@ export function PanelSection({
   };
   return (
     <Container
+      mx={scroll ? "calc(var(--mantine-spacing-xs) * -1)" : undefined}
       px={styles.panel.section.px}
       py={styles.panel.section.py}
+      viewportProps={
+        scroll
+          ? { style: { paddingInline: "var(--mantine-spacing-md" } }
+          : undefined
+      }
       style={style}
     >
       {children}
