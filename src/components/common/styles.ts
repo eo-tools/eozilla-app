@@ -128,7 +128,7 @@ const styles: Styles = {
     py: 0,
     gap: 0,
     item: {
-      px: 4,
+      px: 8,
       py: 6,
     },
   },
