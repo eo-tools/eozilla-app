@@ -24,7 +24,8 @@ export default function ProcessItemView({
       py={styles.list.item.py}
       onClick={() => activateProcess(process.id)}
       active={isActive}
-      variant={isActive ? "filled" : "default"}
+      variant={isActive ? "light" : "default"}
+      className="list-row"
       label={
         <Stack m={0} p={0} gap={2}>
           <Flex justify={"space-between"} align={"center"} {...containerProps}>
