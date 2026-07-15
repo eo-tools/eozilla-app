@@ -1,8 +1,12 @@
-import { useRef, type ChangeEvent, type ReactNode } from "react";
-import { ActionIcon, Box, Tooltip } from "@mantine/core";
+import { useRef, type ChangeEvent } from "react";
+import { ActionIcon, Box, Menu, Text, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
+  IconBrightnessAuto,
+  IconBrightnessAutoFilled,
   IconDownload,
+  IconDotsVertical,
+  IconEye,
   IconPlayerPlayFilled,
   IconUpload,
 } from "@tabler/icons-react";
@@ -27,7 +31,11 @@ interface ProcessRequestActionsProps {
     processId: string,
     processRequest: ProcessRequest,
   ) => void;
-  inputActions?: ReactNode;
+  processEditorMode: "form" | "json";
+  onSetProcessEditorMode: (mode: "form" | "json") => void;
+  hasAdvancedInputs?: boolean;
+  showAdvancedInputs?: boolean;
+  onToggleAdvancedInputs?: () => void;
 }
 
 export default function ProcessRequestActions({
@@ -38,10 +46,14 @@ export default function ProcessRequestActions({
   canExecute,
   onExecute,
   setProcessRequest,
-  inputActions,
+  processEditorMode,
+  onSetProcessEditorMode,
+  hasAdvancedInputs,
+  showAdvancedInputs,
+  onToggleAdvancedInputs,
 }: ProcessRequestActionsProps) {
   const requestFileInputRef = useRef<HTMLInputElement>(null);
-  const { containerProps, revealStyle } = useHoverReveal(200, 0.05, 1);
+  const { containerProps } = useHoverReveal(200, 0.05, 1);
 
   const handleImportClick = () => {
     requestFileInputRef.current?.click();
@@ -104,47 +116,87 @@ export default function ProcessRequestActions({
           minWidth: 0,
         }}
       >
-        <Box
-          component="span"
-          style={{
-            ...revealStyle,
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-          }}
+        <Menu
+          shadow="md"
+          width={220}
+          trigger="hover"
+          openDelay={100}
+          closeOnItemClick={false}
         >
-          <Tooltip label={"Import process request"}>
+          <Menu.Target>
             <ActionIcon
               {...styles.actionIcon.sm}
-              aria-label="Import process request"
-              variant="subtle"
+              aria-label="Process options"
+              variant="transparent"
+            >
+              <IconDotsVertical {...styles.icon.sm} />
+            </ActionIcon>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Sub
+              position="right-start"
+              offset={{ mainAxis: 8, crossAxis: -4 }}
+            >
+              <Menu.Sub.Target>
+                <Menu.Sub.Item
+                  leftSection={<IconEye {...styles.icon.sm} />}
+                  rightSection={
+                    <Text size="xs" c="dimmed" tt="uppercase">
+                      {processEditorMode}
+                    </Text>
+                  }
+                >
+                  View mode
+                </Menu.Sub.Item>
+              </Menu.Sub.Target>
+              <Menu.Sub.Dropdown>
+                <Menu.Item
+                  onClick={() => onSetProcessEditorMode("form")}
+                  disabled={processEditorMode === "form"}
+                >
+                  Form
+                </Menu.Item>
+                <Menu.Item
+                  onClick={() => onSetProcessEditorMode("json")}
+                  disabled={processEditorMode === "json"}
+                >
+                  JSON
+                </Menu.Item>
+              </Menu.Sub.Dropdown>
+            </Menu.Sub>
+            {hasAdvancedInputs && onToggleAdvancedInputs ? (
+              <Menu.Item
+                leftSection={
+                  showAdvancedInputs ? (
+                    <IconBrightnessAutoFilled {...styles.icon.sm} />
+                  ) : (
+                    <IconBrightnessAuto {...styles.icon.sm} />
+                  )
+                }
+                onClick={onToggleAdvancedInputs}
+              >
+                {showAdvancedInputs
+                  ? "Hide advanced inputs"
+                  : "Show advanced inputs"}
+              </Menu.Item>
+            ) : null}
+            <Menu.Divider />
+            <Menu.Item
+              leftSection={<IconUpload {...styles.icon.sm} />}
               onClick={handleImportClick}
               disabled={!processId}
             >
-              <IconUpload {...styles.icon.sm} />
-            </ActionIcon>
-          </Tooltip>
-          <Tooltip label={"Export process request"}>
-            <ActionIcon
-              {...styles.actionIcon.sm}
-              aria-label="Export process request"
-              variant="subtle"
+              Import
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconDownload {...styles.icon.sm} />}
               onClick={handleExportClick}
               disabled={!currentProcessRequest}
             >
-              <IconDownload {...styles.icon.sm} />
-            </ActionIcon>
-          </Tooltip>
-        </Box>
-        {inputActions ? (
-          <Box
-            component="span"
-            ml={4}
-            style={{ display: "flex", alignItems: "center", gap: 4 }}
-          >
-            {inputActions}
-          </Box>
-        ) : null}
+              Export
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
         <Tooltip label={"Execute process"}>
           <ActionIcon
             {...styles.actionIcon.sm}
