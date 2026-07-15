@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ActionIcon, Stack, Tooltip } from "@mantine/core";
+import { ActionIcon, Divider, Stack, Tooltip } from "@mantine/core";
 import {
   IconBrightnessAuto,
   IconBrightnessAutoFilled,
@@ -154,6 +154,7 @@ export default function ProcessPanel() {
                     }
                     inputsField={inputsField}
                   />
+                  <Divider my={8} />
                   <ProcessOutputsSubPanel
                     processDescription={processDescription}
                     processOutputs={activeProcessOutputs || {}}
