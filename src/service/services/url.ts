@@ -20,7 +20,9 @@ interface ApiCallOptions<T> {
   validate?: (data: unknown) => T;
 }
 
-type ApiHeaders = Record<string, string>;
+export type ApiHeaders = Record<string, string>;
+export type ApiHeadersProvider = () => Promise<ApiHeaders>;
+type ApiAuth = ApiHeaders | ApiHeadersProvider;
 
 export class UrlService implements Service {
   readonly providerId: string;
@@ -28,19 +30,21 @@ export class UrlService implements Service {
   readonly user: UserIdentity;
   readonly meta: ServiceMetadata;
   readonly defaultHeaders: ApiHeaders;
+  private readonly auth: ApiAuth;
 
   constructor(
     providerId: string,
     apiUrl: string,
     user: UserIdentity,
     meta: ServiceMetadata,
-    defaultHeaders: ApiHeaders = {},
+    auth: ApiAuth = {},
   ) {
     this.providerId = providerId;
     this.apiUrl = apiUrl;
     this.user = user;
     this.meta = meta;
-    this.defaultHeaders = defaultHeaders;
+    this.auth = auth;
+    this.defaultHeaders = typeof auth === "function" ? {} : auth;
   }
 
   async getProcesses(): Promise<ProcessList> {
@@ -94,20 +98,15 @@ export class UrlService implements Service {
     path: string[] = [],
     options?: ApiCallOptions<T>,
   ): Promise<T> {
-    return await callApi(this.apiUrl, path, options, this.defaultHeaders);
+    return await callApi(this.apiUrl, path, options, this.auth);
   }
 }
 
 export async function loadServiceRootMetadata(
   apiUrl: string,
-  defaultHeaders: ApiHeaders = {},
+  auth: ApiAuth = {},
 ): Promise<ServiceMetadata> {
-  return await callApi(
-    apiUrl,
-    [],
-    { validate: validateServiceMetadata },
-    defaultHeaders,
-  );
+  return await callApi(apiUrl, [], { validate: validateServiceMetadata }, auth);
 }
 
 function validateProcessList(data: unknown): ProcessList {
@@ -144,10 +143,11 @@ async function callApi<T>(
   apiUrl: string,
   path: string[] = [],
   options?: ApiCallOptions<T>,
-  defaultHeaders: ApiHeaders = {},
+  auth: ApiAuth = {},
 ): Promise<T> {
   const url = buildUrl(apiUrl, path, options?.params || []);
   const hasData = typeof options?.data !== "undefined";
+  const defaultHeaders = typeof auth === "function" ? await auth() : auth;
   const response = await fetch(url, {
     method: options?.method,
     headers: buildHeaders(defaultHeaders, hasData),

@@ -16,13 +16,13 @@ export function ServiceLoadingView({
       <Stack align="center">
         <Text mt="xl">
           {isLoading
-            ? "Signing in..."
+            ? "Connecting to the service..."
             : `Preparing ${providerTitle || "service"}...`}
         </Text>
         <Loader color="blue" />
         {providerTitle && hasOptions && (
           <Text c="dimmed" ta="center">
-            We are using the stored options for {providerTitle}.
+            Checking the service and your authentication session.
           </Text>
         )}
       </Stack>

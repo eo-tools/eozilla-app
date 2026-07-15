@@ -30,7 +30,7 @@ export function ServiceDialog() {
       ? "Service Connected"
       : serviceProviderId
         ? "Configure Service"
-        : "Select Service";
+        : "Connect to a Service";
 
   return (
     <Modal

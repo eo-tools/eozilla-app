@@ -10,61 +10,11 @@ describe("URL service options schema", () => {
         default: "http://localhost:8008",
         format: "uri",
       },
-      authUrl: {
-        type: "string",
-        title: "Authentication URL",
-        nullable: true,
-        format: "uri",
-      },
       authType: {
         type: "string",
         title: "Authentication Type",
         default: "none",
-        enum: ["none", "basic", "login", "token", "api-key"],
-      },
-
-      username: {
-        type: "string",
-        title: "Username",
-        nullable: true,
-      },
-      password: {
-        type: "string",
-        title: "Password",
-        nullable: true,
-        format: "password",
-      },
-
-      clientId: {
-        type: "string",
-        title: "Client ID",
-        nullable: true,
-        format: "password",
-      },
-      clientSecret: {
-        type: "string",
-        title: "Client secret",
-        nullable: true,
-        format: "password",
-      },
-      grantType: {
-        type: "string",
-        title: "Grant type",
-        nullable: true,
-        enum: [
-          "authorization_code",
-          "implicit",
-          "password",
-          "client_credentials",
-          "refresh_token",
-        ],
-      },
-
-      refreshToken: {
-        type: "string",
-        title: "Refresh token",
-        nullable: true,
-        format: "password",
+        enum: ["none", "token", "oidc"],
       },
 
       token: {
@@ -76,7 +26,7 @@ describe("URL service options schema", () => {
 
       useBearer: {
         type: "boolean",
-        title: "Grant type",
+        title: "Use Authorization: Bearer header",
         nullable: true,
       },
       tokenHeader: {
@@ -85,16 +35,25 @@ describe("URL service options schema", () => {
         nullable: true,
       },
 
-      apiKey: {
+      issuerUrl: {
         type: "string",
-        title: "API key",
+        title: "OIDC issuer URL",
         nullable: true,
-        format: "password",
+        format: "uri",
       },
-      apiKeyHeader: {
+      clientId: {
         type: "string",
-        title: "Name of the API key header",
-        default: "X-API-Key",
+        title: "OIDC client ID",
+        nullable: true,
+      },
+      scopes: {
+        type: "string",
+        title: "OIDC scopes",
+        default: "openid profile email",
+      },
+      audience: {
+        type: "string",
+        title: "OIDC audience",
         nullable: true,
       },
     });

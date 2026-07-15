@@ -7,6 +7,7 @@ import type {
   UserIdentity,
 } from "@/service";
 import { loadServiceRootMetadata } from "@/service/services/url";
+import { OidcAuth } from "./oidc";
 
 export interface CustomServiceProviderConfig {
   id?: string;
@@ -22,33 +23,45 @@ export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions>
   readonly id: string;
   readonly meta: ServiceProviderMeta;
   readonly optionsSchema = URL_SERVICE_OPTIONS_SCHEMA;
+  private oidcAuth: OidcAuth | null = null;
 
   constructor(config: CustomServiceProviderConfig = {}) {
     this.id = config.id ?? "custom";
     this.meta = config.meta ?? DEFAULT_CUSTOM_SERVICE_PROVIDER_META;
   }
 
-  signIn(_options: ServiceOptionsInput<UrlServiceOptions>): Promise<void> {
-    return Promise.resolve(undefined);
+  async signIn(options: ServiceOptionsInput<UrlServiceOptions>): Promise<void> {
+    if (options.authType === "oidc") {
+      this.oidcAuth = new OidcAuth(options);
+      await this.oidcAuth.signIn();
+    }
   }
 
-  signOut(): Promise<void> {
-    return Promise.resolve(undefined);
+  async signOut(): Promise<void> {
+    await this.oidcAuth?.signOut();
+    this.oidcAuth = null;
   }
 
-  createService(
+  async createService(
     options: ServiceOptionsInput<UrlServiceOptions>,
   ): Promise<UrlService> {
-    // TODO: load user
-    const user: UserIdentity = { id: "unknown", displayName: "anonymous User" };
+    let user: UserIdentity = { id: "anonymous", displayName: "Anonymous User" };
     const apiUrl =
       options.apiUrl ??
       (URL_SERVICE_OPTIONS_SCHEMA.apiUrl.default as string) ??
       "http://localhost:8008";
-    const authHeaders = createTokenAuthHeaders(options);
-    return loadServiceRootMetadata(apiUrl, authHeaders).then(
-      (meta) => new UrlService(this.id, apiUrl, user, meta, authHeaders),
-    );
+    let authHeaders:
+      | Record<string, string>
+      | (() => Promise<Record<string, string>>) =
+      createTokenAuthHeaders(options);
+    if (options.authType === "oidc") {
+      this.oidcAuth = new OidcAuth(options);
+      const auth = await this.oidcAuth.createAuth();
+      user = auth.user;
+      authHeaders = auth.getHeaders;
+    }
+    const meta = await loadServiceRootMetadata(apiUrl, authHeaders);
+    return new UrlService(this.id, apiUrl, user, meta, authHeaders);
   }
 }
 

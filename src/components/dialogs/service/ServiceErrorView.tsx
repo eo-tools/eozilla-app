@@ -18,8 +18,8 @@ export function ServiceErrorView({
       <Stack gap="xs">
         <Text fw={600}>
           {providerTitle
-            ? `Failed to sign in with ${providerTitle}`
-            : "Failed to sign in"}
+            ? `Could not connect to ${providerTitle}`
+            : "Could not connect to the service"}
         </Text>
         <Text c="red">{message}</Text>
       </Stack>

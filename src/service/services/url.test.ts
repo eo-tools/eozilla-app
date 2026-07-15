@@ -181,6 +181,43 @@ describe("UrlService", () => {
     );
   });
 
+  it("loads fresh auth headers for every service operation", async () => {
+    const getHeaders = vi
+      .fn()
+      .mockResolvedValueOnce({ Authorization: "Bearer first" })
+      .mockResolvedValueOnce({ Authorization: "Bearer second" });
+    const service = new UrlService(
+      "custom",
+      "https://example.com/api/",
+      user,
+      meta,
+      getHeaders,
+    );
+
+    fetchMock.mockResolvedValue(
+      createJsonResponse({ processes: [], links: [] }),
+    );
+
+    await service.getProcesses();
+    await service.getProcesses();
+
+    expect(getHeaders).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "https://example.com/api/processes",
+      expect.objectContaining({
+        headers: { Authorization: "Bearer first" },
+      }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "https://example.com/api/processes",
+      expect.objectContaining({
+        headers: { Authorization: "Bearer second" },
+      }),
+    );
+  });
+
   it("throws a ServiceError when the API returns problem details", async () => {
     fetchMock.mockResolvedValueOnce(
       createJsonResponse(
