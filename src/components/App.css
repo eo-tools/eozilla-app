@@ -68,6 +68,16 @@
   cursor: row-resize;
 }
 
+.list-row {
+  border-radius: 8px;
+}
+
+.list-row[data-active] {
+  --nl-bg: rgba(30, 136, 229, 0.16);
+  --nl-hover: rgba(30, 136, 229, 0.16);
+  --nl-color: var(--mantine-color-text);
+}
+
 .input-row-appear > th,
 .input-row-appear > td,
 .input-row-appear:not(tr) {

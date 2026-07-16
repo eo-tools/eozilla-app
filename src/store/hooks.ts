@@ -58,6 +58,13 @@ export function useLoadService() {
           : {};
       return await serviceProvider.createService(options);
     },
+    serviceProviderId === "testing"
+      ? {
+          revalidateOnFocus: false,
+          revalidateOnReconnect: false,
+          revalidateIfStale: false,
+        }
+      : undefined,
   );
 
   // Sync state if the service changes

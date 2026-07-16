@@ -1,6 +1,8 @@
-import { useState } from "react";
-import { Stack } from "@mantine/core";
-import { IconMathFunction } from "@tabler/icons-react";
+import { useMemo, useState } from "react";
+import { Divider, Stack } from "@mantine/core";
+import {
+  IconMathFunction,
+} from "@tabler/icons-react";
 
 import {
   useActiveProcessInputs,
@@ -11,17 +13,22 @@ import {
   useActiveProcessRequestsActions,
   useSetProcessRequest,
   useProcessRequests,
+  useProcessEditorMode,
 } from "@/store/hooks";
 import type { ProcessDescription } from "@/service";
 import { Panel } from "@/components/common/Panel";
 import { ResourceView } from "@/components/common/ResourceView";
 import ProcessDescriptionView from "@/components/panels/process/ProcessDescriptionView";
-import { executeActiveProcess } from "@/store/actions";
+import { executeActiveProcess, setProcessEditorMode } from "@/store/actions";
 import styles from "@/components/common/styles";
 import { SubPanel } from "@/components/common/SubPanel";
 import ProcessInputsSubPanel from "@/components/panels/process/ProcessInputsSubPanel";
 import ProcessOutputsSubPanel from "@/components/panels/process/ProcessOutputsSubPanel";
 import ProcessRequestActions from "@/components/panels/process/ProcessRequestActions";
+import {
+  getFieldFromProcessDescriptionInputs,
+  getVisibleInputFields,
+} from "@/utils/field";
 
 export default function ProcessPanel() {
   const processesState = useActiveProcessDescription();
@@ -34,7 +41,25 @@ export default function ProcessPanel() {
     useActiveProcessRequestsActions();
   const processId = useActiveProcessId();
   const processExecution = useProcessExecution();
+  const processEditorMode = useProcessEditorMode();
   const [openedSubPanels, setOpenedSubPanels] = useState(["inputs", "outputs"]);
+  const [showAdvancedInputs, setShowAdvancedInputs] = useState(false);
+  const inputsField = useMemo(
+    () =>
+      processDescription
+        ? getFieldFromProcessDescriptionInputs(processDescription)
+        : undefined,
+    [processDescription],
+  );
+  const hasAdvancedInputs = useMemo(
+    () =>
+      inputsField
+        ? getVisibleInputFields(inputsField).some((field) =>
+            Boolean(field.advanced),
+          )
+        : false,
+    [inputsField],
+  );
   const currentProcessRequest =
     processId && processRequests ? processRequests[processId] : undefined;
   const isSubmitting = Boolean(
@@ -69,27 +94,47 @@ export default function ProcessPanel() {
           canExecute={canExecute}
           onExecute={handleExecuteProcess}
           setProcessRequest={setProcessRequest}
+          processEditorMode={processEditorMode}
+          onSetProcessEditorMode={setProcessEditorMode}
+          hasAdvancedInputs={hasAdvancedInputs}
+          showAdvancedInputs={showAdvancedInputs}
+          onToggleAdvancedInputs={() =>
+            setShowAdvancedInputs(!showAdvancedInputs)
+          }
         />
       </Panel.Header>
       <Panel.Section grow scroll>
         <ResourceView {...processesState} nullText="No process selected.">
-          {(processDescription: ProcessDescription) => (
-            <Stack>
-              <ProcessDescriptionView processDescription={processDescription} />
-              <SubPanel values={openedSubPanels} setValues={setOpenedSubPanels}>
-                <ProcessInputsSubPanel
+          {(processDescription: ProcessDescription) =>
+            inputsField ? (
+              <Stack>
+                <ProcessDescriptionView
                   processDescription={processDescription}
-                  processInputs={activeProcessInputs || {}}
-                  setProcessInput={setProcessRequestInput}
                 />
-                <ProcessOutputsSubPanel
-                  processDescription={processDescription}
-                  processOutputs={activeProcessOutputs || {}}
-                  setProcessOutput={setProcessRequestOutput}
-                />
-              </SubPanel>
-            </Stack>
-          )}
+                <SubPanel
+                  values={openedSubPanels}
+                  setValues={setOpenedSubPanels}
+                >
+                  <ProcessInputsSubPanel
+                    processDescription={processDescription}
+                    processInputs={activeProcessInputs || {}}
+                    setProcessInput={setProcessRequestInput}
+                    processEditorMode={processEditorMode}
+                    hideAdvancedInputs={
+                      hasAdvancedInputs && !showAdvancedInputs
+                    }
+                    inputsField={inputsField}
+                  />
+                  <Divider my={8} />
+                  <ProcessOutputsSubPanel
+                    processDescription={processDescription}
+                    processOutputs={activeProcessOutputs || {}}
+                    setProcessOutput={setProcessRequestOutput}
+                  />
+                </SubPanel>
+              </Stack>
+            ) : null
+          }
         </ResourceView>
       </Panel.Section>
     </Panel>

@@ -47,7 +47,8 @@ export function JobItemView({
         activateJob(activeJobId !== jobId ? jobId : null);
       }}
       active={isActive}
-      variant={isActive ? "filled" : "default"}
+      variant={isActive ? "light" : "default"}
+      className="list-row"
       label={
         <Flex gap={"xs"} wrap={"nowrap"}>
           <JobStatusIcon status={status} />
