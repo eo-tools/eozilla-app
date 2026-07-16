@@ -118,7 +118,7 @@ export default function ProcessRequestActions({
         currentProcessRequest?.outputs ??
         createInitialProcessOutputs(processDescription),
     });
-    notifications.show({ message: "Process inputs reset." });
+    notifications.show({ message: "Process inputs have been reset." });
   };
 
   return (
@@ -164,7 +164,7 @@ export default function ProcessRequestActions({
                     </Text>
                   }
                 >
-                  View mode
+                  Input mode
                 </Menu.Sub.Item>
               </Menu.Sub.Target>
               <Menu.Sub.Dropdown>
@@ -182,21 +182,20 @@ export default function ProcessRequestActions({
                 </Menu.Item>
               </Menu.Sub.Dropdown>
             </Menu.Sub>
+            <Menu.Item
+              leftSection={
+                showAdvancedInputs ? (
+                  <IconCheck {...styles.icon.sm} />
+                ) : (
+                  <Box w={16} />
+                )
+              }
+              disabled={!hasAdvancedInputs || !onToggleAdvancedInputs}
+              onClick={onToggleAdvancedInputs}
+            >
+              Advanced inputs
+            </Menu.Item>
             <Menu.Divider />
-            {hasAdvancedInputs && onToggleAdvancedInputs ? (
-              <Menu.Item
-                leftSection={
-                  showAdvancedInputs ? (
-                    <IconCheck {...styles.icon.sm} />
-                  ) : (
-                    <Box w={16} />
-                  )
-                }
-                onClick={onToggleAdvancedInputs}
-              >
-                Advanced inputs
-              </Menu.Item>
-            ) : null}
             <Menu.Item
               leftSection={<IconUpload {...styles.icon.sm} />}
               onClick={handleImportClick}
