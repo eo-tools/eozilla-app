@@ -2,18 +2,22 @@ import { useRef, type ChangeEvent } from "react";
 import { ActionIcon, Box, Menu, Text, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
-  IconBrightnessAuto,
-  IconBrightnessAutoFilled,
   IconDownload,
   IconDotsVertical,
   IconEye,
   IconPlayerPlayFilled,
+  IconRestore,
   IconUpload,
+  IconCheck,
 } from "@tabler/icons-react";
 
 import type { ProcessDescription, ProcessRequest } from "@/service";
 import { useHoverReveal } from "@/components/common/useHoverReveal";
 import styles from "@/components/common/styles";
+import {
+  createInitialProcessInputs,
+  createInitialProcessOutputs,
+} from "@/store/processRequests";
 import { getErrorMessage } from "@/utils/common";
 import {
   parseProcessRequestJson,
@@ -103,6 +107,20 @@ export default function ProcessRequestActions({
     URL.revokeObjectURL(url);
   };
 
+  const handleResetInputsClick = () => {
+    if (!processId || !processDescription) {
+      return;
+    }
+
+    setProcessRequest(processId, {
+      inputs: createInitialProcessInputs(processDescription),
+      outputs:
+        currentProcessRequest?.outputs ??
+        createInitialProcessOutputs(processDescription),
+    });
+    notifications.show({ message: "Process inputs reset." });
+  };
+
   return (
     <>
       <Box
@@ -164,36 +182,41 @@ export default function ProcessRequestActions({
                 </Menu.Item>
               </Menu.Sub.Dropdown>
             </Menu.Sub>
+            <Menu.Divider />
             {hasAdvancedInputs && onToggleAdvancedInputs ? (
               <Menu.Item
                 leftSection={
                   showAdvancedInputs ? (
-                    <IconBrightnessAutoFilled {...styles.icon.sm} />
+                    <IconCheck {...styles.icon.sm} />
                   ) : (
-                    <IconBrightnessAuto {...styles.icon.sm} />
+                    <Box w={16} />
                   )
                 }
                 onClick={onToggleAdvancedInputs}
               >
-                {showAdvancedInputs
-                  ? "Hide advanced inputs"
-                  : "Show advanced inputs"}
+                Advanced inputs
               </Menu.Item>
             ) : null}
-            <Menu.Divider />
             <Menu.Item
               leftSection={<IconUpload {...styles.icon.sm} />}
               onClick={handleImportClick}
               disabled={!processId}
             >
-              Import
+              Import process request
             </Menu.Item>
             <Menu.Item
               leftSection={<IconDownload {...styles.icon.sm} />}
               onClick={handleExportClick}
               disabled={!currentProcessRequest}
             >
-              Export
+              Export process request
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconRestore {...styles.icon.sm} />}
+              onClick={handleResetInputsClick}
+              disabled={!processId || !processDescription}
+            >
+              Reset to defaults
             </Menu.Item>
           </Menu.Dropdown>
         </Menu>
