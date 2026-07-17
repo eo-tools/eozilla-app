@@ -246,7 +246,7 @@ const uiConditionNames: UiConditionName[] = [
 const reportedExpressionErrors = new Set<string>();
 
 function compileUiExpressions(xUi: Record<string, unknown>) {
-  let compiled: CompiledUiExpressions | undefined;
+  let compiled: CompiledUiExpressions | undefined = undefined;
   for (const name of uiConditionNames) {
     const source = xUi[name];
     if (typeof source !== "string") {

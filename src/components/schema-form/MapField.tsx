@@ -92,9 +92,8 @@ export function MapField({
       return;
     }
 
-    const source3857 = vectorSource;
     const layer = new VectorLayer({
-      source: source3857,
+      source: vectorSource,
       style: polygonStyle,
     });
     const backgroundLayer = createBackgroundLayer(
