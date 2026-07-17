@@ -39,10 +39,14 @@ export function SelectiveCompositionField({
       <Tabs
         value={String(activeIndex)}
         onChange={(value) => {
+          if (ctx.disabled) {
+            return;
+          }
           const nextIndex = Number(value ?? "0");
           const nextOption = options[nextIndex] ?? options[0]!;
           const nextValue = withCompositionDiscriminatorValue(
-            optionValues[nextIndex] ?? createJsonValueForSchema(nextOption.schema),
+            optionValues[nextIndex] ??
+              createJsonValueForSchema(nextOption.schema),
             nextOption.schema,
             discriminator,
             nextIndex,
@@ -57,7 +61,11 @@ export function SelectiveCompositionField({
       >
         <Tabs.List>
           {options.map((option, index) => (
-            <Tabs.Tab key={option.name} value={String(index)}>
+            <Tabs.Tab
+              key={option.name}
+              value={String(index)}
+              disabled={ctx.disabled}
+            >
               {getFieldLabel(option)}
             </Tabs.Tab>
           ))}
@@ -78,6 +86,9 @@ export function SelectiveCompositionField({
               hideLabel: true,
               hideAdvanced: ctx.hideAdvanced,
               path: [...ctx.path, String(activeIndex)],
+              valuePath: ctx.valuePath,
+              index: ctx.index,
+              disabled: ctx.disabled,
             },
           )}
         </Tabs.Panel>

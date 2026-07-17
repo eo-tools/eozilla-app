@@ -1,5 +1,5 @@
-import type { ReactElement } from "react";
-import { Box, Group, Stack } from "@mantine/core";
+import { Fragment, type ReactElement } from "react";
+import { Group, Stack } from "@mantine/core";
 
 import {
   getVisibleInputFields,
@@ -36,7 +36,10 @@ export const objectFieldFactory: FieldFactory = {
     return (
       <FieldShell
         field={objectField}
-        hideLabel={ctx.hideLabel || (objectField.name === "root" && !objectField.schema.title)}
+        hideLabel={
+          ctx.hideLabel ||
+          (objectField.name === "root" && !objectField.schema.title)
+        }
       >
         {children}
       </FieldShell>
@@ -63,34 +66,28 @@ function createPropertyElements(
   const elements = new Map<string, ReactElement>();
 
   for (const propertyField of visibleFields) {
-    elements.set(
-      propertyField.name,
-      <Box
-        key={propertyField.name}
-        className={
+    const propertyElement = ctx.generator.renderField(
+      propertyField,
+      objectValue[propertyField.name],
+      (propertyValue) => {
+        ctx.onChange(
+          replaceObjectProperty(objectValue, propertyField.name, propertyValue),
+        );
+      },
+      {
+        disabled: ctx.disabled,
+        hideAdvanced: ctx.hideAdvanced,
+        path: [...ctx.path, propertyField.name],
+        valuePath: [...ctx.valuePath, propertyField.name],
+        className:
           !ctx.hideAdvanced && propertyField.advanced
             ? "input-row-appear"
-            : undefined
-        }
-      >
-        {ctx.generator.renderField(
-          propertyField,
-          objectValue[propertyField.name],
-          (propertyValue) => {
-            ctx.onChange(
-              replaceObjectProperty(
-                objectValue,
-                propertyField.name,
-                propertyValue,
-              ),
-            );
-          },
-          {
-            hideAdvanced: ctx.hideAdvanced,
-            path: [...ctx.path, propertyField.name],
-          },
-        )}
-      </Box>,
+            : undefined,
+      },
+    );
+    elements.set(
+      propertyField.name,
+      <Fragment key={propertyField.name}>{propertyElement}</Fragment>,
     );
   }
 

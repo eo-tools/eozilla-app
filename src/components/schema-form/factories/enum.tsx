@@ -1,10 +1,4 @@
-import {
-  Group,
-  Radio,
-  SegmentedControl,
-  Select,
-  Stack,
-} from "@mantine/core";
+import { Group, Radio, SegmentedControl, Select, Stack } from "@mantine/core";
 
 import type { JsonValue } from "@/utils/json";
 import { FieldShell } from "../FieldShell";
@@ -29,6 +23,7 @@ export function renderEnumSelect(ctx: FieldRenderContext, value: JsonValue) {
         label={ctx.hideLabel ? undefined : getFieldLabel(ctx.field)}
         description={getFieldDescription(ctx.field)}
         value={encodeEnumValue(value)}
+        disabled={ctx.disabled}
         onChange={(nextValue) => {
           ctx.onChange(decodeEnumValue(nextValue));
         }}
@@ -36,13 +31,25 @@ export function renderEnumSelect(ctx: FieldRenderContext, value: JsonValue) {
         {layout === "row" ? (
           <Group gap="xs" mt="xs">
             {data.map((item) => (
-              <Radio key={item.value} value={item.value} label={item.label} size="xs" />
+              <Radio
+                key={item.value}
+                value={item.value}
+                label={item.label}
+                size="xs"
+                disabled={ctx.disabled}
+              />
             ))}
           </Group>
         ) : (
           <Stack gap="xs" mt="xs">
             {data.map((item) => (
-              <Radio key={item.value} value={item.value} label={item.label} size="xs" />
+              <Radio
+                key={item.value}
+                value={item.value}
+                label={item.label}
+                size="xs"
+                disabled={ctx.disabled}
+              />
             ))}
           </Stack>
         )}
@@ -56,6 +63,7 @@ export function renderEnumSelect(ctx: FieldRenderContext, value: JsonValue) {
         <SegmentedControl
           value={encodeEnumValue(value)}
           data={data}
+          disabled={ctx.disabled}
           onChange={(nextValue) => {
             ctx.onChange(decodeEnumValue(nextValue));
           }}
@@ -71,6 +79,7 @@ export function renderEnumSelect(ctx: FieldRenderContext, value: JsonValue) {
       value={encodeEnumValue(value)}
       data={data}
       allowDeselect={false}
+      disabled={ctx.disabled}
       onChange={(nextValue) => {
         if (nextValue !== null) {
           ctx.onChange(decodeEnumValue(nextValue));

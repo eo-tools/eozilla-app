@@ -1,4 +1,5 @@
 import {
+  Fragment,
   startTransition,
   useEffect,
   useMemo,
@@ -21,7 +22,11 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 
-import { createJsonValueForSchema, type JsonArray, type JsonValue } from "@/utils/json";
+import {
+  createJsonValueForSchema,
+  type JsonArray,
+  type JsonValue,
+} from "@/utils/json";
 import { FieldShell } from "./FieldShell";
 import { getFieldValue, isArrayField } from "./fieldUtils";
 import type { FieldRenderContext } from "./types";
@@ -59,13 +64,15 @@ function ArrayTextInputField({
     () => serializeArrayValue(value, separator),
     [separator, value],
   );
-  const [{ textValue, errorMessage }, setDraft] = useArrayInputDraft(serializedValue);
+  const [{ textValue, errorMessage }, setDraft] =
+    useArrayInputDraft(serializedValue);
 
   return (
     <FieldShell field={ctx.field} hideLabel={ctx.hideLabel}>
       <Stack gap="xs">
         <TextInput
           value={textValue}
+          disabled={ctx.disabled}
           onChange={(event) => {
             const nextTextValue = event.currentTarget.value;
             try {
@@ -83,7 +90,9 @@ function ArrayTextInputField({
               setDraft({
                 textValue: nextTextValue,
                 errorMessage:
-                  error instanceof Error ? error.message : "Invalid array input.",
+                  error instanceof Error
+                    ? error.message
+                    : "Invalid array input.",
               });
             }
           }}
@@ -113,52 +122,65 @@ function ArrayEditorField({ ctx }: { ctx: FieldRenderContext }) {
     <FieldShell field={ctx.field} hideLabel={ctx.hideLabel}>
       <Stack gap="sm">
         {value.map((itemValue, index) => (
-          <Flex key={index} gap="xs" align="flex-start">
-            <Stack gap={4} style={{ flex: 1 }}>
-              {ctx.generator.renderField(
-                arrayField.items,
-                itemValue,
-                (nextValue) =>
-                  ctx.onChange(replaceArrayItem(value, index, nextValue)),
-                {
-                  hideAdvanced: ctx.hideAdvanced,
-                  hideLabel: true,
-                  path: [...ctx.path, String(index)],
-                },
-              )}
-            </Stack>
-            <Group gap={4} wrap="nowrap">
-              <ActionIcon
-                variant="default"
-                aria-label={`Move item ${index + 1} up`}
-                onClick={() =>
-                  ctx.onChange(moveArrayItem(value, index, index - 1))
-                }
-                disabled={index === 0}
-              >
-                <IconArrowUp size={14} />
-              </ActionIcon>
-              <ActionIcon
-                variant="default"
-                aria-label={`Move item ${index + 1} down`}
-                onClick={() =>
-                  ctx.onChange(moveArrayItem(value, index, index + 1))
-                }
-                disabled={index === value.length - 1}
-              >
-                <IconArrowDown size={14} />
-              </ActionIcon>
-              <ActionIcon
-                variant="default"
-                color="red"
-                aria-label={`Remove item ${index + 1}`}
-                onClick={() => ctx.onChange(removeArrayItem(value, index))}
-                disabled={value.length <= (arrayField.schema.minItems ?? 0)}
-              >
-                <IconTrash size={14} />
-              </ActionIcon>
-            </Group>
-          </Flex>
+          <Fragment key={index}>
+            {ctx.generator.renderField(
+              arrayField.items,
+              itemValue,
+              (nextValue) =>
+                ctx.onChange(replaceArrayItem(value, index, nextValue)),
+              {
+                hideAdvanced: ctx.hideAdvanced,
+                hideLabel: true,
+                path: [...ctx.path, String(index)],
+                valuePath: [...ctx.valuePath, index],
+                index,
+                disabled: ctx.disabled,
+                container: (element, disabled) => (
+                  <Flex gap="xs" align="flex-start">
+                    <Stack gap={4} style={{ flex: 1 }}>
+                      {element}
+                    </Stack>
+                    <Group gap={4} wrap="nowrap">
+                      <ActionIcon
+                        variant="default"
+                        aria-label={`Move item ${index + 1} up`}
+                        onClick={() =>
+                          ctx.onChange(moveArrayItem(value, index, index - 1))
+                        }
+                        disabled={disabled || index === 0}
+                      >
+                        <IconArrowUp size={14} />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant="default"
+                        aria-label={`Move item ${index + 1} down`}
+                        onClick={() =>
+                          ctx.onChange(moveArrayItem(value, index, index + 1))
+                        }
+                        disabled={disabled || index === value.length - 1}
+                      >
+                        <IconArrowDown size={14} />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant="default"
+                        color="red"
+                        aria-label={`Remove item ${index + 1}`}
+                        onClick={() =>
+                          ctx.onChange(removeArrayItem(value, index))
+                        }
+                        disabled={
+                          disabled ||
+                          value.length <= (arrayField.schema.minItems ?? 0)
+                        }
+                      >
+                        <IconTrash size={14} />
+                      </ActionIcon>
+                    </Group>
+                  </Flex>
+                ),
+              },
+            )}
+          </Fragment>
         ))}
         <Button
           variant="default"
@@ -169,7 +191,7 @@ function ArrayEditorField({ ctx }: { ctx: FieldRenderContext }) {
               createJsonValueForSchema(arrayField.items.schema),
             ])
           }
-          disabled={!canAddMore}
+          disabled={ctx.disabled || !canAddMore}
         >
           Add item
         </Button>
@@ -271,8 +293,14 @@ function parseArrayItem(
   throw new Error("This array input only supports primitive item types.");
 }
 
-function replaceArrayItem(value: JsonArray, index: number, nextValue: JsonValue) {
-  return value.map((item, itemIndex) => (itemIndex === index ? nextValue : item));
+function replaceArrayItem(
+  value: JsonArray,
+  index: number,
+  nextValue: JsonValue,
+) {
+  return value.map((item, itemIndex) =>
+    itemIndex === index ? nextValue : item,
+  );
 }
 
 function removeArrayItem(value: JsonArray, index: number) {
