@@ -49,6 +49,7 @@ function renderOptionsField(ctx: FieldRenderContext, options: Field[]) {
         value={ctx.value}
         onChange={ctx.onChange}
         hideLabel={ctx.hideLabel}
+        disabled={ctx.disabled}
       />
     );
   }
@@ -58,6 +59,9 @@ function renderOptionsField(ctx: FieldRenderContext, options: Field[]) {
       hideLabel: ctx.hideLabel,
       hideAdvanced: ctx.hideAdvanced,
       path: ctx.path,
+      valuePath: ctx.valuePath,
+      index: ctx.index,
+      disabled: ctx.disabled,
     });
   }
 
@@ -73,6 +77,7 @@ function renderAllOfField(ctx: FieldRenderContext) {
         value={ctx.value}
         onChange={ctx.onChange}
         hideLabel={ctx.hideLabel}
+        disabled={ctx.disabled}
       />
     );
   }
@@ -82,6 +87,9 @@ function renderAllOfField(ctx: FieldRenderContext) {
       hideLabel: ctx.hideLabel,
       hideAdvanced: ctx.hideAdvanced,
       path: ctx.path,
+      valuePath: ctx.valuePath,
+      index: ctx.index,
+      disabled: ctx.disabled,
     });
   }
 
@@ -96,6 +104,9 @@ function renderAllOfField(ctx: FieldRenderContext) {
         hideLabel: true,
         hideAdvanced: ctx.hideAdvanced,
         path: ctx.path,
+        valuePath: ctx.valuePath,
+        index: ctx.index,
+        disabled: ctx.disabled,
       })}
     </FieldShell>
   );

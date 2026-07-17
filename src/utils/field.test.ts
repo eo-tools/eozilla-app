@@ -144,10 +144,7 @@ describe("field helpers", () => {
     });
     expect(allOfField).toMatchObject({
       name: "input",
-      allOf: [
-        { name: "inputPart0" },
-        { name: "inputPart1" },
-      ],
+      allOf: [{ name: "inputPart0" }, { name: "inputPart1" }],
     });
   });
 
@@ -205,6 +202,64 @@ describe("field helpers", () => {
       "secondOrdered",
       "firstUnordered",
       "secondUnordered",
+    ]);
+  });
+
+  it("compiles dynamic UI expressions and marks only affected subtrees", () => {
+    const field = getFieldFromSchema("inputs", {
+      type: "object",
+      properties: {
+        mode: { type: "string" },
+        staticGroup: {
+          type: "object",
+          properties: { name: { type: "string" } },
+        },
+        dynamicGroup: {
+          type: "object",
+          properties: {
+            password: {
+              type: "string",
+              "x-ui-visible": "mode === 'login'",
+            },
+          },
+        },
+      },
+    } as unknown as JsonSchema) as ObjectField;
+
+    expect(field.hasDynamicExpressions).toBe(true);
+    expect(field.properties.staticGroup!.hasDynamicExpressions).toBeUndefined();
+    expect(field.properties.dynamicGroup!.hasDynamicExpressions).toBe(true);
+    expect(
+      (field.properties.dynamicGroup as ObjectField).properties.password!
+        .dynamicExpressions?.visible?.references,
+    ).toEqual([{ base: "sibling", path: ["mode"] }]);
+  });
+
+  it("keeps static schemas on the no-expression fast path", () => {
+    const field = getFieldFromSchema("inputs", {
+      type: "object",
+      properties: {
+        visible: { type: "string" },
+        hidden: { type: "string", "x-ui-hidden": true },
+      },
+    } as unknown as JsonSchema) as ObjectField;
+
+    expect(field.hasDynamicExpressions).toBeUndefined();
+    expect(field.properties.visible!.dynamicExpressions).toBeUndefined();
+  });
+
+  it("does not statically filter string-valued visibility expressions", () => {
+    const field = getFieldFromSchema("inputs", {
+      type: "object",
+      properties: {
+        dynamicHidden: { type: "string", "x-ui-hidden": "hide_field" },
+        dynamicVisible: { type: "string", "x-ui-visible": "show_field" },
+      },
+    } as unknown as JsonSchema) as ObjectField;
+
+    expect(getVisibleInputFields(field)).toEqual([
+      field.properties.dynamicHidden!,
+      field.properties.dynamicVisible!,
     ]);
   });
 });

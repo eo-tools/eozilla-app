@@ -39,6 +39,7 @@ export function renderNumericField(ctx: FieldRenderContext) {
           min={getMinimum(ctx)}
           max={getMaximum(ctx)}
           step={getStep(ctx)}
+          disabled={ctx.disabled}
           onChange={(nextValue) =>
             ctx.onChange(normalizeNumber(ctx, nextValue))
           }
@@ -56,6 +57,7 @@ export function renderNumericField(ctx: FieldRenderContext) {
       max={getMaximum(ctx)}
       step={getStep(ctx)}
       decimalScale={schema.type === "integer" ? 0 : undefined}
+      disabled={ctx.disabled}
       onChange={(nextValue) => {
         if (typeof nextValue === "number") {
           ctx.onChange(normalizeNumber(ctx, nextValue));

@@ -207,13 +207,16 @@ describe("arrayFieldFactory", () => {
 });
 
 function createContext(
-  overrides: Partial<FieldRenderContext> & Pick<FieldRenderContext, "field" | "onChange">,
+  overrides: Partial<FieldRenderContext> &
+    Pick<FieldRenderContext, "field" | "onChange">,
 ): FieldRenderContext {
   return {
     field: overrides.field,
     value: overrides.value,
     onChange: overrides.onChange,
     path: ["test"],
+    valuePath: ["test"],
+    disabled: false,
     hideLabel: overrides.hideLabel,
     generator: {
       renderField: () => {

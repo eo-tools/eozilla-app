@@ -31,6 +31,7 @@ interface MapFieldProps {
   onChange: (value: string | BBox) => void;
   hideLabel?: boolean;
   valueType?: MapValueType;
+  disabled?: boolean;
 }
 
 type DrawMode = "polygon" | "rectangle";
@@ -63,6 +64,7 @@ export function MapField({
   onChange,
   hideLabel,
   valueType = "wkt",
+  disabled = false,
 }: MapFieldProps) {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
@@ -125,7 +127,7 @@ export function MapField({
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) {
+    if (!map || disabled) {
       return;
     }
 
@@ -144,11 +146,11 @@ export function MapField({
     return () => {
       map.removeInteraction(modify);
     };
-  }, [onChange, valueType, vectorSource]);
+  }, [disabled, onChange, valueType, vectorSource]);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) {
+    if (!map || disabled) {
       return;
     }
 
@@ -161,16 +163,13 @@ export function MapField({
     });
     map.addInteraction(draw);
 
-    const cleanupHoverPointerHandlers = setupHoverPointerHandlers(
-      draw,
-      map,
-    );
+    const cleanupHoverPointerHandlers = setupHoverPointerHandlers(draw, map);
 
     return () => {
       cleanupHoverPointerHandlers();
       map.removeInteraction(draw);
     };
-  }, [drawMode, onChange, valueType, vectorSource]);
+  }, [disabled, drawMode, onChange, valueType, vectorSource]);
 
   useEffect(() => {
     if (valueType === "bbox") {
@@ -211,6 +210,7 @@ export function MapField({
                     type="button"
                     aria-label="Draw rectangle"
                     title="Draw rectangle"
+                    disabled={disabled}
                     onClick={() => setDrawMode("rectangle")}
                     style={
                       drawMode === "rectangle" ? activeControlStyle : undefined
@@ -222,6 +222,7 @@ export function MapField({
                     type="button"
                     aria-label="Draw polygon"
                     title="Draw polygon"
+                    disabled={disabled}
                     onClick={() => setDrawMode("polygon")}
                     style={
                       drawMode === "polygon" ? activeControlStyle : undefined
@@ -236,6 +237,7 @@ export function MapField({
                   type="button"
                   aria-label="Delete geometry"
                   title="Delete geometry"
+                  disabled={disabled}
                   onClick={handleDelete}
                 >
                   <IconTrash size={14} />

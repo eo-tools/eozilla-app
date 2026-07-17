@@ -17,6 +17,11 @@ import {
 } from "@/utils/json";
 import { isObject } from "@/utils/common";
 import type { InputDescription, ProcessDescription } from "@/service";
+import {
+  compileExpression,
+  type CompiledUiExpressions,
+  type UiConditionName,
+} from "@/components/dynamic-expressions";
 
 export interface FieldGroup {
   type: "row" | "column";
@@ -26,13 +31,17 @@ export interface FieldGroup {
 }
 
 export type FieldLayout = "row" | "column" | FieldGroup;
+export type UiConditionExpression = boolean | string;
 
 export interface XUi {
   widget?: string;
   layout?: FieldLayout;
   order?: number;
   advanced?: boolean;
-  hidden?: boolean;
+  visible?: UiConditionExpression;
+  hidden?: UiConditionExpression;
+  enabled?: UiConditionExpression;
+  disabled?: UiConditionExpression;
   placeholder?: string;
   password?: boolean;
   minimum?: number;
@@ -44,6 +53,8 @@ export interface XUi {
 export interface FieldBase<S extends JsonSchema> extends XUi {
   name: string;
   schema: S;
+  dynamicExpressions?: CompiledUiExpressions;
+  hasDynamicExpressions?: true;
 }
 
 export type UntypedField = FieldBase<UntypedSchema>;
@@ -100,7 +111,7 @@ export function getVisibleInputFields(
       index,
       field: inputsField.properties[name]!,
     }))
-    .filter(({ field }) => !field.hidden)
+    .filter(({ field }) => field.hidden !== true && field.visible !== false)
     .filter(({ field }) => !(hideAdvanced && field.advanced))
     .sort((a, b) => {
       const aHasOrder = Number.isFinite(a.field.order);
@@ -141,12 +152,18 @@ export function getFieldFromSchema(name: string, schema: JsonSchema): Field {
     }
   });
 
+  const dynamicExpressions = compileUiExpressions(xUi);
   const fieldBase = { name, schema, ...xUi };
   if (isArraySchema(schema)) {
-    return {
-      ...fieldBase,
-      items: getFieldFromSchema(`${name}Items`, schema.items || {}),
-    } as ArrayField;
+    const items = getFieldFromSchema(`${name}Items`, schema.items || {});
+    return addExpressionMetadata(
+      {
+        ...fieldBase,
+        items,
+      } as ArrayField,
+      dynamicExpressions,
+      [items],
+    );
   } else if (isObjectSchema(schema)) {
     const properties = schema.properties || {};
     const properties_: Record<string, Field> = {};
@@ -168,34 +185,102 @@ export function getFieldFromSchema(name: string, schema: JsonSchema): Field {
       );
     }
 
-    return {
-      ...fieldBase,
-      properties: properties_,
-      additionalProperties: additionalProperties_,
-    } as ObjectField;
+    return addExpressionMetadata(
+      {
+        ...fieldBase,
+        properties: properties_,
+        additionalProperties: additionalProperties_,
+      } as ObjectField,
+      dynamicExpressions,
+      [
+        ...Object.values(properties_),
+        ...(additionalProperties_ ? [additionalProperties_] : []),
+      ],
+    );
   } else if (isOneOfSchema(schema)) {
-    return {
-      ...fieldBase,
-      oneOf: schema.oneOf.map((option, index) =>
-        getFieldFromSchema(`${name}Option${index}`, option),
-      ),
-    } as OneOfField;
+    const oneOf = schema.oneOf.map((option, index) =>
+      getFieldFromSchema(`${name}Option${index}`, option),
+    );
+    return addExpressionMetadata(
+      {
+        ...fieldBase,
+        oneOf,
+      } as OneOfField,
+      dynamicExpressions,
+      oneOf,
+    );
   } else if (isAnyOfSchema(schema)) {
-    return {
-      ...fieldBase,
-      anyOf: schema.anyOf.map((option, index) =>
-        getFieldFromSchema(`${name}Option${index}`, option),
-      ),
-    } as AnyOfField;
+    const anyOf = schema.anyOf.map((option, index) =>
+      getFieldFromSchema(`${name}Option${index}`, option),
+    );
+    return addExpressionMetadata(
+      {
+        ...fieldBase,
+        anyOf,
+      } as AnyOfField,
+      dynamicExpressions,
+      anyOf,
+    );
   } else if (isAllOfSchema(schema)) {
-    return {
-      ...fieldBase,
-      allOf: schema.allOf.map((part, index) =>
-        getFieldFromSchema(`${name}Part${index}`, part),
-      ),
-    } as AllOfField;
+    const allOf = schema.allOf.map((part, index) =>
+      getFieldFromSchema(`${name}Part${index}`, part),
+    );
+    return addExpressionMetadata(
+      {
+        ...fieldBase,
+        allOf,
+      } as AllOfField,
+      dynamicExpressions,
+      allOf,
+    );
   }
-  return fieldBase as Field;
+  return addExpressionMetadata(fieldBase as Field, dynamicExpressions);
+}
+
+const uiConditionNames: UiConditionName[] = [
+  "visible",
+  "hidden",
+  "enabled",
+  "disabled",
+];
+const reportedExpressionErrors = new Set<string>();
+
+function compileUiExpressions(xUi: Record<string, unknown>) {
+  let compiled: CompiledUiExpressions | undefined;
+  for (const name of uiConditionNames) {
+    const source = xUi[name];
+    if (typeof source !== "string") {
+      continue;
+    }
+    try {
+      compiled ??= {};
+      compiled[name] = compileExpression(source);
+    } catch (error) {
+      const key = `${name}:${source}`;
+      if (!reportedExpressionErrors.has(key)) {
+        reportedExpressionErrors.add(key);
+        console.error(`Invalid x-ui-${name} expression '${source}'.`, error);
+      }
+    }
+  }
+  return compiled;
+}
+
+function addExpressionMetadata<T extends Field>(
+  field: T,
+  dynamicExpressions: CompiledUiExpressions | undefined,
+  children: Field[] = [],
+): T {
+  if (dynamicExpressions) {
+    field.dynamicExpressions = dynamicExpressions;
+  }
+  if (
+    dynamicExpressions ||
+    children.some((child) => child.hasDynamicExpressions)
+  ) {
+    field.hasDynamicExpressions = true;
+  }
+  return field;
 }
 
 export function getSchemaFromProcessDescriptionInputs(

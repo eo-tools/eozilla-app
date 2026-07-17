@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "title": "Dynamic expressions",
+  "description": "Visibility and enablement derived from sibling input values.",
+  "properties": {
+    "auth_type": {
+      "type": "string",
+      "title": "Authentication type",
+      "enum": ["anonymous", "login"],
+      "default": "anonymous",
+      "x-ui-widget": "radio-row"
+    },
+    "username": {
+      "type": "string",
+      "title": "Username",
+      "x-ui-visible": "auth_type === 'login'"
+    },
+    "password": {
+      "type": "string",
+      "format": "password",
+      "title": "Password",
+      "x-ui-enabled": "auth_type === 'login'"
+    },
+    "anonymous_note": {
+      "type": "string",
+      "title": "Anonymous note",
+      "description": "This field disappears when login authentication is selected.",
+      "x-ui-hidden": "auth_type === 'login'"
+    }
+  },
+  "additionalProperties": false
+}

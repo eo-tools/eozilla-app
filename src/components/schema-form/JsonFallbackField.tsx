@@ -23,6 +23,7 @@ interface JsonFallbackFieldProps {
   value: FieldValue;
   onChange: (value: JsonValue) => void;
   hideLabel?: boolean;
+  disabled?: boolean;
 }
 
 export function JsonFallbackField({
@@ -30,6 +31,7 @@ export function JsonFallbackField({
   value,
   onChange,
   hideLabel,
+  disabled,
 }: JsonFallbackFieldProps) {
   const initialValue = getFieldValue(field, value);
   const [{ textValue, errorText }, setDraft] = useJsonInputDraft(initialValue);
@@ -65,6 +67,7 @@ export function JsonFallbackField({
         autosize
         minRows={1}
         maxRows={10}
+        disabled={disabled}
         error={
           errorText && (
             <Typography

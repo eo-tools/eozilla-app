@@ -27,6 +27,7 @@ export const arrayFieldFactory: FieldFactory = {
           value={getBBoxValue(ctx.value)}
           onChange={(nextValue) => ctx.onChange(nextValue)}
           hideLabel={ctx.hideLabel}
+          disabled={ctx.disabled}
         />
       );
     }
