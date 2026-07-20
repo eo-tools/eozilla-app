@@ -89,7 +89,11 @@ export function ServiceDialogContent({
   const isBusy = isSigningIn || isCreatingService;
 
   return (
-    <Stack w="min(560px, calc(100vw - 64px))" h={420} gap="lg">
+    <Stack
+      w="min(560px, calc(100vw - 64px))"
+      h="min(570px, calc(100vh - 180px))"
+      gap="lg"
+    >
       <Stepper
         active={stepIndex[activeStep]}
         allowNextStepsSelect={false}
