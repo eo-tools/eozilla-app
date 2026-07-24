@@ -44,6 +44,8 @@ function getBuildNumberSinceLatestPublicRelease(): string {
 
 // See https://vite.dev/config/
 export default defineConfig({
+  // Keep assets under Jupyter's dynamic /proxy/<port>/ path.
+  base: "./",
   plugins: [react()],
   define: {
     "import.meta.env.VITE_APP_VERSION": JSON.stringify(appVersion),

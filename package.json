@@ -1,7 +1,7 @@
 {
   "name": "eozilla",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1-dev.0",
   "type": "module",
   "scripts": {
     "clean": "rimraf dist",
@@ -57,7 +57,7 @@
     "vitest": "^4.0.17"
   },
   "allowScripts": {
-    "esbuild@0.27.7": true,
+    "esbuild@0.28.0": true,
     "@swc/core@1.15.43": true
   }
 }
