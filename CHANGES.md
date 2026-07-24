@@ -4,6 +4,9 @@
 
 - The app can now be served from dynamic base paths, such as those used by
   Jupyter Server Proxy, without failing to load its static assets. (#58)
+- Service requests to loopback URLs can now be routed through a configured
+  browser-visible proxy, enabling remote Jupyter deployments to reach local
+  API endpoints. (#58)
 
 ## Changes in version 0.1.0
 

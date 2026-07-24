@@ -14,6 +14,7 @@ import {
   type ServiceProvider,
 } from "@/service";
 import { parseAppBootstrapConfig } from "@/config/bootstrap";
+import { configureLocalUrlProxy } from "@/config/localUrlProxy";
 import { CustomServiceProvider } from "@/service/providers/custom";
 import { DevServiceProvider } from "@/service/providers/dev";
 import { TestingServiceProvider } from "@/service/providers/testing";
@@ -26,6 +27,7 @@ import {
 } from "@/store/remotestate";
 
 const bootstrapConfig = parseAppBootstrapConfig();
+configureLocalUrlProxy(bootstrapConfig.proxy);
 console.debug("bootstrapConfig:", bootstrapConfig);
 
 initAppStore(() => {
