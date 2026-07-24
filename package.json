@@ -1,14 +1,14 @@
 {
   "name": "eozilla",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1-dev.0",
   "type": "module",
   "scripts": {
     "clean": "rimraf dist",
     "dev": "vite",
     "eozilla:dev": "pixi run --manifest-path ../pyproject.toml wraptile run -- wraptile.services.local.testing:service",
     "build": "rimraf dist && tsc -b && vite build",
-    "eozilla:build": "rimraf ../cuiman/src/cuiman/app/dist && tsc -b && vite build --outDir ../cuiman/src/cuiman/app/dist",
+    "eozilla:build": "rimraf ../cuiman/src/cuiman/app/dist && tsc -b && vite build --emptyOutDir --outDir ../cuiman/src/cuiman/app/dist",
     "schema2ui": "vite --config vite.schema2ui.config.ts --open / --port 4174",
     "test": "vitest --run",
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
@@ -56,7 +56,7 @@
     "vitest": "^4.0.17"
   },
   "allowScripts": {
-    "esbuild@0.27.7": true,
+    "esbuild@0.28.0": true,
     "@swc/core@1.15.43": true
   }
 }
