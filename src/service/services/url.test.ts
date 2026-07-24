@@ -9,6 +9,7 @@ import type {
   ProcessList,
   ServiceMetadata,
 } from "@/service";
+import { configureLocalUrlProxy } from "@/config/localUrlProxy";
 
 function createJsonResponse<T>(
   data: T,
@@ -32,11 +33,13 @@ describe("UrlService", () => {
   let fetchMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
+    configureLocalUrlProxy(null);
     fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
   });
 
   afterEach(() => {
+    configureLocalUrlProxy(null);
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
@@ -68,6 +71,24 @@ describe("UrlService", () => {
       headers: { "X-Auth-Token": "secret" },
       body: undefined,
     });
+  });
+
+  it("proxies loopback API requests at the request boundary", async () => {
+    configureLocalUrlProxy("https://hub.example/user/test/proxy/");
+    fetchMock.mockResolvedValueOnce(createJsonResponse(meta));
+
+    await expect(
+      loadServiceRootMetadata("http://localhost:8080/api/"),
+    ).resolves.toEqual(meta);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://hub.example/user/test/proxy/8080/api/",
+      {
+        method: undefined,
+        headers: undefined,
+        body: undefined,
+      },
+    );
   });
 
   it("performs the public service operations", async () => {

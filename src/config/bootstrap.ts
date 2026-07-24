@@ -7,6 +7,9 @@ import { isObject } from "@/utils/common";
 
 const COMPACT_QUERY_PARAM = "compact";
 const DEBUG_QUERY_PARAM = "debug";
+// `proxy` is the browser-visible Jupyter Server Proxy base URL. The resolver
+// enforces that only loopback service URLs use it.
+const PROXY_QUERY_PARAM = "proxy";
 const SCHEME_QUERY_PARAM = "scheme";
 const SERVICE_QUERY_PARAM = "service";
 const WEBSOCKET_QUERY_PARAM = "ws";
@@ -16,6 +19,7 @@ export type AppColorScheme = "dark" | "light";
 export interface AppBootstrapConfig {
   compact: boolean;
   debug: boolean;
+  proxy: string | null;
   scheme: AppColorScheme | undefined;
   service: SerializedServiceProvider | null;
   ws: string | null;
@@ -33,6 +37,7 @@ export function parseAppBootstrapConfig(
   const params = new URLSearchParams(search);
   const compact = parseBooleanParam(params.get(COMPACT_QUERY_PARAM));
   const debug = parseBooleanParam(params.get(DEBUG_QUERY_PARAM));
+  const proxy = params.get(PROXY_QUERY_PARAM);
   const scheme = parseSchemeParam(params.get(SCHEME_QUERY_PARAM));
   const ws = params.get(WEBSOCKET_QUERY_PARAM);
   const encodedService = params.get(SERVICE_QUERY_PARAM);
@@ -46,7 +51,7 @@ export function parseAppBootstrapConfig(
       console.warn("Failed to parse value of parameter 'service'.", error);
     }
   }
-  return { compact, debug, scheme, service, ws };
+  return { compact, debug, proxy, scheme, service, ws };
 }
 
 export function parseSerializedServiceProvider(

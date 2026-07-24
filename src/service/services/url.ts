@@ -12,6 +12,7 @@ import type {
 } from "@/service";
 import { isObject } from "@/utils/common";
 import { ServiceError } from "@/service/errors";
+import { resolveAppUrl } from "@/config/localUrlProxy";
 
 interface ApiCallOptions<T> {
   params?: [string, string][];
@@ -146,7 +147,7 @@ async function callApi<T>(
   options?: ApiCallOptions<T>,
   defaultHeaders: ApiHeaders = {},
 ): Promise<T> {
-  const url = buildUrl(apiUrl, path, options?.params || []);
+  const url = resolveAppUrl(buildUrl(apiUrl, path, options?.params || []));
   const hasData = typeof options?.data !== "undefined";
   const response = await fetch(url, {
     method: options?.method,
