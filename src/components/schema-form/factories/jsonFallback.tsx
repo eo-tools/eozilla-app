@@ -12,6 +12,7 @@ export const jsonFallbackFieldFactory: FieldFactory = {
         value={ctx.value}
         onChange={ctx.onChange}
         hideLabel={ctx.hideLabel}
+        disabled={ctx.disabled}
       />
     );
   },

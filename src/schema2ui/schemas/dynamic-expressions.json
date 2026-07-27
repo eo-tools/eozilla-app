@@ -1,0 +1,103 @@
+{
+  "type": "object",
+  "title": "Dynamic expressions",
+  "description": "Visibility and enablement derived from sibling input values.",
+  "properties": {
+    "authentication": {
+      "type": "object",
+      "title": "Authentication",
+      "description": "Authentication configuration.",
+      "additionalProperties": false,
+      "properties": {
+        "auth_type": {
+          "type": "string",
+          "enum": ["none", "basic", "token", "login", "api-key"],
+          "default": "none",
+          "title": "Authentication Type"
+        },
+        "auth_url": {
+          "type": "string",
+          "nullable": true,
+          "default": null,
+          "title": "Authentication URL",
+          "x-ui-hidden": "auth_type === 'none' || !auth_type"
+        },
+        "grant_type": {
+          "type": "string",
+          "default": "password",
+          "title": "Grant Type"
+        },
+        "username": {
+          "type": "string",
+          "nullable": true,
+          "default": null,
+          "title": "Username",
+          "x-ui-visible": "auth_type === 'login'"
+        },
+        "password": {
+          "type": "string",
+          "nullable": true,
+          "format": "password",
+          "default": null,
+          "title": "Password",
+          "x-ui-visible": "auth_type === 'login'"
+        },
+        "client_id": {
+          "type": "string",
+          "nullable": true,
+          "default": null,
+          "title": "Client Id"
+        },
+        "client_secret": {
+          "type": "string",
+          "nullable": true,
+          "format": "password",
+          "default": null,
+          "title": "Client Secret"
+        },
+        "refresh_token": {
+          "type": "string",
+          "nullable": true,
+          "format": "password",
+          "default": null,
+          "title": "Refresh Token",
+          "x-ui-visible": "auth_type === 'token'"
+        },
+        "token": {
+          "type": "string",
+          "nullable": true,
+          "format": "password",
+          "default": null,
+          "title": "Token",
+          "x-ui-visible": "auth_type === 'token'"
+        },
+        "use_bearer": {
+          "type": "boolean",
+          "default": true,
+          "title": "Use Bearer",
+          "x-ui-visible": "auth_type === 'token' || auth_type === 'login'"
+        },
+        "token_header": {
+          "default": "X-Auth-Token",
+          "title": "Token Header",
+          "type": "string",
+          "x-ui-visible": "(auth_type === 'token' || auth_type === 'login') && !use_bearer"
+        },
+        "api_key": {
+          "type": "string",
+          "nullable": true,
+          "default": null,
+          "title": "Api Key",
+          "x-ui-visible": "auth_type === 'api-key'"
+        },
+        "api_key_header": {
+          "type": "string",
+          "default": "X-API-Key",
+          "title": "Api Key Header",
+          "x-ui-visible": "auth_type === 'api-key'"
+        }
+      }
+    }
+  }
+}
+

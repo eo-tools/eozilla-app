@@ -32,6 +32,7 @@ export const nullableFieldFactory: FieldFactory = {
           }
           size="xs"
           checked={enabled}
+          disabled={ctx.disabled}
           onChange={(event) => handleToggle(event.currentTarget.checked)}
         />
         <Collapse expanded={enabled}>
@@ -39,6 +40,9 @@ export const nullableFieldFactory: FieldFactory = {
             hideLabel: true,
             hideAdvanced: ctx.hideAdvanced,
             path: ctx.path,
+            valuePath: ctx.valuePath,
+            index: ctx.index,
+            disabled: ctx.disabled,
           })}
         </Collapse>
       </Stack>

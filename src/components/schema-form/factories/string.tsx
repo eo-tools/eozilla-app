@@ -28,6 +28,7 @@ export const stringFieldFactory: FieldFactory = {
           value={String(ctx.value ?? "")}
           onChange={(nextValue) => ctx.onChange(nextValue)}
           hideLabel={ctx.hideLabel}
+          disabled={ctx.disabled}
         />
       );
     }
@@ -63,6 +64,7 @@ function renderStringField(ctx: FieldRenderContext) {
         description={getFieldDescription(ctx.field)}
         placeholder={ctx.field.placeholder}
         value={value}
+        disabled={ctx.disabled}
         onChange={(event) => ctx.onChange(event.currentTarget.value)}
       />
     );
@@ -78,6 +80,7 @@ function renderStringField(ctx: FieldRenderContext) {
         minRows={2}
         maxRows={8}
         value={value}
+        disabled={ctx.disabled}
         onChange={(event) => ctx.onChange(event.currentTarget.value)}
       />
     );
@@ -89,6 +92,7 @@ function renderStringField(ctx: FieldRenderContext) {
       description={getFieldDescription(ctx.field)}
       placeholder={ctx.field.placeholder}
       value={value}
+      disabled={ctx.disabled}
       onChange={(event) => ctx.onChange(event.currentTarget.value)}
     />
   );
@@ -103,6 +107,7 @@ function renderDateField(ctx: FieldRenderContext, value: string) {
       value={toDateValue(value)}
       valueFormat="YYYY-MM-DD"
       clearable={Boolean(ctx.field.schema.nullable)}
+      disabled={ctx.disabled}
       onChange={(nextValue) => {
         ctx.onChange(nextValue ?? "");
       }}
@@ -118,6 +123,7 @@ function renderTimeField(ctx: FieldRenderContext, value: string) {
       placeholder={ctx.field.placeholder}
       value={toTimeValue(value)}
       withSeconds
+      disabled={ctx.disabled}
       onChange={(event) => {
         ctx.onChange(event.currentTarget.value);
       }}
@@ -135,6 +141,7 @@ function renderDateTimeField(ctx: FieldRenderContext, value: string) {
       valueFormat="YYYY-MM-DD HH:mm:ss"
       withSeconds
       clearable={Boolean(ctx.field.schema.nullable)}
+      disabled={ctx.disabled}
       onChange={(nextValue: string | null) => {
         ctx.onChange(nextValue ? fromDateTimePickerValue(nextValue) : "");
       }}

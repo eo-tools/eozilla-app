@@ -198,6 +198,8 @@ function createContext(
     value: overrides.value,
     onChange: overrides.onChange,
     path: ["test"],
+    valuePath: ["test"],
+    disabled: false,
     hideLabel: overrides.hideLabel,
     generator: overrides.generator ?? {
       renderField: () => <div />,

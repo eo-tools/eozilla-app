@@ -10,6 +10,7 @@ The schema-form generator turns OpenAPI/JSON-schema-derived process input
 metadata into a controlled React form built from Mantine components.
 
 The generator is built around a few core ideas:
+
 - normalized `Field` metadata extracted from schemas
 - a scored field factory registry
 - a render context that can recursively render child fields
@@ -21,7 +22,6 @@ The process inputs panel supports two editor modes:
 
 - `Form`: generated controls from `SchemaForm`
 - `JSON`: unstyled and tabular, raw JSON input fields
-
 
 - state type: `ProcessEditorMode`
 - app state property: `processEditorMode`
@@ -165,7 +165,10 @@ Recognized UI hints currently include:
 - `layout`
 - `order`
 - `advanced`
+- `visible`
 - `hidden`
+- `enabled`
+- `disabled`
 - `placeholder`
 - `password`
 - `minimum`
@@ -368,6 +371,9 @@ File: `src/components/schema-form/factories/object.tsx`
 
 Objects render nested generated forms for visible properties.
 
+String-valued visibility and enablement metadata is evaluated through the
+`dynamic-expression` module described in [Dynamic Expressions](dynamic-expressions.md).
+
 It respects:
 
 - `hidden`
@@ -548,6 +554,7 @@ Current fixture corpus:
 - `boolean`
 - `combinations`
 - `discriminator`
+- `dynamic-expressions`
 - `integer`
 - `map-wkt`
 - `nullable-only`

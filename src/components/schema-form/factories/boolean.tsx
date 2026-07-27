@@ -23,6 +23,7 @@ function renderBooleanField(ctx: FieldRenderContext) {
       label={ctx.hideLabel ? undefined : getFieldLabel(ctx.field)}
       description={getFieldDescription(ctx.field)}
       checked={value}
+      disabled={ctx.disabled}
       onChange={(event) => ctx.onChange(event.currentTarget.checked)}
     />
   );
