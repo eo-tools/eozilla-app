@@ -36,11 +36,14 @@ describe("parseAppBootstrapConfig", () => {
 
     expect(
       parseAppBootstrapConfig(
-        `?compact=1&debug=1&scheme=dark&service=${encodedService}`,
+        `?compact=1&debug=1&proxy=${encodeURIComponent(
+          "https://hub.example/user/test/proxy/",
+        )}&scheme=dark&service=${encodedService}`,
       ),
     ).toEqual({
       compact: true,
       debug: true,
+      proxy: "https://hub.example/user/test/proxy/",
       scheme: "dark",
       ws: null,
       service: {
@@ -71,6 +74,7 @@ describe("parseAppBootstrapConfig", () => {
     ).toEqual({
       compact: true,
       debug: false,
+      proxy: null,
       scheme: "dark",
       ws: null,
       service: null,
@@ -83,6 +87,7 @@ describe("parseAppBootstrapConfig", () => {
     expect(parseAppBootstrapConfig("?scheme=auto")).toEqual({
       compact: false,
       debug: false,
+      proxy: null,
       scheme: undefined,
       ws: null,
       service: null,
@@ -93,6 +98,7 @@ describe("parseAppBootstrapConfig", () => {
     expect(parseAppBootstrapConfig("?compact=0")).toEqual({
       compact: false,
       debug: false,
+      proxy: null,
       scheme: undefined,
       ws: null,
       service: null,
@@ -100,6 +106,7 @@ describe("parseAppBootstrapConfig", () => {
     expect(parseAppBootstrapConfig("?compact=false")).toEqual({
       compact: false,
       debug: false,
+      proxy: null,
       scheme: undefined,
       ws: null,
       service: null,
@@ -117,6 +124,7 @@ describe("parseAppBootstrapConfig", () => {
     expect(parseAppBootstrapConfig(`?service=${encodedService}`)).toEqual({
       compact: false,
       debug: false,
+      proxy: null,
       scheme: undefined,
       ws: null,
       service: null,
@@ -127,6 +135,7 @@ describe("parseAppBootstrapConfig", () => {
     expect(parseAppBootstrapConfig("?ws=ws://127.0.0.1:8743/ws")).toEqual({
       compact: false,
       debug: false,
+      proxy: null,
       scheme: undefined,
       ws: "ws://127.0.0.1:8743/ws",
       service: null,
