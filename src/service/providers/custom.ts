@@ -66,21 +66,26 @@ export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions>
 
 function getAuthorizationCodeOptions(
   options: ServiceOptionsInput<UrlServiceOptions>,
-): Pick<UrlServiceOptions, "authUrl" | "clientId"> | null {
+): Pick<
+  UrlServiceOptions,
+  "authorizationServerUrl" | "clientId" | "oauth2Scopes"
+> | null {
   if (
     options.authType === "oauth2" &&
     (options.oauth2GrantType ?? "authorization_code") === "authorization_code"
   ) {
     return {
-      authUrl: options.authorizationServerUrl,
+      authorizationServerUrl: options.authorizationServerUrl,
       clientId: options.clientId,
+      oauth2Scopes: options.oauth2Scopes,
     };
   }
-  if (
-    options.authType === "login" &&
-    options.grantType === "authorization_code"
-  ) {
-    return { authUrl: options.authUrl, clientId: options.clientId };
+  if (options.authType === "login") {
+    return {
+      authorizationServerUrl: options.authorizationServerUrl,
+      clientId: options.clientId,
+      oauth2Scopes: options.oauth2Scopes,
+    };
   }
   return null;
 }

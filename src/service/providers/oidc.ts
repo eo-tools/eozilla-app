@@ -3,33 +3,43 @@ import { UserManager, WebStorageStateStore, type User } from "oidc-client-ts";
 import type { UserIdentity } from "@/service";
 import type { UrlServiceOptions } from "./url";
 
-type OidcOptions = Pick<UrlServiceOptions, "authUrl" | "clientId">;
+type OidcOptions = Pick<
+  UrlServiceOptions,
+  "authorizationServerUrl" | "clientId" | "oauth2Scopes"
+>;
 
 /**
  * Authorization Code + PKCE login using the existing URL-provider options.
  *
- * `authUrl` is the authorization server's base URL and `clientId` identifies
- * the public browser client. The OAuth2 flow uses OIDC discovery and claims
- * when the server supports them.
+ * `authorizationServerUrl` is the authorization server's base URL and
+ * `clientId` identifies the public browser client. The OAuth2 flow uses OIDC
+ * discovery and claims when the server supports them.
  */
 export class OidcAuth {
   private readonly manager: UserManager;
 
   constructor(options: Partial<OidcOptions>) {
-    if (!options.authUrl) {
+    if (!options.authorizationServerUrl?.trim()) {
       throw new Error("Please provide an authentication URL.");
     }
-    if (!options.clientId) {
+    if (!isHttpUrl(options.authorizationServerUrl)) {
+      throw new Error("Please provide a valid HTTP(S) authentication URL.");
+    }
+    if (!options.clientId?.trim()) {
       throw new Error("Please provide a client ID.");
+    }
+    const scope = options.oauth2Scopes?.trim() || "openid profile email";
+    if (!scope.split(/\s+/).includes("openid")) {
+      throw new Error('OAuth2 scopes must include "openid" for login.');
     }
 
     const appUrl = `${window.location.origin}${window.location.pathname}`;
     this.manager = new UserManager({
-      authority: options.authUrl,
-      client_id: options.clientId,
+      authority: options.authorizationServerUrl.trim(),
+      client_id: options.clientId.trim(),
       redirect_uri: appUrl,
       response_type: "code",
-      scope: "openid profile email",
+      scope,
       automaticSilentRenew: false,
       stateStore: new WebStorageStateStore({ store: window.sessionStorage }),
       userStore: new WebStorageStateStore({ store: window.sessionStorage }),
@@ -91,6 +101,15 @@ export class OidcAuth {
     }
     await this.manager.removeUser();
     throw new Error("The login session has expired. Please sign in again.");
+  }
+}
+
+function isHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch (_error) {
+    return false;
   }
 }
 
