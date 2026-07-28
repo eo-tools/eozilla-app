@@ -202,6 +202,25 @@ describe("UrlService", () => {
     );
   });
 
+  it("resolves dynamic headers for every service request", async () => {
+    const headers = vi.fn(async () => ({ Authorization: "Bearer fresh" }));
+    const service = new UrlService(
+      "custom",
+      "https://example.com/api/",
+      user,
+      meta,
+      headers,
+    );
+    fetchMock
+      .mockResolvedValueOnce(createJsonResponse({ processes: [], links: [] }))
+      .mockResolvedValueOnce(createJsonResponse({ processes: [], links: [] }));
+
+    await service.getProcesses();
+    await service.getProcesses();
+
+    expect(headers).toHaveBeenCalledTimes(2);
+  });
+
   it("throws a ServiceError when the API returns problem details", async () => {
     fetchMock.mockResolvedValueOnce(
       createJsonResponse(

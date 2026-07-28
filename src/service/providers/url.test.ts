@@ -1,102 +1,42 @@
 import { describe, expect, it } from "vitest";
+
 import { URL_SERVICE_OPTIONS_SCHEMA } from "./url";
 
 describe("URL service options schema", () => {
-  it("describes the expected configuration fields", () => {
-    expect(URL_SERVICE_OPTIONS_SCHEMA).toEqual({
-      apiUrl: {
-        type: "string",
-        title: "Service API URL",
-        default: "http://localhost:8008",
-        format: "uri",
-      },
-      authUrl: {
-        type: "string",
-        title: "Authentication URL",
-        nullable: true,
-        format: "uri",
-      },
+  it("uses the new OAuth2 configuration while retaining hidden legacy fields", () => {
+    expect(URL_SERVICE_OPTIONS_SCHEMA).toMatchObject({
       authType: {
-        type: "string",
-        title: "Authentication Type",
         default: "none",
-        enum: ["none", "basic", "login", "token", "api-key"],
+        enum: ["none", "token", "oauth2"],
       },
-
-      username: {
-        type: "string",
-        title: "Username",
-        nullable: true,
-      },
-      password: {
-        type: "string",
-        title: "Password",
-        nullable: true,
+      accessToken: {
         format: "password",
+        "x-ui-visible": "authType === 'token'",
       },
-
-      clientId: {
-        type: "string",
-        title: "Client ID",
-        nullable: true,
-        format: "password",
-      },
-      clientSecret: {
-        type: "string",
-        title: "Client secret",
-        nullable: true,
-        format: "password",
-      },
-      grantType: {
-        type: "string",
-        title: "Grant type",
-        nullable: true,
-        enum: [
-          "authorization_code",
-          "implicit",
-          "password",
-          "client_credentials",
-          "refresh_token",
-        ],
-      },
-
-      refreshToken: {
-        type: "string",
-        title: "Refresh token",
-        nullable: true,
-        format: "password",
-      },
-
-      token: {
-        type: "string",
-        title: "Access token",
-        nullable: true,
-        format: "password",
-      },
-
       useBearer: {
-        type: "boolean",
-        title: "Grant type",
-        nullable: true,
+        default: true,
+        "x-ui-visible": "authType === 'token'",
       },
-      tokenHeader: {
-        type: "string",
-        title: "Name of the token header",
-        nullable: true,
+      accessTokenHeader: {
+        default: "X-Auth-Token",
+        "x-ui-visible": "authType === 'token' && !useBearer",
       },
-
-      apiKey: {
-        type: "string",
-        title: "API key",
-        nullable: true,
-        format: "password",
+      authorizationServerUrl: {
+        format: "uri",
+        "x-ui-visible": "authType === 'oauth2'",
       },
-      apiKeyHeader: {
-        type: "string",
-        title: "Name of the API key header",
-        default: "X-API-Key",
-        nullable: true,
+      clientId: {
+        "x-ui-visible": "authType === 'oauth2'",
       },
+      oauth2GrantType: {
+        default: "authorization_code",
+        enum: ["authorization_code"],
+        "x-ui-hidden": true,
+      },
+      authUrl: { "x-ui-hidden": true },
+      token: { "x-ui-hidden": true },
+      tokenHeader: { "x-ui-hidden": true },
+      grantType: { "x-ui-hidden": true },
     });
   });
 });

@@ -17,6 +17,7 @@ export interface ServiceOptionSchemaBase {
   title: string;
   description?: string;
   nullable?: boolean;
+  [key: `x-ui-${string}`]: boolean | string | undefined;
 }
 
 export interface BooleanServiceOptionSchema extends ServiceOptionSchemaBase {
