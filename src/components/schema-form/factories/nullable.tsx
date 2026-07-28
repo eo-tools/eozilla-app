@@ -16,7 +16,17 @@ export const nullableFieldFactory: FieldFactory = {
         : ctx.value;
     const handleToggle = (checked: boolean) => {
       ctx.onChange(
-        checked ? createJsonValueForSchema(innerField.schema) : null,
+        checked
+          ? createJsonValueForSchema({
+              ...innerField.schema,
+              // Keeping `default: null` here would set the value back to `null` when the
+              // switch is enabled, so omit it and let the type-specific fallback be used.
+              default:
+                innerField.schema.default === null
+                  ? undefined
+                  : innerField.schema.default,
+            })
+          : null,
       );
     };
 
