@@ -23,6 +23,4 @@ Before opening a pull request, make sure that all applicable items below are com
 
 Use Prettier to format code and ESLint to identify code-quality issues.
 
-Keep changes small and focused. Place component work in `src/components`, service integration work in `src/service`, shared application state in `src/store`, and persisted state in `src/state`.
-
 Use TypeScript types for public interfaces and keep OGC API - Processes terminology consistent throughout the application.
