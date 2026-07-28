@@ -1,4 +1,5 @@
 import type { ComponentProps, ReactElement } from "react";
+import { TextInput } from "@mantine/core";
 import { describe, expect, it, vi } from "vitest";
 
 import { getFieldFromSchema } from "@/utils/field";
@@ -8,6 +9,7 @@ import { stringFieldFactory } from "./string";
 import type { FieldRenderContext } from "../types";
 
 type MapFieldElement = ReactElement<ComponentProps<typeof MapField>>;
+type TextInputElement = ReactElement<ComponentProps<typeof TextInput>>;
 
 describe("stringFieldFactory", () => {
   it("scores string map fields", () => {
@@ -40,6 +42,25 @@ describe("stringFieldFactory", () => {
 
     element.props.onChange("POLYGON((1 1,2 1,2 2,1 2,1 1))");
     expect(onChange).toHaveBeenCalledWith("POLYGON((1 1,2 1,2 2,1 2,1 1))");
+  });
+
+  it("validates text input against minLength", () => {
+    const field = getFieldFromSchema("title", {
+      type: "string",
+      minLength: 5,
+    } as JsonSchema);
+
+    const invalidElement = stringFieldFactory.render(
+      createContext({ field, value: "test", onChange: vi.fn() }),
+    ) as TextInputElement;
+    const validElement = stringFieldFactory.render(
+      createContext({ field, value: "valid", onChange: vi.fn() }),
+    ) as TextInputElement;
+
+    expect(invalidElement.type).toBe(TextInput);
+    expect(invalidElement.props.minLength).toBe(5);
+    expect(invalidElement.props.error).toBe("Must be at least 5 characters.");
+    expect(validElement.props.error).toBeUndefined();
   });
 });
 

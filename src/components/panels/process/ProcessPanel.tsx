@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Divider, Stack } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import {
   IconMathFunction,
 } from "@tabler/icons-react";
@@ -25,10 +26,12 @@ import { SubPanel } from "@/components/common/SubPanel";
 import ProcessInputsSubPanel from "@/components/panels/process/ProcessInputsSubPanel";
 import ProcessOutputsSubPanel from "@/components/panels/process/ProcessOutputsSubPanel";
 import ProcessRequestActions from "@/components/panels/process/ProcessRequestActions";
+import { getErrorMessage } from "@/utils/common";
 import {
   getFieldFromProcessDescriptionInputs,
   getVisibleInputFields,
 } from "@/utils/field";
+import { validateJsonValue } from "@/utils/json";
 
 export default function ProcessPanel() {
   const processesState = useActiveProcessDescription();
@@ -75,9 +78,30 @@ export default function ProcessPanel() {
       !processExecution.submitting),
   );
   const handleExecuteProcess = () => {
-    if (processRequests) {
-      executeActiveProcess(processRequests);
+    if (!processRequests || !processId || !inputsField) {
+      return;
     }
+
+    const processRequest = processRequests[processId];
+    if (!processRequest) {
+      return;
+    }
+
+    try {
+      validateJsonValue(
+        inputsField.name,
+        processRequest.inputs ?? {},
+        inputsField.schema,
+      );
+    } catch (error) {
+      notifications.show({
+        message: `Invalid process inputs: ${getErrorMessage(error)}`,
+        color: "red",
+      });
+      return;
+    }
+
+    executeActiveProcess(processRequests);
   };
   return (
     <Panel>
