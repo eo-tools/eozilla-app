@@ -16,7 +16,17 @@ export const nullableFieldFactory: FieldFactory = {
         : ctx.value;
     const handleToggle = (checked: boolean) => {
       ctx.onChange(
-        checked ? createJsonValueForSchema(innerField.schema) : null,
+        checked
+          ? createJsonValueForSchema({
+              ...innerField.schema,
+              // A nullable field's `default: null` represents its disabled
+              // state. Once enabled, use the non-nullable fallback instead.
+              default:
+                innerField.schema.default === null
+                  ? undefined
+                  : innerField.schema.default,
+            })
+          : null,
       );
     };
 
