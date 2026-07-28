@@ -10,6 +10,7 @@ export type AuthType =
 
 /** The only OAuth2 grant supported by this browser client. */
 export type OAuth2GrantType = "authorization_code";
+export type OAuth2Protocol = "oauth2" | "oidc";
 
 export interface UrlServiceOptions extends ServiceOptions {
   apiUrl: string;
@@ -27,6 +28,9 @@ export interface UrlServiceOptions extends ServiceOptions {
   apiKey?: string;
   apiKeyHeader?: string;
   authorizationServerUrl?: string;
+  oauth2Protocol?: OAuth2Protocol;
+  authorizationEndpoint?: string;
+  tokenEndpoint?: string;
   oauth2GrantType?: OAuth2GrantType;
   oauth2Scopes?: string;
   accessToken?: string;
@@ -150,18 +154,45 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
   authorizationServerUrl: {
     type: "string",
     title: "Authorization server URL",
-    description: "The base URL used to discover the OAuth2 endpoints.",
+    description: "The OIDC issuer URL used to discover its endpoints.",
     nullable: true,
     format: "uri",
+    "x-ui-visible":
+      "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oidc'",
+  },
+  oauth2Protocol: {
+    type: "string",
+    title: "Authorization protocol",
+    default: "oidc",
+    enum: ["oauth2", "oidc"],
     "x-ui-visible": "authType === 'login' || authType === 'oauth2'",
+  },
+  authorizationEndpoint: {
+    type: "string",
+    title: "Authorization endpoint",
+    description: "The OAuth2 endpoint that starts the authorization redirect.",
+    nullable: true,
+    format: "uri",
+    "x-ui-visible":
+      "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
+  },
+  tokenEndpoint: {
+    type: "string",
+    title: "Token endpoint",
+    description:
+      "The OAuth2 endpoint that exchanges an authorization code for tokens.",
+    nullable: true,
+    format: "uri",
+    "x-ui-visible":
+      "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
   },
   oauth2Scopes: {
     type: "string",
     title: "OAuth2 scopes",
     description:
       "Space-separated scopes requested from the authorization server.",
-    default: "openid profile email",
-    "x-ui-visible": "authType === 'oauth2'",
+    nullable: true,
+    "x-ui-visible": "authType === 'login' || authType === 'oauth2'",
   },
   oauth2GrantType: {
     type: "string",

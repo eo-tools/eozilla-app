@@ -7,7 +7,7 @@ import type {
   UserIdentity,
 } from "@/service";
 import { loadServiceRootMetadata } from "@/service/services/url";
-import { OidcAuth } from "./oidc";
+import { OAuth2Auth } from "./oauth2";
 
 export interface CustomServiceProviderConfig {
   id?: string;
@@ -23,7 +23,7 @@ export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions>
   readonly id: string;
   readonly meta: ServiceProviderMeta;
   readonly optionsSchema = URL_SERVICE_OPTIONS_SCHEMA;
-  private oidcAuth: OidcAuth | null = null;
+  private oauth2Auth: OAuth2Auth | null = null;
 
   constructor(config: CustomServiceProviderConfig = {}) {
     this.id = config.id ?? "custom";
@@ -33,14 +33,14 @@ export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions>
   async signIn(options: ServiceOptionsInput<UrlServiceOptions>): Promise<void> {
     const oauth2Options = getAuthorizationCodeOptions(options);
     if (oauth2Options) {
-      this.oidcAuth = new OidcAuth(oauth2Options);
-      await this.oidcAuth.signIn();
+      this.oauth2Auth = new OAuth2Auth(oauth2Options);
+      await this.oauth2Auth.signIn();
     }
   }
 
   async signOut(): Promise<void> {
-    await this.oidcAuth?.signOut();
-    this.oidcAuth = null;
+    await this.oauth2Auth?.signOut();
+    this.oauth2Auth = null;
   }
 
   async createService(
@@ -54,8 +54,8 @@ export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions>
     let authHeaders: ApiHeadersProvider = createTokenAuthHeaders(options);
     const oauth2Options = getAuthorizationCodeOptions(options);
     if (oauth2Options) {
-      this.oidcAuth = new OidcAuth(oauth2Options);
-      const auth = await this.oidcAuth.createAuth();
+      this.oauth2Auth = new OAuth2Auth(oauth2Options);
+      const auth = await this.oauth2Auth.createAuth();
       user = auth.user;
       authHeaders = auth.getHeaders;
     }
@@ -68,7 +68,12 @@ function getAuthorizationCodeOptions(
   options: ServiceOptionsInput<UrlServiceOptions>,
 ): Pick<
   UrlServiceOptions,
-  "authorizationServerUrl" | "clientId" | "oauth2Scopes"
+  | "authorizationServerUrl"
+  | "authorizationEndpoint"
+  | "tokenEndpoint"
+  | "oauth2Protocol"
+  | "clientId"
+  | "oauth2Scopes"
 > | null {
   if (
     options.authType === "oauth2" &&
@@ -76,6 +81,9 @@ function getAuthorizationCodeOptions(
   ) {
     return {
       authorizationServerUrl: options.authorizationServerUrl,
+      authorizationEndpoint: options.authorizationEndpoint,
+      tokenEndpoint: options.tokenEndpoint,
+      oauth2Protocol: options.oauth2Protocol,
       clientId: options.clientId,
       oauth2Scopes: options.oauth2Scopes,
     };
@@ -83,6 +91,9 @@ function getAuthorizationCodeOptions(
   if (options.authType === "login") {
     return {
       authorizationServerUrl: options.authorizationServerUrl,
+      authorizationEndpoint: options.authorizationEndpoint,
+      tokenEndpoint: options.tokenEndpoint,
+      oauth2Protocol: options.oauth2Protocol,
       clientId: options.clientId,
       oauth2Scopes: options.oauth2Scopes,
     };

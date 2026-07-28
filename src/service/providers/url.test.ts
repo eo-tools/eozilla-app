@@ -23,11 +23,24 @@ describe("URL service options schema", () => {
       },
       authorizationServerUrl: {
         format: "uri",
-        "x-ui-visible": "authType === 'login' || authType === 'oauth2'",
+        "x-ui-visible":
+          "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oidc'",
+      },
+      oauth2Protocol: {
+        default: "oidc",
+        enum: ["oauth2", "oidc"],
+      },
+      authorizationEndpoint: {
+        "x-ui-visible":
+          "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
+      },
+      tokenEndpoint: {
+        "x-ui-visible":
+          "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
       },
       oauth2Scopes: {
-        default: "openid profile email",
-        "x-ui-visible": "authType === 'oauth2'",
+        nullable: true,
+        "x-ui-visible": "authType === 'login' || authType === 'oauth2'",
       },
       clientId: {
         "x-ui-visible": "authType === 'login' || authType === 'oauth2'",
