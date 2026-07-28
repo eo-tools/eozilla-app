@@ -64,6 +64,8 @@ function renderStringField(ctx: FieldRenderContext) {
         description={getFieldDescription(ctx.field)}
         placeholder={ctx.field.placeholder}
         value={value}
+        minLength={schema.minLength}
+        error={getMinLengthError(schema, value)}
         disabled={ctx.disabled}
         onChange={(event) => ctx.onChange(event.currentTarget.value)}
       />
@@ -80,6 +82,8 @@ function renderStringField(ctx: FieldRenderContext) {
         minRows={2}
         maxRows={8}
         value={value}
+        minLength={schema.minLength}
+        error={getMinLengthError(schema, value)}
         disabled={ctx.disabled}
         onChange={(event) => ctx.onChange(event.currentTarget.value)}
       />
@@ -92,10 +96,22 @@ function renderStringField(ctx: FieldRenderContext) {
       description={getFieldDescription(ctx.field)}
       placeholder={ctx.field.placeholder}
       value={value}
+      minLength={schema.minLength}
+      error={getMinLengthError(schema, value)}
       disabled={ctx.disabled}
       onChange={(event) => ctx.onChange(event.currentTarget.value)}
     />
   );
+}
+
+function getMinLengthError(schema: StringSchema, value: string) {
+  if (
+    typeof schema.minLength === "number" &&
+    value.length < schema.minLength
+  ) {
+    return `Must be at least ${schema.minLength} characters.`;
+  }
+  return undefined;
 }
 
 function renderDateField(ctx: FieldRenderContext, value: string) {

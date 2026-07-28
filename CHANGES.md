@@ -2,6 +2,8 @@
 
 ### Fixes
 
+- Generated string inputs now report `minLength` validation errors, and invalid
+  process inputs are rejected locally before execution. (eo-tools/eozilla#105)
 - Nullable fields with a `default` value of `null` can now be enabled and
   initialized with a suitable non-null value. (#62)
 - The app can now be served from dynamic base paths, such as those used by
