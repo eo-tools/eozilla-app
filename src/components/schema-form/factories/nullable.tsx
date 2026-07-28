@@ -19,8 +19,8 @@ export const nullableFieldFactory: FieldFactory = {
         checked
           ? createJsonValueForSchema({
               ...innerField.schema,
-              // A nullable field's `default: null` represents its disabled
-              // state. Once enabled, use the non-nullable fallback instead.
+              // Keeping `default: null` here would set the value back to `null` when the
+              // switch is enabled, so omit it and let the type-specific fallback be used.
               default:
                 innerField.schema.default === null
                   ? undefined
