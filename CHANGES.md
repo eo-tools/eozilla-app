@@ -2,6 +2,8 @@
 
 ### Fixes
 
+- Generated string inputs now report `minLength` validation errors, and invalid
+  process inputs are rejected locally before execution. (eo-tools/eozilla#105)
 - The app can now be served from dynamic base paths, such as those used by
   Jupyter Server Proxy, without failing to load its static assets. (#58)
 - Service requests to loopback URLs can now be routed through a configured
