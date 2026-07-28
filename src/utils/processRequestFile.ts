@@ -1,10 +1,6 @@
 import type { ProcessDescription, ProcessRequest } from "@/service";
 import { getSchemaFromProcessDescriptionInputs } from "@/utils/field";
-import {
-  isJsonObject,
-  validateJsonValue,
-  type JsonObject,
-} from "@/utils/json";
+import { isJsonObject, validateJsonValue, type JsonObject } from "@/utils/json";
 
 export function stringifyProcessRequestJson(
   processRequest: ProcessRequest,
@@ -36,7 +32,9 @@ function validateProcessRequest(
   ]);
   for (const key of Object.keys(value)) {
     if (!allowedTopLevelKeys.has(key)) {
-      throw new Error(`Process request contains unsupported property '${key}'.`);
+      throw new Error(
+        `Process request contains unsupported property '${key}'.`,
+      );
     }
   }
 
@@ -62,7 +60,9 @@ function validateProcessRequestInputs(
     throw new Error("Process request inputs must be a JSON object.");
   }
 
-  const allowedInputNames = new Set(Object.keys(processDescription.inputs ?? {}));
+  const allowedInputNames = new Set(
+    Object.keys(processDescription.inputs ?? {}),
+  );
   for (const key of Object.keys(value)) {
     if (!allowedInputNames.has(key)) {
       throw new Error(`Process request contains unsupported input '${key}'.`);
@@ -106,7 +106,9 @@ function validateProcessRequestOutputs(
       );
     }
     if ("format" in outputValue && !isJsonObject(outputValue.format)) {
-      throw new Error(`Process request outputs.${key}.format must be an object.`);
+      throw new Error(
+        `Process request outputs.${key}.format must be an object.`,
+      );
     }
   }
 }

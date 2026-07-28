@@ -85,7 +85,9 @@ describe("TestingService", () => {
       progress: 50,
       message: "Woke up too early",
     });
-    await expect(service.getJobResults(acceptedJob.jobID)).rejects.toMatchObject({
+    await expect(
+      service.getJobResults(acceptedJob.jobID),
+    ).rejects.toMatchObject({
       apiError: { status: 403 },
     });
   });

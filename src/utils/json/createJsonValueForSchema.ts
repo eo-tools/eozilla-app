@@ -47,7 +47,9 @@ export function createJsonValueForSchema(schema: JsonSchema): JsonValue {
   return 0;
 }
 
-function createArrayValueForSchema(schema: Extract<JsonSchema, { type: "array" }>) {
+function createArrayValueForSchema(
+  schema: Extract<JsonSchema, { type: "array" }>,
+) {
   const items = schema.items || {};
   const itemDefault =
     typeof items.default !== "undefined"

@@ -16,12 +16,7 @@ describe("MapField", () => {
     } as JsonSchema);
 
     const markup = renderMapField(
-      <MapField
-        field={field}
-        valueType="wkt"
-        value=""
-        onChange={vi.fn()}
-      />,
+      <MapField field={field} valueType="wkt" value="" onChange={vi.fn()} />,
     );
 
     expect(markup).toContain('aria-label="Draw rectangle"');
@@ -98,9 +93,5 @@ describe("MapField", () => {
 });
 
 function renderMapField(element: ReactElement) {
-  return renderToStaticMarkup(
-    <MantineProvider>
-      {element}
-    </MantineProvider>,
-  );
+  return renderToStaticMarkup(<MantineProvider>{element}</MantineProvider>);
 }

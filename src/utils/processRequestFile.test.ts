@@ -37,9 +37,9 @@ describe("processRequestFile", () => {
   });
 
   it("rejects non-object JSON", () => {
-    expect(() => parseProcessRequestJson("[]", createProcessDescription())).toThrow(
-      "Process request import must be a JSON object.",
-    );
+    expect(() =>
+      parseProcessRequestJson("[]", createProcessDescription()),
+    ).toThrow("Process request import must be a JSON object.");
   });
 
   it("rejects imported requests with the wrong input structure", () => {

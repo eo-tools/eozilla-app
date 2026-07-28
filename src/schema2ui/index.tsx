@@ -46,8 +46,9 @@ function Schema2UiPlayground() {
   const initialFixture =
     schemaFixtures.find((fixture) => fixture.id === initialFixtureId) ??
     defaultFixture;
-  const [selectedFixtureId, setSelectedFixtureId] =
-    useState<SchemaFixtureId>(initialFixture.id);
+  const [selectedFixtureId, setSelectedFixtureId] = useState<SchemaFixtureId>(
+    initialFixture.id,
+  );
   const [hideAdvanced, setHideAdvanced] = useState(true);
   const selectedFixture = useMemo(
     () =>
@@ -227,10 +228,7 @@ function renderSchemaCases(
     <Stack gap="lg">
       {propertyFields.map((propertyField, index) => (
         <Stack key={propertyField.name} gap="sm">
-          <Divider
-            label={`Case ${index + 1}`}
-            labelPosition="left"
-          />
+          <Divider label={`Case ${index + 1}`} labelPosition="left" />
           <SchemaForm
             field={propertyField}
             value={objectValue[propertyField.name]}
