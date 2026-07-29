@@ -51,11 +51,7 @@ export function useLoadService() {
         return null;
       }
       const serviceProvider = getServiceProvider(serviceProviderId);
-      const storedSelection = storage.serviceProviderSelection.get();
-      const options =
-        storedSelection && storedSelection.id === serviceProviderId
-          ? storedSelection.options
-          : {};
+      const options = storage.getServiceProviderOptions(serviceProviderId);
       return await serviceProvider.createService(options);
     },
     serviceProviderId === "testing"

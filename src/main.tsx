@@ -45,7 +45,7 @@ initAppStore(() => {
         meta: serviceProvider.meta,
       }),
     );
-    storage.serviceProviderSelection.set({
+    storage.saveServiceProviderSelection({
       id: serviceProvider.id,
       options: serviceProvider.options,
     });

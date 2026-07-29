@@ -56,8 +56,45 @@ An optional schema describing configuration values the user must enter before
 sign-in. The service dialog converts this schema into a form and passes the
 normalized values to `signIn()` and later to `createService()`.
 
-Examples are API URL, token header name, token value, or any future OAuth/OIDC
-configuration required by a provider.
+Examples are API URL, token header name, token value, or OAuth2/OIDC
+configuration required by a provider. Fields can use `x-ui-visible` to be
+shown only when they apply to the selected authentication method, and
+`x-ui-required` to reject an incomplete configuration before sign-in starts.
+
+## Custom Service Authentication
+
+The built-in Custom Service provider connects to an arbitrary API URL. Its
+configuration offers four authentication choices:
+
+- **None** sends no authentication header.
+- **Token** sends the supplied access token as a Bearer token by default, or in
+  a user-defined header.
+- **Login** and **OAuth2** start browser-based authentication. Both support the
+  OAuth 2.0 Authorization Code flow with PKCE; choose **OIDC** when the
+  authorization server provides OpenID Connect discovery, or **OAuth2** when
+  its authorization and token endpoints are configured explicitly.
+
+Browser authentication requires a client ID. OIDC additionally requires the
+authorization-server URL. Plain OAuth2 requires both the authorization and
+token endpoint URLs. The authorization server must be configured to redirect
+back to this application and allow the application's browser origin where its
+token endpoint is called from the browser.
+
+For OIDC, leaving scopes empty requests `openid profile email`. A custom OIDC
+scope list must include `openid`. OAuth2 scopes are otherwise passed through to
+the authorization server unchanged.
+
+The provider sends the obtained access token as a Bearer token with API
+requests. If the authorization server supplies a refresh token, the provider
+refreshes the access token before it expires. This only authenticates requests
+to the configured API; the API must accept the token or provide its own token
+exchange mechanism.
+
+Passwords, API keys, access tokens, refresh tokens, and client secrets are
+stored in `sessionStorage`, not persistent local storage. They survive a page
+reload in the same browser session, but must be entered again in a new browser
+session. The non-secret provider selection is kept in local storage so the app
+can reopen the service dialog when credentials are needed again.
 
 ### `signIn(options)`
 
@@ -139,7 +176,7 @@ sequenceDiagram
     actor User
     participant Dialog as Service Dialog
     participant Actions as store/actions.signIn
-    participant Storage as localStorage
+    participant Storage as Browser storage
     participant Registry as Service Provider Registry
     participant Provider as ServiceProvider
     participant Auth as External Sign-In Page
@@ -150,7 +187,7 @@ sequenceDiagram
     Dialog->>Actions: signIn(providerId, options)
     Actions->>Registry: getServiceProvider(providerId)
     Registry-->>Actions: provider
-    Actions->>Storage: Store { id: providerId, options }
+    Actions->>Storage: Store selection and session-only secrets
     Actions->>Provider: signIn(options)
 
     alt Provider resolves without redirect
@@ -167,7 +204,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant Auth as External Sign-In Page
-    participant Storage as localStorage
+    participant Storage as Browser storage
     participant Startup as createInitialAppState
     participant Hooks as useLoadService
     participant Registry as Service Provider Registry
@@ -209,7 +246,9 @@ sequenceDiagram
    from `provider.optionsSchema`.
 4. When the user submits the form, `store/actions.signIn()`:
    - looks up the provider;
-   - stores `{ id, options }` under `eozilla.serviceProviderSelection`;
+   - stores the provider id and non-secret options under
+     `eozilla.serviceProviderSelection` in local storage;
+   - stores secret options in browser session storage;
    - calls `provider.signIn(options)`;
    - sets `serviceProviderId` only if control returns to the app.
 5. If `provider.signIn()` redirects to another website, app execution can stop

@@ -75,27 +75,17 @@ function getAuthorizationCodeOptions(
   | "clientId"
   | "oauth2Scopes"
 > | null {
-  if (options.authType === "oauth2") {
-    return {
-      authorizationServerUrl: options.authorizationServerUrl,
-      authorizationEndpoint: options.authorizationEndpoint,
-      tokenEndpoint: options.tokenEndpoint,
-      oauth2Protocol: options.oauth2Protocol,
-      clientId: options.clientId,
-      oauth2Scopes: options.oauth2Scopes,
-    };
+  if (options.authType !== "oauth2" && options.authType !== "login") {
+    return null;
   }
-  if (options.authType === "login") {
-    return {
-      authorizationServerUrl: options.authorizationServerUrl,
-      authorizationEndpoint: options.authorizationEndpoint,
-      tokenEndpoint: options.tokenEndpoint,
-      oauth2Protocol: options.oauth2Protocol,
-      clientId: options.clientId,
-      oauth2Scopes: options.oauth2Scopes,
-    };
-  }
-  return null;
+  return {
+    authorizationServerUrl: options.authorizationServerUrl,
+    authorizationEndpoint: options.authorizationEndpoint,
+    tokenEndpoint: options.tokenEndpoint,
+    oauth2Protocol: options.oauth2Protocol,
+    clientId: options.clientId,
+    oauth2Scopes: options.oauth2Scopes,
+  };
 }
 
 function createTokenAuthHeaders(
