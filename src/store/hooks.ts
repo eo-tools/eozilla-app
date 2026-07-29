@@ -54,7 +54,7 @@ export function useLoadService() {
       const options = storage.getServiceProviderOptions(serviceProviderId);
       return await serviceProvider.createService(options);
     },
-    serviceProviderId === "testing"
+    serviceProviderId === "testing" || serviceProviderId === "custom"
       ? {
           revalidateOnFocus: false,
           revalidateOnReconnect: false,
