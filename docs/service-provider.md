@@ -80,21 +80,13 @@ token endpoint URLs. The authorization server must be configured to redirect
 back to this application and allow the application's browser origin where its
 token endpoint is called from the browser.
 
-For OIDC, leaving scopes empty requests `openid profile email`. A custom OIDC
-scope list must include `openid`. OAuth2 scopes are otherwise passed through to
-the authorization server unchanged.
+For OIDC, leaving scopes empty requests `openid profile email`.
 
 The provider sends the obtained access token as a Bearer token with API
 requests. If the authorization server supplies a refresh token, the provider
 refreshes the access token before it expires. This only authenticates requests
 to the configured API; the API must accept the token or provide its own token
 exchange mechanism.
-
-Passwords, API keys, access tokens, refresh tokens, and client secrets are
-stored in `sessionStorage`, not persistent local storage. They survive a page
-reload in the same browser session, but must be entered again in a new browser
-session. The non-secret provider selection is kept in local storage so the app
-can reopen the service dialog when credentials are needed again.
 
 ### `signIn(options)`
 
