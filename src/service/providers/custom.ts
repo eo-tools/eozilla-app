@@ -75,10 +75,7 @@ function getAuthorizationCodeOptions(
   | "clientId"
   | "oauth2Scopes"
 > | null {
-  if (
-    options.authType === "oauth2" &&
-    (options.oauth2GrantType ?? "authorization_code") === "authorization_code"
-  ) {
+  if (options.authType === "oauth2") {
     return {
       authorizationServerUrl: options.authorizationServerUrl,
       authorizationEndpoint: options.authorizationEndpoint,

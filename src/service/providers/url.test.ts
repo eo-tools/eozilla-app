@@ -12,6 +12,7 @@ describe("URL service options schema", () => {
       accessToken: {
         format: "password",
         "x-ui-visible": "authType === 'token'",
+        "x-ui-required": "authType === 'token'",
       },
       useBearer: {
         default: true,
@@ -25,6 +26,8 @@ describe("URL service options schema", () => {
         format: "uri",
         "x-ui-visible":
           "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oidc'",
+        "x-ui-required":
+          "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oidc'",
       },
       oauth2Protocol: {
         default: "oidc",
@@ -33,9 +36,13 @@ describe("URL service options schema", () => {
       authorizationEndpoint: {
         "x-ui-visible":
           "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
+        "x-ui-required":
+          "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
       },
       tokenEndpoint: {
         "x-ui-visible":
+          "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
+        "x-ui-required":
           "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
       },
       oauth2Scopes: {
@@ -44,15 +51,10 @@ describe("URL service options schema", () => {
       },
       clientId: {
         "x-ui-visible": "authType === 'login' || authType === 'oauth2'",
-      },
-      oauth2GrantType: {
-        default: "authorization_code",
-        enum: ["authorization_code"],
-        "x-ui-hidden": true,
+        "x-ui-required": "authType === 'login' || authType === 'oauth2'",
       },
       token: { "x-ui-hidden": true },
       tokenHeader: { "x-ui-hidden": true },
-      grantType: { "x-ui-hidden": true },
     });
   });
 });

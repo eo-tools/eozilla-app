@@ -8,8 +8,6 @@ export type AuthType =
   | "oauth2"
   | "api-key";
 
-/** The only OAuth2 grant supported by this browser client. */
-export type OAuth2GrantType = "authorization_code";
 export type OAuth2Protocol = "oauth2" | "oidc";
 
 export interface UrlServiceOptions extends ServiceOptions {
@@ -19,8 +17,6 @@ export interface UrlServiceOptions extends ServiceOptions {
   password?: string;
   clientId?: string;
   clientSecret?: string;
-  /** @deprecated Use oauth2GrantType for OAuth2. */
-  grantType?: string;
   refreshToken?: string;
   token?: string;
   useBearer?: boolean;
@@ -31,7 +27,6 @@ export interface UrlServiceOptions extends ServiceOptions {
   oauth2Protocol?: OAuth2Protocol;
   authorizationEndpoint?: string;
   tokenEndpoint?: string;
-  oauth2GrantType?: OAuth2GrantType;
   oauth2Scopes?: string;
   accessToken?: string;
   accessTokenHeader?: string;
@@ -76,8 +71,8 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
     title: "Client ID",
     description:
       "The public browser client registered with the authorization server.",
-    nullable: true,
     "x-ui-visible": "authType === 'login' || authType === 'oauth2'",
+    "x-ui-required": "authType === 'login' || authType === 'oauth2'",
   },
   clientSecret: {
     type: "string",
@@ -86,20 +81,6 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
     format: "password",
     "x-ui-hidden": true,
   },
-  grantType: {
-    type: "string",
-    title: "Grant type",
-    default: "authorization_code",
-    enum: [
-      "authorization_code",
-      "implicit",
-      "password",
-      "client_credentials",
-      "refresh_token",
-    ],
-    "x-ui-hidden": true,
-  },
-
   // For type "login", token refresh phase — set after a successful login if the server
   // returned a refresh token; presence of this field activates automatic token refresh on 401
   refreshToken: {
@@ -155,9 +136,10 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
     type: "string",
     title: "Authorization server URL",
     description: "The OIDC issuer URL used to discover its endpoints.",
-    nullable: true,
     format: "uri",
     "x-ui-visible":
+      "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oidc'",
+    "x-ui-required":
       "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oidc'",
   },
   oauth2Protocol: {
@@ -171,9 +153,10 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
     type: "string",
     title: "Authorization endpoint",
     description: "The OAuth2 endpoint that starts the authorization redirect.",
-    nullable: true,
     format: "uri",
     "x-ui-visible":
+      "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
+    "x-ui-required":
       "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
   },
   tokenEndpoint: {
@@ -181,9 +164,10 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
     title: "Token endpoint",
     description:
       "The OAuth2 endpoint that exchanges an authorization code for tokens.",
-    nullable: true,
     format: "uri",
     "x-ui-visible":
+      "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
+    "x-ui-required":
       "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
   },
   oauth2Scopes: {
@@ -194,20 +178,13 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
     nullable: true,
     "x-ui-visible": "authType === 'login' || authType === 'oauth2'",
   },
-  oauth2GrantType: {
-    type: "string",
-    title: "OAuth2 grant type",
-    default: "authorization_code",
-    enum: ["authorization_code"],
-    "x-ui-hidden": true,
-  },
   accessToken: {
     type: "string",
     title: "Access token",
     description: "The token sent with each request to the service.",
-    nullable: true,
     format: "password",
     "x-ui-visible": "authType === 'token'",
+    "x-ui-required": "authType === 'token'",
   },
   accessTokenHeader: {
     type: "string",
