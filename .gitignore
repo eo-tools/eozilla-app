@@ -9,6 +9,11 @@ dist
 dist-ssr
 *.local
 
+# Brand-specific env overrides for downstream consumers (e.g. S2GOS) are not
+# part of this generic library; consumers create these locally from their
+# own documentation and never commit them here.
+.env.s2gos
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
