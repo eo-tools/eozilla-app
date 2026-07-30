@@ -10,6 +10,13 @@
   refresh token is available.
 - Custom Service authentication forms now show only fields relevant to the
   chosen method and prevent sign-in until the required fields are supplied.
+- The app title, favicon, and header icon are now configurable via the
+  `VITE_APP_TITLE`, `VITE_APP_FAVICON`, and `VITE_APP_ICON` env vars, and
+  the Custom Service form's default API URL, authentication type, client ID,
+  authorization server URL, and OAuth2 protocol via `VITE_DEFAULT_SERVICE_*`
+  env vars. Downstream consumers (e.g. S2GOS) can build a rebranded bundle
+  with their own `.env.<mode>` file and `vite build --mode <mode>.
+
 
 ### Fixes
 

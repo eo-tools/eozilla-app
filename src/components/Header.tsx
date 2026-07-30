@@ -15,6 +15,9 @@ import { useLoadService } from "@/store/hooks";
 import { openDialog } from "@/store/actions";
 import styles from "@/components/common/styles";
 
+const appIcon = import.meta.env.VITE_APP_ICON || "🦖";
+const appIconIsImage = appIcon.startsWith("/");
+
 export default function Header() {
   const [navbarOpened, { toggle: toggleNavbar }] = useDisclosure();
   const { toggleColorScheme } = useMantineColorScheme();
@@ -33,11 +36,15 @@ export default function Header() {
         <Flex flex={1} justify={"center"}>
           <Group gap={5}>
             <Text size={"xl"} fw={600}>
-              Eozilla
+              {import.meta.env.VITE_APP_TITLE}
             </Text>
-            <Text size={"xl"} fw={200}>
-              🦖
-            </Text>
+            {appIconIsImage ? (
+              <img src={appIcon} alt="" height={24} />
+            ) : (
+              <Text size={"xl"} fw={200}>
+                {appIcon}
+              </Text>
+            )}
           </Group>
         </Flex>
         <Group>
