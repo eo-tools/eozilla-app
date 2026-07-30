@@ -29,7 +29,7 @@ export function closeDialog() {
 }
 
 export function resetState() {
-  storage.serviceProviderSelection.delete();
+  storage.deleteServiceProviderSelection();
   const { service } = getAppState();
   if (service) {
     void service.close();
@@ -81,7 +81,7 @@ export async function signIn(
   options: ServiceOptionsInput<ServiceOptions>,
 ) {
   const provider = getServiceProvider(serviceProviderId);
-  storage.serviceProviderSelection.set({
+  storage.saveServiceProviderSelection({
     id: serviceProviderId,
     options,
   });
@@ -89,7 +89,7 @@ export async function signIn(
     await provider.signIn(options);
     setAppState({ serviceProviderId });
   } catch (e) {
-    storage.serviceProviderSelection.delete();
+    storage.deleteServiceProviderSelection();
     console.error(e);
     throw e;
   }
@@ -98,7 +98,7 @@ export async function signIn(
 }
 
 export async function signOut() {
-  storage.serviceProviderSelection.delete();
+  storage.deleteServiceProviderSelection();
   const { service } = getAppState();
   if (!service) {
     return;

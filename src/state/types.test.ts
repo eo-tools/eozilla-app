@@ -12,6 +12,7 @@ function createLocalStorageMock() {
 describe("createInitialAppState", () => {
   beforeEach(() => {
     vi.stubGlobal("localStorage", createLocalStorageMock());
+    vi.stubGlobal("sessionStorage", createLocalStorageMock());
   });
 
   afterEach(() => {

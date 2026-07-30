@@ -1,15 +1,15 @@
 import type { ServiceOptions, ServiceOptionsInput } from "@/service";
 
-const s = localStorage;
-
 class JsonProperty<T> {
   readonly name: string;
-  constructor(name: string) {
+  private readonly store: Storage;
+  constructor(store: Storage, name: string) {
+    this.store = store;
     this.name = name;
   }
 
   get() {
-    const value = s.getItem(this.name);
+    const value = this.store.getItem(this.name);
     if (value === null) {
       return null;
     }
@@ -21,21 +21,91 @@ class JsonProperty<T> {
   }
 
   set(value: T) {
-    s.setItem(this.name, JSON.stringify(value));
+    this.store.setItem(this.name, JSON.stringify(value));
   }
 
   delete() {
-    s.removeItem(this.name);
+    this.store.removeItem(this.name);
   }
 }
 
 export interface ServiceProviderSelection {
   id: string;
   options: ServiceOptionsInput<ServiceOptions>;
+  hasSecrets?: boolean;
 }
 
+interface ServiceProviderSecrets {
+  id: string;
+  options: ServiceOptionsInput<ServiceOptions>;
+}
+
+const secretOptionNames = new Set([
+  "password",
+  "clientSecret",
+  "refreshToken",
+  "token",
+  "accessToken",
+  "apiKey",
+]);
+
+const serviceProviderSelection = new JsonProperty<ServiceProviderSelection>(
+  localStorage,
+  "eozilla.serviceProviderSelection",
+);
+const serviceProviderSecrets = new JsonProperty<ServiceProviderSecrets>(
+  sessionStorage,
+  "eozilla.serviceProviderSecrets",
+);
+
 export const storage = {
-  serviceProviderSelection: new JsonProperty<ServiceProviderSelection>(
-    "eozilla.serviceProviderSelection",
-  ),
+  serviceProviderSelection,
+  saveServiceProviderSelection(selection: ServiceProviderSelection) {
+    const [options, secrets] = splitSecretOptions(selection.options);
+    serviceProviderSelection.set({
+      id: selection.id,
+      options,
+      hasSecrets: Object.keys(secrets).length > 0,
+    });
+    if (Object.keys(secrets).length > 0) {
+      serviceProviderSecrets.set({ id: selection.id, options: secrets });
+    } else {
+      serviceProviderSecrets.delete();
+    }
+  },
+  getServiceProviderOptions(id: string): ServiceOptionsInput<ServiceOptions> {
+    const selection = serviceProviderSelection.get();
+    if (!selection || selection.id !== id) {
+      return {};
+    }
+    const secrets = serviceProviderSecrets.get();
+    return {
+      ...selection.options,
+      ...(secrets?.id === id ? secrets.options : {}),
+    };
+  },
+  hasServiceProviderSelection(): boolean {
+    const selection = serviceProviderSelection.get();
+    if (!selection) {
+      return false;
+    }
+    return (
+      !selection.hasSecrets || serviceProviderSecrets.get()?.id === selection.id
+    );
+  },
+  deleteServiceProviderSelection() {
+    serviceProviderSelection.delete();
+    serviceProviderSecrets.delete();
+  },
 };
+
+function splitSecretOptions(
+  options: ServiceOptionsInput<ServiceOptions>,
+): [ServiceOptionsInput<ServiceOptions>, ServiceOptionsInput<ServiceOptions>] {
+  const publicOptions: ServiceOptionsInput<ServiceOptions> = {};
+  const secrets: ServiceOptionsInput<ServiceOptions> = {};
+  Object.entries(options).forEach(([name, value]) => {
+    (secretOptionNames.has(name) ? secrets : publicOptions)[name] = value;
+  });
+  return [publicOptions, secrets];
+}

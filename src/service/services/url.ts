@@ -22,20 +22,21 @@ interface ApiCallOptions<T> {
 }
 
 type ApiHeaders = Record<string, string>;
+export type ApiHeadersProvider = ApiHeaders | (() => Promise<ApiHeaders>);
 
 export class UrlService implements Service {
   readonly providerId: string;
   readonly apiUrl: string;
   readonly user: UserIdentity;
   readonly meta: ServiceMetadata;
-  readonly defaultHeaders: ApiHeaders;
+  readonly defaultHeaders: ApiHeadersProvider;
 
   constructor(
     providerId: string,
     apiUrl: string,
     user: UserIdentity,
     meta: ServiceMetadata,
-    defaultHeaders: ApiHeaders = {},
+    defaultHeaders: ApiHeadersProvider = {},
   ) {
     this.providerId = providerId;
     this.apiUrl = apiUrl;
@@ -101,7 +102,7 @@ export class UrlService implements Service {
 
 export async function loadServiceRootMetadata(
   apiUrl: string,
-  defaultHeaders: ApiHeaders = {},
+  defaultHeaders: ApiHeadersProvider = {},
 ): Promise<ServiceMetadata> {
   return await callApi(
     apiUrl,
@@ -145,13 +146,13 @@ async function callApi<T>(
   apiUrl: string,
   path: string[] = [],
   options?: ApiCallOptions<T>,
-  defaultHeaders: ApiHeaders = {},
+  defaultHeaders: ApiHeadersProvider = {},
 ): Promise<T> {
   const url = resolveAppUrl(buildUrl(apiUrl, path, options?.params || []));
   const hasData = typeof options?.data !== "undefined";
   const response = await fetch(url, {
     method: options?.method,
-    headers: buildHeaders(defaultHeaders, hasData),
+    headers: buildHeaders(await resolveHeaders(defaultHeaders), hasData),
     body: hasData ? JSON.stringify(options.data) : undefined,
   });
   const returnValue = await response.json();
@@ -165,6 +166,12 @@ async function callApi<T>(
     return options?.validate(returnValue);
   }
   return returnValue as T;
+}
+
+async function resolveHeaders(
+  headers: ApiHeadersProvider,
+): Promise<ApiHeaders> {
+  return typeof headers === "function" ? await headers() : headers;
 }
 
 function buildHeaders(

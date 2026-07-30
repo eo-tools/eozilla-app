@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-function createLocalStorageMock() {
+function createStorageMock() {
   const data = new Map<string, string>();
   return {
     getItem: vi.fn((key: string) => (data.has(key) ? data.get(key)! : null)),
@@ -21,7 +21,8 @@ describe("storage", () => {
 
   beforeEach(async () => {
     vi.resetModules();
-    vi.stubGlobal("localStorage", createLocalStorageMock());
+    vi.stubGlobal("localStorage", createStorageMock());
+    vi.stubGlobal("sessionStorage", createStorageMock());
     storageModule = await import("./storage");
   });
 
@@ -57,5 +58,25 @@ describe("storage", () => {
     storageModule.storage.serviceProviderSelection.delete();
 
     expect(storageModule.storage.serviceProviderSelection.get()).toBeNull();
+  });
+
+  it("keeps secrets in session storage", () => {
+    storageModule.storage.saveServiceProviderSelection({
+      id: "custom",
+      options: {
+        apiUrl: "https://example.com",
+        accessToken: "secret",
+      },
+    });
+
+    expect(storageModule.storage.serviceProviderSelection.get()).toEqual({
+      id: "custom",
+      options: { apiUrl: "https://example.com" },
+      hasSecrets: true,
+    });
+    expect(storageModule.storage.getServiceProviderOptions("custom")).toEqual({
+      apiUrl: "https://example.com",
+      accessToken: "secret",
+    });
   });
 });

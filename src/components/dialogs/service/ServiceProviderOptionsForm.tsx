@@ -1,6 +1,7 @@
 import { useMemo, useState, type SubmitEvent } from "react";
 
 import { Box, Button, Group, Stack, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 
 import { SchemaForm } from "@/components/schema-form";
 import type {
@@ -13,19 +14,20 @@ import { ResetOnKey } from "@/components/common/ResetOnKey";
 import { getFieldFromSchema, type ObjectField } from "@/utils/field";
 import { getErrorMessage } from "@/utils/common";
 import { isJsonObject, type JsonSchema, type JsonValue } from "@/utils/json";
+import {
+  normalizeServiceProviderOptions,
+  type ServiceOptionDraft,
+  type ServiceOptionDraftValue,
+} from "./serviceProviderOptions";
 
-type DraftValue = string | number | boolean | null | undefined;
-type DraftOptions = Record<string, DraftValue>;
+type DraftValue = ServiceOptionDraftValue;
+type DraftOptions = ServiceOptionDraft;
 
 export interface ServiceProviderOptionsFormProps {
   provider: ServiceProvider<ServiceOptions>;
   loading?: boolean;
   onBack: () => void;
   onSubmit: (options: ServiceOptionsInput<ServiceOptions>) => Promise<void>;
-}
-
-function isEmptyDraftValue(value: DraftValue): boolean {
-  return value === null || value === undefined || value === "";
 }
 
 function getInitialDraftValue(schema: ServiceOptionSchema): DraftValue {
@@ -54,71 +56,6 @@ function createInitialDraft(
   return draft;
 }
 
-function normalizeDraft(
-  provider: ServiceProvider<ServiceOptions>,
-  draft: DraftOptions,
-): ServiceOptionsInput<ServiceOptions> {
-  const options: Record<string, string | number | boolean> = {};
-
-  Object.entries(provider.optionsSchema ?? {}).forEach(([key, schema]) => {
-    const value = draft[key];
-
-    if (value === null || value === undefined) {
-      if (schema.default !== undefined) {
-        options[key] = schema.default;
-        return;
-      }
-      if (schema.nullable) {
-        return;
-      }
-    }
-
-    if (schema.type === "boolean") {
-      options[key] = Boolean(value);
-      return;
-    }
-
-    if (schema.type === "string") {
-      const stringValue = isEmptyDraftValue(value) ? "" : String(value);
-      if (!stringValue) {
-        if (schema.default !== undefined) {
-          options[key] = schema.default;
-          return;
-        }
-        if (schema.nullable) {
-          return;
-        }
-        throw new Error(`Please provide a value for ${schema.title}.`);
-      }
-      options[key] = stringValue;
-      return;
-    }
-
-    const rawValue = isEmptyDraftValue(value) ? undefined : value;
-    if (rawValue === undefined) {
-      if (schema.default !== undefined) {
-        options[key] = schema.default;
-        return;
-      }
-      if (schema.nullable) {
-        return;
-      }
-      throw new Error(`Please provide a value for ${schema.title}.`);
-    }
-
-    const numberValue =
-      typeof rawValue === "number" ? rawValue : Number(rawValue);
-    if (!Number.isFinite(numberValue)) {
-      throw new Error(`Please provide a valid value for ${schema.title}.`);
-    }
-
-    options[key] =
-      schema.type === "integer" ? Math.trunc(numberValue) : numberValue;
-  });
-
-  return options;
-}
-
 function getOptionsField(
   provider: ServiceProvider<ServiceOptions>,
 ): ObjectField | null {
@@ -143,17 +80,18 @@ function ServiceProviderOptionsFormFields({
   const initialDraft = useMemo(() => createInitialDraft(provider), [provider]);
   const optionsField = useMemo(() => getOptionsField(provider), [provider]);
   const [draftOptions, setDraftOptions] = useState<DraftOptions>(initialDraft);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
-    setSubmitError(null);
     try {
-      await onSubmit(normalizeDraft(provider, draftOptions));
+      await onSubmit(normalizeServiceProviderOptions(provider, draftOptions));
     } catch (error) {
-      setSubmitError(getErrorMessage(error));
+      notifications.show({
+        message: `Invalid authentication options: ${getErrorMessage(error)}`,
+        color: "red",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -167,7 +105,6 @@ function ServiceProviderOptionsFormFields({
     <Box component="form" onSubmit={handleSubmit} h="100%">
       <Stack h="100%" justify="space-between" gap="md">
         <Stack gap="md">
-          {submitError && <Text c="red">{submitError}</Text>}
           <Text>
             {provider.meta.description ||
               `Configure ${provider.meta.title} before continuing.`}
