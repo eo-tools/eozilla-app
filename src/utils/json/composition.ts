@@ -54,7 +54,10 @@ export function mergeAllOfSchemas(schemas: JsonSchema[]): JsonSchema {
     if (schemaObject.type !== undefined && merged.type === undefined) {
       merged.type = schemaObject.type;
     }
-    if (schemaObject.properties && typeof schemaObject.properties === "object") {
+    if (
+      schemaObject.properties &&
+      typeof schemaObject.properties === "object"
+    ) {
       Object.assign(properties, schemaObject.properties);
     }
   }

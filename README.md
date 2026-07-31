@@ -114,9 +114,8 @@ npm run dev            # Start the Vite dev server
 npm run eozilla:dev    # Start the local wraptile API server for testing
 npm run build          # Type-check and build production assets
 npm run eozilla:build  # Type-check and build production assets into eozilla cuiman
-npm run test           # Run the Vitest suite
-npm run typecheck      # TypeScript type check without emitting files
-npm run lint           # Run ESLint
+npm run tests          # Run the Vitest suite
+npm run checks         # Run TypeScript type checking and ESLint
 npm run format         # Format source files with Prettier
 npm run preview        # Preview the production build locally
 ```
@@ -171,8 +170,8 @@ VITE_BUILD_NUMBER=12 npm run build
   - A `Process` describes a capability exposed by the service.
   - A `Job` is an execution instance of a process.
 - Prefer small, local changes over broad rewrites.
-- If you change behavior, run `npm run typecheck`, `npm run lint`, and
-  `npm run test` before finishing.
+- If you change behavior, run `npm run checks` and `npm run tests` before
+  finishing.
 
 ## License
 

@@ -1,9 +1,7 @@
 import { useMemo, useState } from "react";
 import { Divider, Stack } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import {
-  IconMathFunction,
-} from "@tabler/icons-react";
+import { IconMathFunction } from "@tabler/icons-react";
 
 import {
   useActiveProcessInputs,

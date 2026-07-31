@@ -29,9 +29,7 @@ export default function ProcessItemView({
       label={
         <Stack m={0} p={0} gap={2}>
           <Flex justify={"space-between"} align={"center"} {...containerProps}>
-            <Text size={"sm"}>
-              {process.title}
-            </Text>
+            <Text size={"sm"}>{process.title}</Text>
             <HoverHelpIcon
               markdownText={process.description}
               revealStyle={revealStyle}

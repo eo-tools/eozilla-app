@@ -101,7 +101,8 @@ const SLEEP_A_WHILE_PROCESS: Process = {
   id: "sleep_a_while",
   title: "Sleep Processor",
   version: "1.0.0",
-  description: "Sleeps for `duration` seconds; fails at 50% when `fail` is true.",
+  description:
+    "Sleeps for `duration` seconds; fails at 50% when `fail` is true.",
   inputs: {
     duration: {
       title: "Duration",

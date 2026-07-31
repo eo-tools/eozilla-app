@@ -46,19 +46,24 @@ function resolveSchemaNode(
   definitions: Record<string, JsonSchema>,
   seen = new Set<string>(),
 ): JsonSchema {
-  const ref =
-    schema.ref ?? (schema as Record<string, unknown>)["$ref"];
+  const ref = schema.ref ?? (schema as Record<string, unknown>)["$ref"];
   if (typeof ref === "string") {
     if (seen.has(ref)) {
       return schema;
     }
     return {
-      ...resolveSchemaNode(getRefTarget(ref, definitions), definitions, new Set([...seen, ref])),
+      ...resolveSchemaNode(
+        getRefTarget(ref, definitions),
+        definitions,
+        new Set([...seen, ref]),
+      ),
       ref,
     } as JsonSchema;
   }
 
-  const resolved: Record<string, unknown> = { ...(schema as Record<string, unknown>) };
+  const resolved: Record<string, unknown> = {
+    ...(schema as Record<string, unknown>),
+  };
   delete resolved["$ref"];
 
   for (const [key, value] of Object.entries(resolved)) {

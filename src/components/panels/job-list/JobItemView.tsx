@@ -83,9 +83,7 @@ export function JobItemView({
               </ActionIcon.Group>
             </Flex>
             {status === "running" && isString(message) && (
-              <Text size={"xs"}>
-                {message}
-              </Text>
+              <Text size={"xs"}>{message}</Text>
             )}
             {status === "running" && isNumber(progress) && (
               <Progress value={progress} size={"sm"} color="teal" />

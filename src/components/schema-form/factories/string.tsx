@@ -105,10 +105,7 @@ function renderStringField(ctx: FieldRenderContext) {
 }
 
 function getMinLengthError(schema: StringSchema, value: string) {
-  if (
-    typeof schema.minLength === "number" &&
-    value.length < schema.minLength
-  ) {
+  if (typeof schema.minLength === "number" && value.length < schema.minLength) {
     return `Must be at least ${schema.minLength} characters.`;
   }
   return undefined;

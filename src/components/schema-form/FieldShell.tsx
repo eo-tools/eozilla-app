@@ -23,9 +23,7 @@ export function FieldShell({ field, children, hideLabel }: FieldShellProps) {
   return (
     <Stack gap={4}>
       <Flex justify="space-between" align="center" {...containerProps}>
-        <Input.Label>
-          {getFieldLabel(field)}
-        </Input.Label>
+        <Input.Label>{getFieldLabel(field)}</Input.Label>
         <HoverHelpIcon markdownText={description} revealStyle={revealStyle} />
       </Flex>
       {children}
