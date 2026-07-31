@@ -10,10 +10,11 @@
     "build": "rimraf dist && tsc -b && vite build",
     "eozilla:build": "rimraf ../cuiman/src/cuiman/app/dist && tsc -b && vite build --emptyOutDir --outDir ../cuiman/src/cuiman/app/dist",
     "schema2ui": "vite --config vite.schema2ui.config.ts --open / --port 4174",
-    "test": "vitest --run",
+    "tests": "vitest --run",
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
     "format": "prettier -w src",
     "lint": "eslint .",
+    "checks": "npm run typecheck && npm run lint",
     "preview": "vite preview"
   },
   "dependencies": {

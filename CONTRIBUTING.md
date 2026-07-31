@@ -12,15 +12,16 @@ Before opening a pull request, make sure that all applicable items below are com
 
 - [ ] The pull request is linked to a corresponding issue.
 - [ ] Code is formatted by running `npm run format`.
-- [ ] Type checking passes by running `npm run typecheck`.
-- [ ] Linting passes by running `npm run lint`.
-- [ ] Tests pass by running `npm run test`.
+- [ ] Type checking and linting pass by running `npm run checks`.
+- [ ] Tests pass by running `npm run tests`.
 - [ ] A production build succeeds by running `npm run build`.
 - [ ] Tests were added or updated for behavior changes.
 - [ ] Documentation, including the README where relevant, was updated for user-facing changes.
 
 ## Code style
 
-Use Prettier to format code and ESLint to identify code-quality issues.
+We use [Prettier](https://prettier.io/) to format code and [ESLint](https://eslint.org/) to identify code-quality issues.
+
+Use `npm run format` and `npm run checks` to run these tools in a well-defined way.
 
 Use TypeScript types for public interfaces and keep OGC API - Processes terminology consistent throughout the application.
