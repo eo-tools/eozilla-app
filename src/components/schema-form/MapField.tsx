@@ -171,12 +171,13 @@ export function MapField({
   }, [disabled, drawMode, onChange, valueType, vectorSource]);
 
   useEffect(() => {
+    const map = mapRef.current;
     if (valueType === "bbox") {
-      syncBBoxSourceFromValue(value, vectorSource, setErrorMessage);
+      syncBBoxSourceFromValue(value, vectorSource, setErrorMessage, map);
       return;
     }
 
-    syncSourceFromValue(value, vectorSource, setErrorMessage);
+    syncSourceFromValue(value, vectorSource, setErrorMessage, map);
   }, [valueType, value, vectorSource]);
 
   return (
@@ -275,6 +276,7 @@ function syncSourceFromValue(
   value: string | number[],
   source: VectorSource,
   setErrorMessage: (message: string | null) => void,
+  map: Map | null,
 ) {
   source.clear();
 
@@ -297,6 +299,7 @@ function syncSourceFromValue(
     }
 
     source.addFeature(feature);
+    fitMapToFeature(map, feature);
     setErrorMessage(null);
   } catch {
     setErrorMessage("Invalid geometry string. Expected a POLYGON WKT value.");
@@ -307,6 +310,7 @@ function syncBBoxSourceFromValue(
   value: string | number[],
   source: VectorSource,
   setErrorMessage: (message: string | null) => void,
+  map: Map | null,
 ) {
   source.clear();
 
@@ -325,10 +329,23 @@ function syncBBoxSourceFromValue(
       geometry: fromExtent(transformExtent(value, "EPSG:4326", "EPSG:3857")),
     });
     source.addFeature(feature);
+    fitMapToFeature(map, feature);
     setErrorMessage(null);
   } catch {
     setErrorMessage("Invalid bbox value [minLon, minLat, maxLon, maxLat].");
   }
+}
+
+function fitMapToFeature(map: Map | null, feature: Feature) {
+  const geometry = feature.getGeometry();
+  if (!map || !geometry) {
+    return;
+  }
+
+  map.getView().fit(geometry.getExtent(), {
+    padding: [32, 32, 32, 32],
+    maxZoom: 14,
+  });
 }
 
 function syncValueFromFeature(
