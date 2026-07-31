@@ -7,6 +7,7 @@ import {
   createInitialAppState,
 } from "@/state/types";
 import {
+  type JobInfo,
   getServiceProvider,
   type ServiceOptions,
   type ServiceOptionsInput,
@@ -184,6 +185,39 @@ export function dismissJob(jobId: string) {
   service.dismissJob(jobId).then(() => {
     console.debug(`requested dismissal of job ${jobId}`);
   });
+}
+
+/** Whether a job can be submitted again from the jobs list. */
+export function canRestartJob(jobInfo: JobInfo): boolean {
+  return jobInfo.status === "failed" || jobInfo.status === "dismissed";
+}
+
+/** Ask the service to submit a failed or dismissed job again. */
+export async function restartJob(jobInfo: JobInfo): Promise<void> {
+  if (!canRestartJob(jobInfo)) {
+    return;
+  }
+
+  const { service } = getAppState();
+  if (!service) {
+    return;
+  }
+
+  try {
+    const restartedJob = await service.restartJob(jobInfo.jobID);
+    notifications.show({
+      message: "Job restart accepted.",
+    });
+    setAppState({
+      processId: restartedJob.processID,
+      jobId: restartedJob.jobID,
+    });
+  } catch (error: unknown) {
+    notifications.show({
+      message: `Job restart rejected: ${getErrorMessage(error)}`,
+      color: "red",
+    });
+  }
 }
 
 ////////////////////////////////////////////////////////////////////

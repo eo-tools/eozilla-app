@@ -8,6 +8,7 @@ export interface JobListViewProps {
   activeJobId?: string;
   activateJob: (jobId: Optional<string>) => void;
   dismissJob: (jobId: string) => void;
+  restartJob: (jobInfo: JobInfo) => void;
 }
 
 export default function JobListView({
@@ -15,6 +16,7 @@ export default function JobListView({
   activeJobId,
   activateJob,
   dismissJob,
+  restartJob,
 }: JobListViewProps) {
   if (jobs.length === 0) {
     return <UnavailableHint message="The list of jobs is empty." />;
@@ -26,6 +28,7 @@ export default function JobListView({
       activeJobId={activeJobId}
       activateJob={activateJob}
       dismissJob={dismissJob}
+      restartJob={restartJob}
     />
   ));
 }

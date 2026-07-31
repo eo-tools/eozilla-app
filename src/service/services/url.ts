@@ -82,6 +82,13 @@ export class UrlService implements Service {
     return await this.callApi<void>(["jobs", jobId], { method: "delete" });
   }
 
+  async restartJob(jobId: string): Promise<JobInfo> {
+    return await this.callApi(["jobs", jobId, "restart"], {
+      method: "post",
+      validate: validateJobInfo,
+    });
+  }
+
   async getJobResults(jobId: string): Promise<JobResults> {
     return await this.callApi(["jobs", jobId, "results"], {
       validate: validateJobResults,

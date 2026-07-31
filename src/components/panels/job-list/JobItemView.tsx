@@ -10,7 +10,8 @@ import {
 import type { JobInfo } from "@/service";
 import { useHoverReveal } from "@/components/common/useHoverReveal";
 import { isNumber, isString, type Optional } from "@/utils/common";
-import { IconCancel, IconTrash } from "@tabler/icons-react";
+import { IconCancel, IconRefresh, IconTrash } from "@tabler/icons-react";
+import { Tooltip } from "@mantine/core";
 import styles from "@/components/common/styles";
 import { JobStatusIcon } from "./JobStatusIcon";
 
@@ -19,6 +20,7 @@ export interface JobItemViewProps {
   activeJobId?: string;
   activateJob: (jobId: Optional<string>) => void;
   dismissJob: (jobId: string) => void;
+  restartJob: (jobInfo: JobInfo) => void;
 }
 
 export function JobItemView({
@@ -26,6 +28,7 @@ export function JobItemView({
   activeJobId,
   activateJob,
   dismissJob,
+  restartJob,
 }: JobItemViewProps) {
   const {
     jobID: jobId,
@@ -36,6 +39,7 @@ export function JobItemView({
   } = jobInfo;
   const { containerProps, revealStyle } = useHoverReveal();
   const canDismiss = true;
+  const canRestart = status === "failed" || status === "dismissed";
   const isActive = jobId === activeJobId;
   const DismissIcon =
     status === "accepted" || status === "running" ? IconCancel : IconTrash;
@@ -70,16 +74,43 @@ export function JobItemView({
                 </Text>
               </Text>
               <ActionIcon.Group style={revealStyle}>
-                <ActionIcon
-                  {...styles.actionIcon.sm}
-                  disabled={!canDismiss}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    dismissJob(jobId);
-                  }}
+                {canRestart && (
+                  <Tooltip label="Restart job">
+                    <ActionIcon
+                      {...styles.actionIcon.sm}
+                      aria-label="Restart job"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        restartJob(jobInfo);
+                      }}
+                    >
+                      <IconRefresh {...styles.icon.sm} />
+                    </ActionIcon>
+                  </Tooltip>
+                )}
+                <Tooltip
+                  label={
+                    status === "accepted" || status === "running"
+                      ? "Cancel job"
+                      : "Delete job"
+                  }
                 >
-                  <DismissIcon {...styles.icon.sm} />
-                </ActionIcon>
+                  <ActionIcon
+                    {...styles.actionIcon.sm}
+                    aria-label={
+                      status === "accepted" || status === "running"
+                        ? "Cancel job"
+                        : "Delete job"
+                    }
+                    disabled={!canDismiss}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dismissJob(jobId);
+                    }}
+                  >
+                    <DismissIcon {...styles.icon.sm} />
+                  </ActionIcon>
+                </Tooltip>
               </ActionIcon.Group>
             </Flex>
             {status === "running" && isString(message) && (
