@@ -126,7 +126,8 @@ describe("UrlService", () => {
       .mockResolvedValueOnce(createJsonResponse(jobs))
       .mockResolvedValueOnce(createJsonResponse(job))
       .mockResolvedValueOnce(createJsonResponse(results))
-      .mockResolvedValueOnce(createJsonResponse(undefined));
+      .mockResolvedValueOnce(createJsonResponse(undefined))
+      .mockResolvedValueOnce(createJsonResponse(job));
 
     await expect(service.getProcesses()).resolves.toEqual(processes);
     await expect(service.getProcess("p1")).resolves.toEqual(process);
@@ -137,6 +138,7 @@ describe("UrlService", () => {
     await expect(service.getJob("j1")).resolves.toEqual(job);
     await expect(service.getJobResults("j1")).resolves.toEqual(results);
     await expect(service.dismissJob("j1")).resolves.toBeUndefined();
+    await expect(service.restartJob("j1")).resolves.toEqual(job);
 
     expect(fetchMock).toHaveBeenCalledWith(
       "https://example.com/api/processes",
@@ -157,6 +159,10 @@ describe("UrlService", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "https://example.com/api/jobs/j1",
       expect.objectContaining({ method: "delete" }),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://example.com/api/jobs/j1/restart",
+      expect.objectContaining({ method: "post" }),
     );
   });
 

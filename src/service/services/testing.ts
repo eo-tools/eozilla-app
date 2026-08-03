@@ -17,6 +17,7 @@ interface Process extends ProcessDescription {
 }
 
 interface Job extends JobInfo {
+  processRequest: ProcessRequest;
   result?: JobResults;
   timer?: ReturnType<typeof setInterval>;
 }
@@ -195,6 +196,7 @@ export class TestingService implements Service {
       message: "Accepted for processing",
       created: timestamp(),
       progress: 0,
+      processRequest: structuredClone(processRequest),
     };
     this.jobs.set(job.jobID, job);
     const acceptedJob = toJobInfo(job);
@@ -239,6 +241,20 @@ export class TestingService implements Service {
       } else {
         this.jobs.delete(job.jobID);
       }
+    });
+  }
+
+  async restartJob(jobId: string): Promise<JobInfo> {
+    return await delayed(this.delay, async () => {
+      const job = this.getKnownJob(jobId);
+      if (job.status !== "failed" && job.status !== "dismissed") {
+        throw new ServiceError({
+          type: "Not Available",
+          status: 403,
+          title: `Job ${jobId} cannot be restarted`,
+        });
+      }
+      return await this.executeProcess(job.processID, job.processRequest);
     });
   }
 
@@ -355,6 +371,11 @@ function runSleepJob(job: Job, inputs: Record<string, unknown>): void {
   }, stepDuration);
 }
 
-function toJobInfo({ result: _result, timer: _timer, ...job }: Job): JobInfo {
+function toJobInfo({
+  processRequest: _processRequest,
+  result: _result,
+  timer: _timer,
+  ...job
+}: Job): JobInfo {
   return { ...job };
 }

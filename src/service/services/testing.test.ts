@@ -135,6 +135,29 @@ describe("TestingService", () => {
     });
   });
 
+  it("restarts failed jobs with their original request", async () => {
+    vi.useFakeTimers();
+    const service = new TestingService(0);
+    const failedJob = await service.executeProcess("sleep_a_while", {
+      inputs: { duration: 1, fail: true },
+    });
+
+    await vi.advanceTimersByTimeAsync(500);
+    const restartedJob = await service.restartJob(failedJob.jobID);
+
+    expect(restartedJob).toMatchObject({
+      processID: "sleep_a_while",
+      status: "accepted",
+    });
+    expect(restartedJob.jobID).not.toBe(failedJob.jobID);
+
+    await vi.advanceTimersByTimeAsync(500);
+    await expect(service.getJob(restartedJob.jobID)).resolves.toMatchObject({
+      status: "failed",
+      message: "Woke up too early",
+    });
+  });
+
   it("rejects unknown process and job ids with service errors", async () => {
     const service = new TestingService(0);
 

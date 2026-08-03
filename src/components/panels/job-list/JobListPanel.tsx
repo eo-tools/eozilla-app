@@ -2,7 +2,7 @@ import { IconStackPush } from "@tabler/icons-react";
 
 import type { JobList } from "@/service";
 import { useActiveJobId, useJobList } from "@/store/hooks";
-import { activateJob, dismissJob } from "@/store/actions";
+import { activateJob, dismissJob, restartJob } from "@/store/actions";
 import styles from "@/components/common/styles";
 import { ResourceView } from "@/components/common/ResourceView";
 import { Panel } from "@/components/common/Panel";
@@ -74,6 +74,7 @@ export default function JobListPanel() {
               activeJobId={activeJobId}
               activateJob={activateJob}
               dismissJob={dismissJob}
+              restartJob={(jobInfo) => void restartJob(jobInfo)}
             />
           )}
         </ResourceView>

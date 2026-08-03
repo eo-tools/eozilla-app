@@ -22,6 +22,7 @@ export interface Service {
   getJob(jobId: string): Promise<JobInfo>;
   getJobResults(jobId: string): Promise<JobResults>;
   dismissJob(jobId: string): Promise<void>;
+  restartJob(jobId: string): Promise<JobInfo>;
   close(): Promise<void>;
 }
 
