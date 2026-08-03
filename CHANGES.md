@@ -1,3 +1,11 @@
+## Changes in version 0.1.2 (in development)
+
+### Added
+
+- Failed and dismissed jobs can now be restarted from the Jobs list. The app
+  asks the configured service to recreate the job from its original request.
+  (eo-tools/eozilla#41)
+
 ## Changes in version 0.1.1
 
 ### Added
