@@ -1,6 +1,6 @@
 ## Changes in version 0.1.1
 
-### Added
+### Enhancements
 
 - The Custom Service provider now supports no authentication, manually supplied
   token authentication (Bearer or a custom header), and browser-based Login or
@@ -16,6 +16,8 @@
   authorization server URL, and OAuth2 protocol via `VITE_DEFAULT_SERVICE_*`
   env vars. Downstream consumers (e.g. S2GOS) can build a rebranded bundle
   with their own `.env.<mode>` file and `vite build --mode <mode>.
+- When generating titles for input fields without a title set, we skip a 
+  prefix `x-` from the input's name before converting it. (#74)
 
 
 ### Fixes

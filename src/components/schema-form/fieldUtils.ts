@@ -77,6 +77,7 @@ export function getNonNullableField(field: Field): Field {
 
 function makeLabel(name: string): string {
   return name
+    .replace(/^x-/, "")
     .replace(/([a-z])([A-Z])/g, "$1 $2")
     .split(/[_-\s]+/)
     .filter(Boolean)
