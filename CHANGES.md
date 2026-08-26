@@ -1,5 +1,8 @@
 ## Changes in version 0.1.2 (in development)
+### Enhancements
 
+- When generating titles for input fields without a title set, we skip a 
+  prefix `x-` from the input's name before converting it. (#74)
 ### Fixes
 
 - Map process inputs now zoom to the current polygon or bbox when an
