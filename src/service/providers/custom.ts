@@ -75,7 +75,11 @@ function getAuthorizationCodeOptions(
   | "clientId"
   | "oauth2Scopes"
 > | null {
-  if (options.authType !== "oauth2" && options.authType !== "login") {
+  if (
+    options.authType !== "oauth2" ||
+    (!options.authorizationServerUrl &&
+      !(options.authorizationEndpoint && options.tokenEndpoint))
+  ) {
     return null;
   }
   return {
@@ -91,14 +95,48 @@ function getAuthorizationCodeOptions(
 function createTokenAuthHeaders(
   options: ServiceOptionsInput<UrlServiceOptions>,
 ): Record<string, string> {
-  const token = options.accessToken ?? options.token;
-  if (options.authType !== "token" || !token) {
+  switch (options.authType) {
+    case "basic":
+      return createBasicAuthHeaders(options);
+    case "token":
+    case "login":
+    case "oauth2":
+      return createAccessTokenHeaders(options);
+    case "api-key":
+      return createApiKeyAuthHeaders(options);
+    default:
+      return {};
+  }
+}
+
+function createBasicAuthHeaders(
+  options: ServiceOptionsInput<UrlServiceOptions>,
+): Record<string, string> {
+  if (!options.username || !options.password) {
+    return {};
+  }
+  return {
+    Authorization: `Basic ${btoa(`${options.username}:${options.password}`)}`,
+  };
+}
+
+function createAccessTokenHeaders(
+  options: ServiceOptionsInput<UrlServiceOptions>,
+): Record<string, string> {
+  if (!options.accessToken) {
     return {};
   }
   if (options.useBearer === true) {
-    return { Authorization: `Bearer ${token}` };
+    return { Authorization: `Bearer ${options.accessToken}` };
   }
-  const tokenHeader =
-    options.accessTokenHeader ?? options.tokenHeader ?? "X-Auth-Token";
-  return { [tokenHeader]: token };
+  return { [options.accessTokenHeader ?? "X-Auth-Token"]: options.accessToken };
+}
+
+function createApiKeyAuthHeaders(
+  options: ServiceOptionsInput<UrlServiceOptions>,
+): Record<string, string> {
+  if (!options.apiKey) {
+    return {};
+  }
+  return { [options.apiKeyHeader ?? "X-API-Key"]: options.apiKey };
 }

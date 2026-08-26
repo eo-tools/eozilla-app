@@ -1,3 +1,13 @@
+## Changes in version 0.1.2 (in development)
+
+### Fixes
+
+- Custom Service now recognizes the renamed Cuiman service options:
+  `loginUrl`, `tokenUrl`, `grantType`, `accessToken`, and
+  `accessTokenHeader`. It applies supplied Basic, access-token, and API-key
+  credentials to service requests, and uses a supplied OAuth2 access token
+  without starting a browser authorization-code flow.
+
 ## Changes in version 0.1.1
 
 ### Added

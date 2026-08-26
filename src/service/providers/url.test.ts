@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 import { URL_SERVICE_OPTIONS_SCHEMA } from "./url";
 
 describe("URL service options schema", () => {
-  it("uses the new OAuth2 configuration while retaining hidden legacy fields", () => {
+  it("uses the Cuiman authentication option names", () => {
     expect(URL_SERVICE_OPTIONS_SCHEMA).toMatchObject({
       authType: {
         default: "none",
-        enum: ["none", "token", "login", "oauth2"],
+        enum: ["none", "basic", "token", "login", "oauth2", "api-key"],
       },
       accessToken: {
         format: "password",
@@ -53,8 +53,12 @@ describe("URL service options schema", () => {
         "x-ui-visible": "authType === 'login' || authType === 'oauth2'",
         "x-ui-required": "authType === 'login' || authType === 'oauth2'",
       },
-      token: { "x-ui-hidden": true },
-      tokenHeader: { "x-ui-hidden": true },
+      loginUrl: { format: "uri", "x-ui-hidden": true },
+      tokenUrl: { format: "uri", "x-ui-hidden": true },
+      grantType: {
+        enum: ["password", "client_credentials"],
+        "x-ui-hidden": true,
+      },
     });
   });
 });

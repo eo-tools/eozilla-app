@@ -70,7 +70,7 @@ describe("CustomServiceProvider", () => {
     const service = await provider.createService({
       apiUrl: "https://example.com/api/",
       authType: "token",
-      token: "secret",
+      accessToken: "secret",
       useBearer: true,
     });
 
@@ -87,8 +87,8 @@ describe("CustomServiceProvider", () => {
     const service = await provider.createService({
       apiUrl: "https://example.com/api/",
       authType: "token",
-      token: "secret",
-      tokenHeader: "X-Custom-Token",
+      accessToken: "secret",
+      accessTokenHeader: "X-Custom-Token",
     });
 
     expect(loadServiceRootMetadata).toHaveBeenCalledWith(
@@ -104,7 +104,7 @@ describe("CustomServiceProvider", () => {
     const service = await provider.createService({
       apiUrl: "https://example.com/api/",
       authType: "token",
-      token: "secret",
+      accessToken: "secret",
     });
 
     expect(loadServiceRootMetadata).toHaveBeenCalledWith(
@@ -114,19 +114,59 @@ describe("CustomServiceProvider", () => {
     expect(service.defaultHeaders).toEqual({ "X-Auth-Token": "secret" });
   });
 
-  it("does not pass auth headers for other auth types", async () => {
+  it("uses an OAuth2 access token without starting a browser login flow", async () => {
     const provider = new CustomServiceProvider();
 
     const service = await provider.createService({
       apiUrl: "https://example.com/api/",
-      authType: "none",
-      token: "secret",
+      authType: "oauth2",
+      tokenUrl: "https://auth.example.test/token",
+      grantType: "client_credentials",
+      accessToken: "secret",
+      useBearer: false,
+      accessTokenHeader: "X-Service-Token",
     });
 
     expect(loadServiceRootMetadata).toHaveBeenCalledWith(
       "https://example.com/api/",
-      {},
+      { "X-Service-Token": "secret" },
     );
-    expect(service.defaultHeaders).toEqual({});
+    expect(service.defaultHeaders).toEqual({ "X-Service-Token": "secret" });
+  });
+
+  it("passes basic auth headers to the URL service", async () => {
+    const provider = new CustomServiceProvider();
+
+    const service = await provider.createService({
+      apiUrl: "https://example.com/api/",
+      authType: "basic",
+      username: "user",
+      password: "secret",
+    });
+
+    expect(loadServiceRootMetadata).toHaveBeenCalledWith(
+      "https://example.com/api/",
+      { Authorization: "Basic dXNlcjpzZWNyZXQ=" },
+    );
+    expect(service.defaultHeaders).toEqual({
+      Authorization: "Basic dXNlcjpzZWNyZXQ=",
+    });
+  });
+
+  it("passes API key auth headers to the URL service", async () => {
+    const provider = new CustomServiceProvider();
+
+    const service = await provider.createService({
+      apiUrl: "https://example.com/api/",
+      authType: "api-key",
+      apiKey: "secret",
+      apiKeyHeader: "X-Service-Key",
+    });
+
+    expect(loadServiceRootMetadata).toHaveBeenCalledWith(
+      "https://example.com/api/",
+      { "X-Service-Key": "secret" },
+    );
+    expect(service.defaultHeaders).toEqual({ "X-Service-Key": "secret" });
   });
 });
