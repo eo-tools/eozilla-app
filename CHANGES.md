@@ -1,3 +1,10 @@
+## Changes in version 0.1.2 (in development)
+
+### Fixes
+
+- Map process inputs now zoom to the current polygon or bbox when an
+  existing value is loaded, so saved geometry is visible immediately.
+
 ## Changes in version 0.1.1
 
 ### Enhancements
