@@ -26,8 +26,6 @@
   authorization server URL, and OAuth2 protocol via `VITE_DEFAULT_SERVICE_*`
   env vars. Downstream consumers (e.g. S2GOS) can build a rebranded bundle
   with their own `.env.<mode>` file and `vite build --mode <mode>.
-- When generating titles for input fields without a title set, we skip a 
-  prefix `x-` from the input's name before converting it. (#74)
 
 
 ### Fixes
