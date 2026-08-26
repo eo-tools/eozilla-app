@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "properties": {
+    "title_set": {
+      "type": "string",
+      "title": "My Title Is Set",
+      "description": "Property 'title' set to 'My Title Is Set'"
+    },
+    "my-name-is-kebabcase": {
+      "type": "string",
+      "description": "Property 'title' is not set, property name is 'my-name-is-kebabcase'"
+    },
+    "my_name_is_snakecase": {
+      "type": "string",
+      "description": "Property 'title' is not set, property name is 'my_name_is_snakecase'"
+    },
+    "myNameIsCamelcase": {
+      "type": "string",
+      "description": "Property 'title' is not set, property name is 'myNameIsCamelcase'"
+    },
+    "x-myNameIsPrefixedByX": {
+      "type": "string",
+      "description": "Property 'title' is not set, property name is 'x-myNameIsPrefixedByX'"
+    }
+  }
+}
