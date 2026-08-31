@@ -88,6 +88,7 @@ describe("CustomServiceProvider", () => {
       apiUrl: "https://example.com/api/",
       authType: "token",
       accessToken: "secret",
+      useBearer: false,
       accessTokenHeader: "X-Custom-Token",
     });
 
@@ -98,7 +99,7 @@ describe("CustomServiceProvider", () => {
     expect(service.defaultHeaders).toEqual({ "X-Custom-Token": "secret" });
   });
 
-  it("uses X-Auth-Token as the default token auth header", async () => {
+  it("uses bearer authentication by default for access tokens", async () => {
     const provider = new CustomServiceProvider();
 
     const service = await provider.createService({
@@ -109,9 +110,9 @@ describe("CustomServiceProvider", () => {
 
     expect(loadServiceRootMetadata).toHaveBeenCalledWith(
       "https://example.com/api/",
-      { "X-Auth-Token": "secret" },
+      { Authorization: "Bearer secret" },
     );
-    expect(service.defaultHeaders).toEqual({ "X-Auth-Token": "secret" });
+    expect(service.defaultHeaders).toEqual({ Authorization: "Bearer secret" });
   });
 
   it("uses an OAuth2 access token without starting a browser login flow", async () => {
@@ -127,6 +128,45 @@ describe("CustomServiceProvider", () => {
       accessTokenHeader: "X-Service-Token",
     });
 
+    expect(loadServiceRootMetadata).toHaveBeenCalledWith(
+      "https://example.com/api/",
+      { "X-Service-Token": "secret" },
+    );
+    expect(service.defaultHeaders).toEqual({ "X-Service-Token": "secret" });
+  });
+
+  it("exchanges login credentials for an access token before loading the service", async () => {
+    const fetchMock = vi.fn<typeof fetch>();
+    fetchMock.mockResolvedValue({
+      ok: true,
+      text: async () => JSON.stringify({ result: { authToken: "secret" } }),
+    } as Response);
+    vi.stubGlobal("fetch", fetchMock);
+    const provider = new CustomServiceProvider();
+
+    const service = await provider.createService({
+      apiUrl: "https://example.com/api/",
+      authType: "login",
+      loginUrl: "https://auth.example.test/login",
+      username: "user",
+      password: "secret",
+      useBearer: false,
+      accessTokenHeader: "X-Service-Token",
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://auth.example.test/login",
+      expect.objectContaining({
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      }),
+    );
+    const [, request] = fetchMock.mock.calls[0]!;
+    const body = (request as RequestInit).body as URLSearchParams;
+    expect(Object.fromEntries(body)).toEqual({
+      username: "user",
+      password: "secret",
+    });
     expect(loadServiceRootMetadata).toHaveBeenCalledWith(
       "https://example.com/api/",
       { "X-Service-Token": "secret" },

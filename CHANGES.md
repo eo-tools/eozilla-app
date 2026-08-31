@@ -7,6 +7,10 @@
 
 ### Fixes
 
+- Custom Service now treats **Login** as Cuiman's proprietary
+  username/password login endpoint: it exchanges the credentials for an access
+  token before making API requests. OAuth2 remains the browser-based flow.
+
 - Custom Service now recognizes the renamed Cuiman service options:
   `loginUrl`, `tokenUrl`, `grantType`, `accessToken`, and
   `accessTokenHeader`. It applies supplied Basic, access-token, and API-key

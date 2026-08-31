@@ -37,6 +37,13 @@ describe("normalizeServiceProviderOptions", () => {
 
     expect(() =>
       normalizeServiceProviderOptions(provider, {
+        authType: "api-key",
+        apiKey: "",
+      }),
+    ).toThrow("Please provide a value for API key.");
+
+    expect(() =>
+      normalizeServiceProviderOptions(provider, {
         authType: "oauth2",
         oauth2Protocol: "oauth2",
         clientId: "eozilla-app",
@@ -44,5 +51,14 @@ describe("normalizeServiceProviderOptions", () => {
         tokenEndpoint: "",
       }),
     ).toThrow("Please provide a value for Authorization endpoint.");
+
+    expect(() =>
+      normalizeServiceProviderOptions(provider, {
+        authType: "login",
+        loginUrl: "https://auth.example/login",
+        username: "user",
+        password: "",
+      }),
+    ).toThrow("Please provide a value for Password.");
   });
 });
