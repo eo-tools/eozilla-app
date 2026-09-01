@@ -24,6 +24,7 @@ export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions>
   readonly meta: ServiceProviderMeta;
   readonly optionsSchema = URL_SERVICE_OPTIONS_SCHEMA;
   private oauth2Auth: OAuth2Auth | null = null;
+  private loginSession: { key: string; accessToken: string } | null = null;
 
   constructor(config: CustomServiceProviderConfig = {}) {
     this.id = config.id ?? "custom";
@@ -31,6 +32,10 @@ export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions>
   }
 
   async signIn(options: ServiceOptionsInput<UrlServiceOptions>): Promise<void> {
+    if (options.authType === "login") {
+      await this.getLoginAccessToken(options);
+      return;
+    }
     const oauth2Options = getAuthorizationCodeOptions(options);
     if (oauth2Options) {
       this.oauth2Auth = new OAuth2Auth(oauth2Options);
@@ -41,6 +46,7 @@ export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions>
   async signOut(): Promise<void> {
     await this.oauth2Auth?.signOut();
     this.oauth2Auth = null;
+    this.loginSession = null;
   }
 
   async createService(
@@ -52,6 +58,12 @@ export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions>
       (URL_SERVICE_OPTIONS_SCHEMA.apiUrl.default as string) ??
       "http://localhost:8008";
     let authHeaders: ApiHeadersProvider = createTokenAuthHeaders(options);
+    if (options.authType === "login") {
+      authHeaders = createAccessTokenHeaders({
+        ...options,
+        accessToken: await this.getLoginAccessToken(options),
+      });
+    }
     const oauth2Options = getAuthorizationCodeOptions(options);
     if (oauth2Options) {
       this.oauth2Auth = new OAuth2Auth(oauth2Options);
@@ -61,6 +73,34 @@ export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions>
     }
     const meta = await loadServiceRootMetadata(apiUrl, authHeaders);
     return new UrlService(this.id, apiUrl, user, meta, authHeaders);
+  }
+
+  /** Obtain and retain the proprietary login token for the active options. */
+  private async getLoginAccessToken(
+    options: ServiceOptionsInput<UrlServiceOptions>,
+  ): Promise<string> {
+    if (options.accessToken) {
+      return options.accessToken;
+    }
+    const loginUrl = requireHttpUrl(options.loginUrl, "login URL");
+    const username = requireText(options.username, "username");
+    const password = requireText(options.password, "password");
+    const key = JSON.stringify({ loginUrl, username, password });
+    if (this.loginSession?.key === key) {
+      return this.loginSession.accessToken;
+    }
+
+    const response = await fetch(loginUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ username, password }),
+    });
+    if (!response.ok) {
+      throw new Error(`Login request failed (${response.status}).`);
+    }
+    const accessToken = parseLoginAccessToken(await response.text());
+    this.loginSession = { key, accessToken };
+    return accessToken;
   }
 }
 
@@ -75,7 +115,11 @@ function getAuthorizationCodeOptions(
   | "clientId"
   | "oauth2Scopes"
 > | null {
-  if (options.authType !== "oauth2" && options.authType !== "login") {
+  if (
+    options.authType !== "oauth2" ||
+    (!options.authorizationServerUrl &&
+      !(options.authorizationEndpoint && options.tokenEndpoint))
+  ) {
     return null;
   }
   return {
@@ -91,14 +135,114 @@ function getAuthorizationCodeOptions(
 function createTokenAuthHeaders(
   options: ServiceOptionsInput<UrlServiceOptions>,
 ): Record<string, string> {
-  const token = options.accessToken ?? options.token;
-  if (options.authType !== "token" || !token) {
+  switch (options.authType) {
+    case "basic":
+      return createBasicAuthHeaders(options);
+    case "token":
+    case "login":
+    case "oauth2":
+      return createAccessTokenHeaders(options);
+    case "api-key":
+      return createApiKeyAuthHeaders(options);
+    default:
+      return {};
+  }
+}
+
+function createBasicAuthHeaders(
+  options: ServiceOptionsInput<UrlServiceOptions>,
+): Record<string, string> {
+  if (!options.username || !options.password) {
     return {};
   }
-  if (options.useBearer === true) {
-    return { Authorization: `Bearer ${token}` };
+  return {
+    Authorization: `Basic ${btoa(`${options.username}:${options.password}`)}`,
+  };
+}
+
+function createAccessTokenHeaders(
+  options: ServiceOptionsInput<UrlServiceOptions>,
+): Record<string, string> {
+  if (!options.accessToken) {
+    return {};
   }
-  const tokenHeader =
-    options.accessTokenHeader ?? options.tokenHeader ?? "X-Auth-Token";
-  return { [tokenHeader]: token };
+  if (options.useBearer !== false) {
+    return { Authorization: `Bearer ${options.accessToken}` };
+  }
+  return { [options.accessTokenHeader ?? "X-Auth-Token"]: options.accessToken };
+}
+
+function createApiKeyAuthHeaders(
+  options: ServiceOptionsInput<UrlServiceOptions>,
+): Record<string, string> {
+  if (!options.apiKey) {
+    return {};
+  }
+  return { [options.apiKeyHeader ?? "X-API-Key"]: options.apiKey };
+}
+
+function requireText(value: string | undefined, name: string): string {
+  if (!value?.trim()) {
+    throw new Error(`Please provide a ${name}.`);
+  }
+  return value.trim();
+}
+
+function requireHttpUrl(value: string | undefined, name: string): string {
+  const url = requireText(value, name);
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      return url;
+    }
+  } catch (_error) {
+    // Use the common error below.
+  }
+  throw new Error(`Please provide a valid HTTP(S) ${name}.`);
+}
+
+function parseLoginAccessToken(responseBody: string): string {
+  let value: unknown = responseBody.trim();
+  try {
+    value = JSON.parse(responseBody);
+  } catch (_error) {
+    // Proprietary login endpoints may return a plain-text token.
+  }
+  const token = findLoginAccessToken(value);
+  if (!token) {
+    throw new Error(
+      "Login succeeded, but the server did not return an access token.",
+    );
+  }
+  return token;
+}
+
+function findLoginAccessToken(value: unknown): string | null {
+  if (typeof value === "string") {
+    return value || null;
+  }
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return null;
+  }
+  const record = value as Record<string, unknown>;
+  for (const name of [
+    "token",
+    "authToken",
+    "auth_token",
+    "accessToken",
+    "access_token",
+    "apiToken",
+    "api_token",
+  ]) {
+    if (typeof record[name] === "string" && record[name]) {
+      return record[name];
+    }
+  }
+  for (const nested of Object.values(record)) {
+    const token = findLoginAccessToken(nested);
+    if (token) {
+      return token;
+    }
+  }
+  return null;
 }

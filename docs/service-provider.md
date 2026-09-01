@@ -69,13 +69,16 @@ configuration offers four authentication choices:
 - **None** sends no authentication header.
 - **Token** sends the supplied access token as a Bearer token by default, or in
   a user-defined header.
-- **Login** and **OAuth2** start browser-based authentication. Both support the
-  OAuth 2.0 Authorization Code flow with PKCE; choose **OIDC** when the
+- **Login** posts the supplied username and password to a proprietary login
+  endpoint, then sends the returned access token with API requests. The
+  endpoint must allow the app's browser origin (CORS).
+- **OAuth2** starts browser-based authentication using the OAuth 2.0
+  Authorization Code flow with PKCE; choose **OIDC** when the
   authorization server provides OpenID Connect discovery, or **OAuth2** when
   its authorization and token endpoints are configured explicitly.
 
-Browser authentication requires a client ID. OIDC additionally requires the
-authorization-server URL. Plain OAuth2 requires both the authorization and
+OAuth2 browser authentication requires a client ID. OIDC additionally requires
+the authorization-server URL. Plain OAuth2 requires both the authorization and
 token endpoint URLs. The authorization server must be configured to redirect
 back to this application and allow the application's browser origin where its
 token endpoint is called from the browser.

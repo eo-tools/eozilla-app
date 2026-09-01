@@ -1,9 +1,21 @@
 ## Changes in version 0.1.2 (in development)
+
 ### Enhancements
 
 - When generating titles for input fields without a title set, we skip a 
   prefix `x-` from the input's name before converting it. (#74)
+
 ### Fixes
+
+- Custom Service now treats **Login** as Cuiman's proprietary
+  username/password login endpoint: it exchanges the credentials for an access
+  token before making API requests. OAuth2 remains the browser-based flow.
+
+- Custom Service now recognizes the renamed Cuiman service options:
+  `loginUrl`, `tokenUrl`, `grantType`, `accessToken`, and
+  `accessTokenHeader`. It applies supplied Basic, access-token, and API-key
+  credentials to service requests, and uses a supplied OAuth2 access token
+  without starting a browser authorization-code flow.
 
 - Map process inputs now zoom to the current polygon or bbox when an
   existing value is loaded, so saved geometry is visible immediately.

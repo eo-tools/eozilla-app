@@ -15,12 +15,15 @@ export interface UrlServiceOptions extends ServiceOptions {
   authType: AuthType;
   username?: string;
   password?: string;
+  loginUrl?: string;
+  tokenUrl?: string;
+  grantType?: "password" | "client_credentials";
   clientId?: string;
   clientSecret?: string;
   refreshToken?: string;
-  token?: string;
   useBearer?: boolean;
-  tokenHeader?: string;
+  accessToken?: string;
+  accessTokenHeader?: string;
   apiKey?: string;
   apiKeyHeader?: string;
   authorizationServerUrl?: string;
@@ -28,8 +31,6 @@ export interface UrlServiceOptions extends ServiceOptions {
   authorizationEndpoint?: string;
   tokenEndpoint?: string;
   oauth2Scopes?: string;
-  accessToken?: string;
-  accessTokenHeader?: string;
 }
 
 export type UrlServiceOptionsSchema = ServiceOptionsSchema<UrlServiceOptions>;
@@ -38,7 +39,8 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
   apiUrl: {
     type: "string",
     title: "Service API URL",
-    default: import.meta.env.VITE_DEFAULT_SERVICE_API_URL || "http://localhost:8008",
+    default:
+      import.meta.env.VITE_DEFAULT_SERVICE_API_URL || "http://localhost:8008",
     format: "uri",
   },
 
@@ -47,33 +49,55 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
     title: "Authentication Type",
     description: "Choose how requests to the service are authorized.",
     default: import.meta.env.VITE_DEFAULT_SERVICE_AUTH_TYPE || "none",
-    enum: ["none", "token", "login", "oauth2"],
+    enum: ["none", "basic", "token", "login", "oauth2", "api-key"],
   },
 
-  // Reserved for a proprietary login flow, which is not implemented yet.
   username: {
     type: "string",
     title: "Username",
-    nullable: true,
-    "x-ui-hidden": true,
+    "x-ui-visible": "authType === 'basic' || authType === 'login'",
+    "x-ui-required": "authType === 'basic' || authType === 'login'",
   },
   password: {
     type: "string",
     title: "Password",
-    nullable: true,
     format: "password",
+    "x-ui-visible": "authType === 'basic' || authType === 'login'",
+    "x-ui-required": "authType === 'basic' || authType === 'login'",
+  },
+
+  loginUrl: {
+    type: "string",
+    title: "Login URL",
+    format: "uri",
+    "x-ui-visible": "authType === 'login'",
+    "x-ui-required": "authType === 'login'",
+  },
+  // These legacy Cuiman options are accepted in preconfigured providers. The
+  // app's interactive OAuth2 flow uses Authorization Code + PKCE instead.
+  tokenUrl: {
+    type: "string",
+    title: "OAuth2 token URL",
+    nullable: true,
+    format: "uri",
+    "x-ui-hidden": true,
+  },
+  grantType: {
+    type: "string",
+    title: "OAuth2 grant type",
+    nullable: true,
+    enum: ["password", "client_credentials"],
     "x-ui-hidden": true,
   },
 
-  // Kept for legacy proprietary-login configurations and reused by OAuth2.
   clientId: {
     type: "string",
     title: "Client ID",
     description:
       "The public browser client registered with the authorization server.",
     default: import.meta.env.VITE_DEFAULT_SERVICE_CLIENT_ID || undefined,
-    "x-ui-visible": "authType === 'login' || authType === 'oauth2'",
-    "x-ui-required": "authType === 'login' || authType === 'oauth2'",
+    "x-ui-visible": "authType === 'oauth2'",
+    "x-ui-required": "authType === 'oauth2'",
   },
   clientSecret: {
     type: "string",
@@ -82,8 +106,6 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
     format: "password",
     "x-ui-hidden": true,
   },
-  // For type "login", token refresh phase — set after a successful login if the server
-  // returned a refresh token; presence of this field activates automatic token refresh on 401
   refreshToken: {
     type: "string",
     title: "Refresh token",
@@ -92,46 +114,49 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
     "x-ui-hidden": true,
   },
 
-  // For type "token" or "login"
-  token: {
+  // For type "token". Login and OAuth2 obtain their access tokens themselves.
+  accessToken: {
     type: "string",
     title: "Access token",
     description: "The token sent with each request to the service.",
-    nullable: true,
     format: "password",
-    "x-ui-hidden": true,
+    "x-ui-visible": "authType === 'token'",
+    "x-ui-required": "authType === 'token'",
   },
 
-  // For type "token": custom header or Bearer
   useBearer: {
     type: "boolean",
     title: "Use Authorization: Bearer header",
     description:
       "Turn this off only when the service requires a custom header.",
     default: true,
-    "x-ui-visible": "authType === 'token'",
+    "x-ui-visible": "authType === 'token' || authType === 'login'",
+    "x-ui-required": "authType === 'token' || authType === 'login'",
   },
-  tokenHeader: {
+  accessTokenHeader: {
     type: "string",
-    title: "Name of the token header",
+    title: "Access token header",
     default: "X-Auth-Token",
-    "x-ui-hidden": true,
+    "x-ui-visible":
+      "(authType === 'token' || authType === 'login') && !useBearer",
+    "x-ui-required":
+      "(authType === 'token' || authType === 'login') && !useBearer",
   },
 
   // For type "api-key"
   apiKey: {
     type: "string",
     title: "API key",
-    nullable: true,
     format: "password",
-    "x-ui-hidden": true,
+    "x-ui-visible": "authType === 'api-key'",
+    "x-ui-required": "authType === 'api-key'",
   },
   apiKeyHeader: {
     type: "string",
     title: "Name of the API key header",
     default: "X-API-Key",
-    nullable: true,
-    "x-ui-hidden": true,
+    "x-ui-visible": "authType === 'api-key'",
+    "x-ui-required": "authType === 'api-key'",
   },
   authorizationServerUrl: {
     type: "string",
@@ -141,27 +166,24 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
       import.meta.env.VITE_DEFAULT_SERVICE_AUTHORIZATION_SERVER_URL ||
       undefined,
     format: "uri",
-    "x-ui-visible":
-      "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oidc'",
-    "x-ui-required":
-      "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oidc'",
+    "x-ui-visible": "authType === 'oauth2' && oauth2Protocol === 'oidc'",
+    "x-ui-required": "authType === 'oauth2' && oauth2Protocol === 'oidc'",
   },
   oauth2Protocol: {
     type: "string",
     title: "Authorization protocol",
     default: import.meta.env.VITE_DEFAULT_SERVICE_OAUTH2_PROTOCOL || "oidc",
     enum: ["oauth2", "oidc"],
-    "x-ui-visible": "authType === 'login' || authType === 'oauth2'",
+    "x-ui-visible": "authType === 'oauth2'",
+    "x-ui-required": "authType === 'oauth2'",
   },
   authorizationEndpoint: {
     type: "string",
     title: "Authorization endpoint",
     description: "The OAuth2 endpoint that starts the authorization redirect.",
     format: "uri",
-    "x-ui-visible":
-      "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
-    "x-ui-required":
-      "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
+    "x-ui-visible": "authType === 'oauth2' && oauth2Protocol === 'oauth2'",
+    "x-ui-required": "authType === 'oauth2' && oauth2Protocol === 'oauth2'",
   },
   tokenEndpoint: {
     type: "string",
@@ -169,10 +191,8 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
     description:
       "The OAuth2 endpoint that exchanges an authorization code for tokens.",
     format: "uri",
-    "x-ui-visible":
-      "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
-    "x-ui-required":
-      "(authType === 'login' || authType === 'oauth2') && oauth2Protocol === 'oauth2'",
+    "x-ui-visible": "authType === 'oauth2' && oauth2Protocol === 'oauth2'",
+    "x-ui-required": "authType === 'oauth2' && oauth2Protocol === 'oauth2'",
   },
   oauth2Scopes: {
     type: "string",
@@ -180,20 +200,6 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
     description:
       "Space-separated scopes requested from the authorization server.",
     nullable: true,
-    "x-ui-visible": "authType === 'login' || authType === 'oauth2'",
-  },
-  accessToken: {
-    type: "string",
-    title: "Access token",
-    description: "The token sent with each request to the service.",
-    format: "password",
-    "x-ui-visible": "authType === 'token'",
-    "x-ui-required": "authType === 'token'",
-  },
-  accessTokenHeader: {
-    type: "string",
-    title: "Access token header",
-    default: "X-Auth-Token",
-    "x-ui-visible": "authType === 'token' && !useBearer",
+    "x-ui-visible": "authType === 'oauth2'",
   },
 };

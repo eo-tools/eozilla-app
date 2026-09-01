@@ -83,6 +83,44 @@ describe("parseAppBootstrapConfig", () => {
     warn.mockRestore();
   });
 
+  it("preserves the renamed Cuiman authentication options", () => {
+    const encodedService = encodeBase64Url({
+      id: "client",
+      meta: { type: "custom", title: "Client" },
+      options: {
+        apiUrl: "https://example.test/ogcapi",
+        authType: "oauth2",
+        tokenUrl: "https://auth.example.test/token",
+        grantType: "client_credentials",
+        accessToken: "secret",
+        accessTokenHeader: "X-Service-Token",
+        useBearer: false,
+      },
+    });
+
+    expect(
+      parseAppBootstrapConfig(`?service=${encodedService}`).service,
+    ).toEqual({
+      id: "client",
+      meta: {
+        type: "custom",
+        title: "Client",
+        description: undefined,
+        disabled: undefined,
+        hidden: undefined,
+      },
+      options: {
+        apiUrl: "https://example.test/ogcapi",
+        authType: "oauth2",
+        tokenUrl: "https://auth.example.test/token",
+        grantType: "client_credentials",
+        accessToken: "secret",
+        accessTokenHeader: "X-Service-Token",
+        useBearer: false,
+      },
+    });
+  });
+
   it("ignores invalid color scheme values", () => {
     expect(parseAppBootstrapConfig("?scheme=auto")).toEqual({
       compact: false,
