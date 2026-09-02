@@ -85,20 +85,6 @@ async function startApp(): Promise<void> {
           authType: "none",
         },
       });
-    } else {
-      const serviceProvider = bootstrapConfig.service;
-      if (serviceProvider) {
-        providers.push(
-          new CustomServiceProvider({
-            id: serviceProvider.id,
-            meta: serviceProvider.meta,
-          }),
-        );
-        storage.saveServiceProviderSelection({
-          id: serviceProvider.id,
-          options: serviceProvider.options,
-        });
-      }
     }
 
     registerServiceProviders(providers);
