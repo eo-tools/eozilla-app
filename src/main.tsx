@@ -30,6 +30,15 @@ const bootstrapConfig = parseAppBootstrapConfig();
 configureLocalUrlProxy(bootstrapConfig.proxy);
 console.debug("bootstrapConfig:", bootstrapConfig);
 
+// A Cuiman launch is deliberately different from a standalone SPA launch:
+//
+//   ?launch=<one-shot-code>
+//     -> POST ./_cuiman/launch (sets an HttpOnly cookie)
+//     -> one CustomServiceProvider using ./_cuiman/service/
+//
+// The relative paths are essential for remote JupyterLab.  Its Server Proxy
+// exposes the app below /user/.../proxy/<port>/, which must remain part of
+// every request rather than being replaced by window.location.origin.
 void startApp();
 
 async function startApp(): Promise<void> {
@@ -63,6 +72,9 @@ async function startApp(): Promise<void> {
         ];
 
     if (isCuimanLaunch) {
+      // Keep the Cuiman provider separate from a user's persistent standalone
+      // choice.  Reloading this launched tab still works, while opening the
+      // standalone app later does not unexpectedly select Cuiman.
       storage.saveTransientServiceProviderSelection({
         id: "cuiman",
         options: {
@@ -111,6 +123,8 @@ async function startApp(): Promise<void> {
 }
 
 async function exchangeCuimanLaunch(launchCode: string): Promise<void> {
+  // Do not return provider options here.  The fixed, relative proxy route is
+  // enough for the app; resolved upstream auth headers remain on Cuiman.
   const response = await fetch("./_cuiman/launch", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -122,6 +136,8 @@ async function exchangeCuimanLaunch(launchCode: string): Promise<void> {
 }
 
 function removeLaunchCodeFromUrl(): void {
+  // Retain public RemoteState/UI parameters such as `ws`, but remove the
+  // one-shot capability before the user can copy, bookmark, or refresh it.
   const params = new URLSearchParams(window.location.search);
   params.delete("launch");
   const query = params.toString();

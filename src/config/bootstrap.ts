@@ -12,6 +12,8 @@ const DEBUG_QUERY_PARAM = "debug";
 const PROXY_QUERY_PARAM = "proxy";
 const SCHEME_QUERY_PARAM = "scheme";
 const SERVICE_QUERY_PARAM = "service";
+// A Cuiman launch code is an opaque, one-shot bootstrap capability.  It never
+// contains provider configuration or processing-service credentials.
 const LAUNCH_QUERY_PARAM = "launch";
 const WEBSOCKET_QUERY_PARAM = "ws";
 
@@ -23,6 +25,7 @@ export interface AppBootstrapConfig {
   proxy: string | null;
   scheme: AppColorScheme | undefined;
   service: SerializedServiceProvider | null;
+  /** One-shot Cuiman bootstrap capability, or null for a standalone app. */
   launchCode: string | null;
   ws: string | null;
 }

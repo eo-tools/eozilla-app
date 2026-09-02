@@ -62,6 +62,9 @@ const transientServiceProviderSelection =
     sessionStorage,
     "eozilla.transientServiceProviderSelection",
   );
+// Cuiman launches use this session-only record so they do not overwrite a
+// user's saved standalone provider.  It contains only the relative proxy URL
+// and `authType: "none"`; credentials are never stored in the browser.
 
 export const storage = {
   serviceProviderSelection,
