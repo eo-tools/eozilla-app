@@ -12,6 +12,7 @@ const DEBUG_QUERY_PARAM = "debug";
 const PROXY_QUERY_PARAM = "proxy";
 const SCHEME_QUERY_PARAM = "scheme";
 const SERVICE_QUERY_PARAM = "service";
+const LAUNCH_QUERY_PARAM = "launch";
 const WEBSOCKET_QUERY_PARAM = "ws";
 
 export type AppColorScheme = "dark" | "light";
@@ -22,6 +23,7 @@ export interface AppBootstrapConfig {
   proxy: string | null;
   scheme: AppColorScheme | undefined;
   service: SerializedServiceProvider | null;
+  launchCode: string | null;
   ws: string | null;
 }
 
@@ -41,6 +43,7 @@ export function parseAppBootstrapConfig(
   const scheme = parseSchemeParam(params.get(SCHEME_QUERY_PARAM));
   const ws = params.get(WEBSOCKET_QUERY_PARAM);
   const encodedService = params.get(SERVICE_QUERY_PARAM);
+  const launchCode = params.get(LAUNCH_QUERY_PARAM);
   let service = null;
   if (encodedService) {
     try {
@@ -51,7 +54,7 @@ export function parseAppBootstrapConfig(
       console.warn("Failed to parse value of parameter 'service'.", error);
     }
   }
-  return { compact, debug, proxy, scheme, service, ws };
+  return { compact, debug, proxy, scheme, service, launchCode, ws };
 }
 
 export function parseSerializedServiceProvider(

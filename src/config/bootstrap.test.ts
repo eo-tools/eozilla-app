@@ -46,6 +46,7 @@ describe("parseAppBootstrapConfig", () => {
       proxy: "https://hub.example/user/test/proxy/",
       scheme: "dark",
       ws: null,
+      launchCode: null,
       service: {
         id: "notebook",
         meta: {
@@ -77,6 +78,7 @@ describe("parseAppBootstrapConfig", () => {
       proxy: null,
       scheme: "dark",
       ws: null,
+      launchCode: null,
       service: null,
     });
 
@@ -128,6 +130,7 @@ describe("parseAppBootstrapConfig", () => {
       proxy: null,
       scheme: undefined,
       ws: null,
+      launchCode: null,
       service: null,
     });
   });
@@ -139,6 +142,7 @@ describe("parseAppBootstrapConfig", () => {
       proxy: null,
       scheme: undefined,
       ws: null,
+      launchCode: null,
       service: null,
     });
     expect(parseAppBootstrapConfig("?compact=false")).toEqual({
@@ -147,6 +151,7 @@ describe("parseAppBootstrapConfig", () => {
       proxy: null,
       scheme: undefined,
       ws: null,
+      launchCode: null,
       service: null,
     });
   });
@@ -165,6 +170,7 @@ describe("parseAppBootstrapConfig", () => {
       proxy: null,
       scheme: undefined,
       ws: null,
+      launchCode: null,
       service: null,
     });
   });
@@ -176,6 +182,19 @@ describe("parseAppBootstrapConfig", () => {
       proxy: null,
       scheme: undefined,
       ws: "ws://127.0.0.1:8743/ws",
+      launchCode: null,
+      service: null,
+    });
+  });
+
+  it("parses a Cuiman one-shot launch code without a service config", () => {
+    expect(parseAppBootstrapConfig("?launch=opaque-code")).toEqual({
+      compact: false,
+      debug: false,
+      proxy: null,
+      scheme: undefined,
+      ws: null,
+      launchCode: "opaque-code",
       service: null,
     });
   });

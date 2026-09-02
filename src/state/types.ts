@@ -50,7 +50,7 @@ export interface AppState {
 }
 
 export function createInitialAppState(): AppState {
-  const serviceProviderSelection = storage.serviceProviderSelection.get();
+  const serviceProviderSelection = storage.getActiveServiceProviderSelection();
   let serviceProviderId = storage.hasServiceProviderSelection()
     ? (serviceProviderSelection?.id ?? null)
     : null;

@@ -57,9 +57,22 @@ const serviceProviderSecrets = new JsonProperty<ServiceProviderSecrets>(
   sessionStorage,
   "eozilla.serviceProviderSecrets",
 );
+const transientServiceProviderSelection =
+  new JsonProperty<ServiceProviderSelection>(
+    sessionStorage,
+    "eozilla.transientServiceProviderSelection",
+  );
 
 export const storage = {
   serviceProviderSelection,
+  getActiveServiceProviderSelection(): ServiceProviderSelection | null {
+    return (
+      transientServiceProviderSelection.get() ?? serviceProviderSelection.get()
+    );
+  },
+  saveTransientServiceProviderSelection(selection: ServiceProviderSelection) {
+    transientServiceProviderSelection.set(selection);
+  },
   saveServiceProviderSelection(selection: ServiceProviderSelection) {
     const [options, secrets] = splitSecretOptions(selection.options);
     serviceProviderSelection.set({
@@ -74,6 +87,10 @@ export const storage = {
     }
   },
   getServiceProviderOptions(id: string): ServiceOptionsInput<ServiceOptions> {
+    const transientSelection = transientServiceProviderSelection.get();
+    if (transientSelection?.id === id) {
+      return transientSelection.options;
+    }
     const selection = serviceProviderSelection.get();
     if (!selection || selection.id !== id) {
       return {};
@@ -85,6 +102,10 @@ export const storage = {
     };
   },
   hasServiceProviderSelection(): boolean {
+    const transientSelection = transientServiceProviderSelection.get();
+    if (transientSelection) {
+      return true;
+    }
     const selection = serviceProviderSelection.get();
     if (!selection) {
       return false;

@@ -79,4 +79,29 @@ describe("storage", () => {
       accessToken: "secret",
     });
   });
+
+  it("uses a transient selection without replacing the standalone selection", () => {
+    storageModule.storage.saveServiceProviderSelection({
+      id: "custom",
+      options: { apiUrl: "https://standalone.example.test" },
+    });
+
+    storageModule.storage.saveTransientServiceProviderSelection({
+      id: "cuiman",
+      options: { apiUrl: "https://cuiman.example.test/_cuiman/service/" },
+    });
+
+    expect(storageModule.storage.serviceProviderSelection.get()).toEqual({
+      id: "custom",
+      options: { apiUrl: "https://standalone.example.test" },
+      hasSecrets: false,
+    });
+    expect(storageModule.storage.getActiveServiceProviderSelection()).toEqual({
+      id: "cuiman",
+      options: { apiUrl: "https://cuiman.example.test/_cuiman/service/" },
+    });
+    expect(storageModule.storage.getServiceProviderOptions("cuiman")).toEqual({
+      apiUrl: "https://cuiman.example.test/_cuiman/service/",
+    });
+  });
 });
