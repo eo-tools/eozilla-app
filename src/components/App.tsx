@@ -5,12 +5,14 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Main from "@/components/Main";
 import styles from "@/components/common/styles";
+import type { SerializedServiceProvider } from "@/config/bootstrap";
 
 interface AppProps {
   compact?: boolean;
+  initialService?: SerializedServiceProvider | null;
 }
 
-export default function App({ compact = false }: AppProps) {
+export default function App({ compact = false, initialService }: AppProps) {
   return (
     <AppShell
       withBorder={false}
@@ -26,7 +28,7 @@ export default function App({ compact = false }: AppProps) {
       )}
 
       <AppShell.Main>
-        <Main />
+        <Main initialService={initialService} />
       </AppShell.Main>
 
       {!compact && (

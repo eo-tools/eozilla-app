@@ -2,10 +2,13 @@
 
 ### Enhancements
 
-- When generating titles for input fields without a title set, we skip a 
+- When generating titles for input fields without a title set, we skip a
   prefix `x-` from the input's name before converting it. (#74)
 
 ### Fixes
+
+- A service supplied through the bootstrap configuration is now presented as
+  the only provider. Its configured options are shown before the user connects.
 
 - Custom Service now treats **Login** as Cuiman's proprietary
   username/password login endpoint: it exchanges the credentials for an access
@@ -16,6 +19,13 @@
   `accessTokenHeader`. It applies supplied Basic, access-token, and API-key
   credentials to service requests, and uses a supplied OAuth2 access token
   without starting a browser authorization-code flow.
+
+- The bootstrap service configuration is preserved across OAuth2/OIDC callback
+  redirects, so a configured service remains selected after authentication.
+
+- Dedicated services now connect automatically when their configured
+  credentials are complete. If input is required, they show a compact login
+  form instead of the multi-step service wizard.
 
 - Map process inputs now zoom to the current polygon or bbox when an
   existing value is loaded, so saved geometry is visible immediately.

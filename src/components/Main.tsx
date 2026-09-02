@@ -12,15 +12,20 @@ import { TracebackDialog } from "@/components/dialogs/traceback/TracebackDialog"
 import { JobResultDialog } from "@/components/dialogs/job-result/JobResultDialog";
 import JobPanel from "@/components/panels/job/JobPanel";
 import PrivacyDialog from "@/components/dialogs/privacy/PrivacyDialog";
+import type { SerializedServiceProvider } from "@/config/bootstrap";
 
-export default function Main() {
+export default function Main({
+  initialService,
+}: {
+  initialService?: SerializedServiceProvider | null;
+}) {
   return (
     <RGroup
       orientation="horizontal"
       style={{ width: "100%", height: "100%" }}
       className="horizontal-group"
     >
-      <ServiceDialog />
+      <ServiceDialog initialService={initialService} />
       <TracebackDialog />
       <JobResultDialog />
       <PrivacyDialog />

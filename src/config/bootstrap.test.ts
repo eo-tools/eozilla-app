@@ -179,4 +179,28 @@ describe("parseAppBootstrapConfig", () => {
       service: null,
     });
   });
+
+  it("restores the service provider after an authentication redirect", () => {
+    const storage = new Map<string, string>();
+    vi.stubGlobal("window", {
+      sessionStorage: {
+        setItem: (key: string, value: string) => storage.set(key, value),
+        getItem: (key: string) => storage.get(key) ?? null,
+      },
+    });
+    const encodedService = encodeBase64Url({
+      id: "client",
+      meta: { type: "custom", title: "Client" },
+      options: { apiUrl: "http://localhost:8008", authType: "oauth2" },
+    });
+
+    expect(
+      parseAppBootstrapConfig(`?service=${encodedService}`).service?.id,
+    ).toBe("client");
+    expect(parseAppBootstrapConfig("?code=abc&state=xyz").service?.id).toBe(
+      "client",
+    );
+
+    vi.unstubAllGlobals();
+  });
 });

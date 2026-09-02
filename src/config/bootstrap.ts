@@ -13,6 +13,7 @@ const PROXY_QUERY_PARAM = "proxy";
 const SCHEME_QUERY_PARAM = "scheme";
 const SERVICE_QUERY_PARAM = "service";
 const WEBSOCKET_QUERY_PARAM = "ws";
+const SERVICE_SESSION_STORAGE_KEY = "eozilla.bootstrap.service";
 
 export type AppColorScheme = "dark" | "light";
 
@@ -47,11 +48,47 @@ export function parseAppBootstrapConfig(
       service = parseSerializedServiceProvider(
         decodeBase64UrlJson(encodedService),
       );
+      if (service) {
+        storeServiceForAuthCallback(encodedService);
+      }
     } catch (error) {
       console.warn("Failed to parse value of parameter 'service'.", error);
     }
+  } else if (isAuthCallback(params)) {
+    service = restoreServiceForAuthCallback();
   }
   return { compact, debug, proxy, scheme, service, ws };
+}
+
+function isAuthCallback(params: URLSearchParams): boolean {
+  return params.has("state") && (params.has("code") || params.has("error"));
+}
+
+function storeServiceForAuthCallback(encodedService: string): void {
+  if (typeof window !== "undefined") {
+    window.sessionStorage.setItem(SERVICE_SESSION_STORAGE_KEY, encodedService);
+  }
+}
+
+function restoreServiceForAuthCallback(): SerializedServiceProvider | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  const encodedService = window.sessionStorage.getItem(
+    SERVICE_SESSION_STORAGE_KEY,
+  );
+  if (!encodedService) {
+    return null;
+  }
+  try {
+    return parseSerializedServiceProvider(decodeBase64UrlJson(encodedService));
+  } catch (error) {
+    console.warn(
+      "Failed to restore service after authentication callback.",
+      error,
+    );
+    return null;
+  }
 }
 
 export function parseSerializedServiceProvider(

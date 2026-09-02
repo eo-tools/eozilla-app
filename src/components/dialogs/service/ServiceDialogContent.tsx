@@ -15,6 +15,7 @@ import { ServiceLoadingView } from "./ServiceLoadingView";
 import { ServiceProviderList } from "./ServiceProviderList";
 import { ServiceProviderOptionsForm } from "./ServiceProviderOptionsForm";
 import { ServiceSignedInView } from "./ServiceSignedInView";
+import { FixedServiceLogin } from "./FixedServiceLogin";
 
 export interface ServiceDialogContentProps {
   service: Service | null;
@@ -29,6 +30,8 @@ export interface ServiceDialogContentProps {
     options: ServiceOptionsInput<ServiceOptions>,
   ) => Promise<void>;
   onSignOut: () => Promise<void>;
+  initialOptions?: ServiceOptionsInput<ServiceOptions>;
+  fixedService?: boolean;
 }
 
 type ServiceDialogStep = "select" | "configure" | "connect" | "ready";
@@ -50,9 +53,11 @@ export function ServiceDialogContent({
   onReset,
   onSignIn,
   onSignOut,
+  initialOptions,
+  fixedService = false,
 }: ServiceDialogContentProps) {
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(
-    null,
+    serviceProviders.length === 1 ? serviceProviders[0].id : null,
   );
   const [isSigningIn, setIsSigningIn] = useState(false);
 
@@ -130,6 +135,20 @@ export function ServiceDialogContent({
               }}
             />
           </Stack>
+        ) : fixedService && !service && !serviceProviderId ? (
+          <FixedServiceLogin
+            options={initialOptions ?? {}}
+            providerTitle={activeProvider?.meta.title ?? "Service"}
+            loading={isBusy}
+            onSubmit={async (options) => {
+              setIsSigningIn(true);
+              try {
+                await onSignIn(activeProvider?.id ?? "", options);
+              } finally {
+                setIsSigningIn(false);
+              }
+            }}
+          />
         ) : !service && selectedProvider && !serviceProviderId ? (
           <ServiceProviderOptionsForm
             provider={selectedProvider}

@@ -91,6 +91,22 @@ refreshes the access token before it expires. This only authenticates requests
 to the configured API; the API must accept the token or provide its own token
 exchange mechanism.
 
+### Bootstrap-defined services
+
+An application embedding eozilla-app can provide one service provider through
+the bootstrap `service` configuration. In this dedicated-service mode, the
+provider list and the multi-step selection wizard are skipped:
+
+- if the configured authentication values are complete, the app connects
+  automatically and opens the process interface directly;
+- if values are missing, the app shows only the relevant compact login form;
+- for OAuth2/OIDC without an access token, the form contains only a `Login`
+  button and the provider-specific values remain hidden;
+- if connection fails, the app shows a short error with a retry action.
+
+The configured service is kept in session storage while an OAuth2/OIDC
+redirect is in progress, so the provider remains available after the callback.
+
 ### `signIn(options)`
 
 Called from a user-triggered action after a provider has been selected and its
@@ -236,25 +252,28 @@ sequenceDiagram
 ## What Happens in the App
 
 1. The provider list is read from the registry with `getServiceProviders()`.
-2. The service dialog shows non-hidden providers from that list.
-3. When the user selects a provider, the dialog renders a configuration form
+2. If a bootstrap service is supplied, it is registered as the only provider.
+   Otherwise, the non-hidden providers are shown in the selection dialog.
+3. For a bootstrap-defined service, complete credentials trigger the sign-in
+   flow automatically. Missing credentials are collected in a compact form.
+4. For a normal provider selection, the dialog renders a configuration form
    from `provider.optionsSchema`.
-4. When the user submits the form, `store/actions.signIn()`:
+5. When the user submits the form, `store/actions.signIn()`:
    - looks up the provider;
    - stores the provider id and non-secret options under
      `eozilla.serviceProviderSelection` in local storage;
    - stores secret options in browser session storage;
    - calls `provider.signIn(options)`;
    - sets `serviceProviderId` only if control returns to the app.
-5. If `provider.signIn()` redirects to another website, app execution can stop
+6. If `provider.signIn()` redirects to another website, app execution can stop
    immediately after the provider call. This is expected behavior.
-6. After the external sign-in redirects back to Eozilla, app startup restores
+7. After the external sign-in redirects back to Eozilla, app startup restores
    the provider id from `eozilla.serviceProviderSelection`.
-7. `useLoadService()` sees the restored `serviceProviderId`, reads the stored
+8. `useLoadService()` sees the restored `serviceProviderId`, reads the stored
    options, and calls `provider.createService(options)`.
-8. `createService()` resolves the provider-specific sign-in result and user
+9. `createService()` resolves the provider-specific sign-in result and user
    identity, loads service metadata if needed, and returns a `Service`.
-9. The app stores that `Service` in app state and the rest of the UI uses the
+10. The app stores that `Service` in app state and the rest of the UI uses the
    service methods.
 
 ## Provider Implementation Checklist
@@ -276,8 +295,9 @@ When adding a new provider:
 ## Current Built-In Providers
 
 - `CustomServiceProvider` uses the URL service options and creates a
-  `UrlService`. Its current `signIn()` is a no-op; token headers can be supplied
-  through options.
+  `UrlService`. It supports no authentication, Basic authentication, API keys,
+  manually supplied tokens, proprietary username/password login, and
+  browser-based OAuth2/OIDC authentication.
 - `DevServiceProvider` connects to `http://localhost:8008` with an anonymous
   user. Its `signIn()` and `signOut()` are no-ops.
 - `TestServiceProvider` creates an in-memory test service for local development

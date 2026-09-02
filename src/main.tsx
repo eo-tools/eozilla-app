@@ -18,7 +18,6 @@ import { configureLocalUrlProxy } from "@/config/localUrlProxy";
 import { CustomServiceProvider } from "@/service/providers/custom";
 import { DevServiceProvider } from "@/service/providers/dev";
 import { TestingServiceProvider } from "@/service/providers/testing";
-import { storage } from "@/state/storage";
 import { initAppStore } from "@/store/store";
 import App from "@/components/App";
 import {
@@ -29,27 +28,21 @@ import {
 const bootstrapConfig = parseAppBootstrapConfig();
 configureLocalUrlProxy(bootstrapConfig.proxy);
 console.debug("bootstrapConfig:", bootstrapConfig);
+const serviceProvider = bootstrapConfig.service;
 
 initAppStore(() => {
-  const providers: ServiceProvider<ServiceOptions>[] = [
-    new CustomServiceProvider(),
-    new DevServiceProvider(),
-    new TestingServiceProvider(),
-  ];
-
-  const serviceProvider = bootstrapConfig.service;
-  if (serviceProvider) {
-    providers.push(
-      new CustomServiceProvider({
-        id: serviceProvider.id,
-        meta: serviceProvider.meta,
-      }),
-    );
-    storage.saveServiceProviderSelection({
-      id: serviceProvider.id,
-      options: serviceProvider.options,
-    });
-  }
+  const providers: ServiceProvider<ServiceOptions>[] = serviceProvider
+    ? [
+        new CustomServiceProvider({
+          id: serviceProvider.id,
+          meta: serviceProvider.meta,
+        }),
+      ]
+    : [
+        new CustomServiceProvider(),
+        new DevServiceProvider(),
+        new TestingServiceProvider(),
+      ];
 
   registerServiceProviders(providers);
 });
@@ -65,7 +58,10 @@ createRoot(document.getElementById("root")!).render(
     >
       <MantineProvider forceColorScheme={bootstrapConfig.scheme}>
         <Notifications />
-        <App compact={bootstrapConfig.compact} />
+        <App
+          compact={bootstrapConfig.compact}
+          initialService={serviceProvider}
+        />
       </MantineProvider>
     </AppRemoteStateProvider>
   </StrictMode>,

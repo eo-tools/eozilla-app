@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 import { Center, Group, Modal, Text } from "@mantine/core";
 import { IconNetwork } from "@tabler/icons-react";
 
@@ -10,8 +12,14 @@ import {
 } from "@/store/hooks";
 import { isPopup } from "@/utils/common";
 import { ServiceDialogContent } from "./ServiceDialogContent";
+import type { SerializedServiceProvider } from "@/config/bootstrap";
+import { canAutoConnect } from "./FixedServiceLogin";
 
-export function ServiceDialog() {
+export function ServiceDialog({
+  initialService,
+}: {
+  initialService?: SerializedServiceProvider | null;
+}) {
   const serviceProviders = useServiceProviders();
   const serviceProviderId = useServiceProviderId();
   const {
@@ -20,6 +28,31 @@ export function ServiceDialog() {
     isLoading: isLoadingService,
   } = useLoadService();
   const dialogOpened = useDialogOpened("service");
+  const autoConnectStarted = useRef(false);
+
+  useEffect(() => {
+    if (
+      !initialService ||
+      serviceProviderId ||
+      serviceError ||
+      autoConnectStarted.current ||
+      !canAutoConnect(initialService.options)
+    ) {
+      return;
+    }
+    autoConnectStarted.current = true;
+    void signIn(initialService.id, initialService.options).catch(
+      (error: unknown) => {
+        console.error("Automatic service sign-in failed.", error);
+      },
+    );
+  }, [initialService, serviceError, serviceProviderId]);
+
+  useEffect(() => {
+    if (initialService && service && !serviceError) {
+      closeDialog();
+    }
+  }, [initialService, service, serviceError]);
 
   if (isPopup()) {
     return "Please return to the main window...";
@@ -28,13 +61,23 @@ export function ServiceDialog() {
   const title =
     service && !serviceError
       ? "Service Connected"
-      : serviceProviderId
-        ? "Configure Service"
-        : "Select Service";
+      : initialService && !serviceProviderId
+        ? "Login"
+        : serviceProviderId || initialService
+          ? "Configure Service"
+          : "Select Service";
 
   return (
     <Modal
-      opened={dialogOpened}
+      opened={
+        dialogOpened &&
+        !(
+          initialService &&
+          !serviceError &&
+          !serviceProviderId &&
+          canAutoConnect(initialService.options)
+        )
+      }
       onClose={closeDialog}
       size={680}
       centered
@@ -57,6 +100,8 @@ export function ServiceDialog() {
           onReset={resetState}
           onSignIn={signIn}
           onSignOut={signOut}
+          initialOptions={initialService?.options}
+          fixedService={Boolean(initialService)}
         />
       </Center>
     </Modal>
