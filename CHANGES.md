@@ -4,6 +4,11 @@
 
 - When generating titles for input fields without a title set, we skip a 
   prefix `x-` from the input's name before converting it. (#74)
+- Cuiman-launched apps now exchange a short-lived, single-use `launch` code
+  for an HttpOnly session at the Cuiman app server, then use its same-origin
+  processing-service proxy. Credentials and service configuration are never
+  included in the app URL or browser storage. This is a breaking protocol
+  change: the legacy `service` query parameter is no longer supported. (#80)
 
 ### Fixes
 
