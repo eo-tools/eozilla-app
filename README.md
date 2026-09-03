@@ -57,8 +57,29 @@ Useful entry points when exploring the code:
 ### Prerequisites
 
 - Node.js and npm
-- Optional: [Pixi](https://pixi.sh/) and a checkout of
-  `eozilla` if you want to run the local Eozilla Dev-Service backend
+- [Pixi](https://pixi.sh/) and a checkout of `eozilla` for team development
+  and the local Eozilla Dev-Service backend
+
+### Team Development Workspace
+
+Eozilla App is maintained as a separate Git repository, checked out inside the
+Eozilla repository. This is the standard team workspace layout:
+
+```text
+eozilla/
+  eozilla-app/
+```
+
+Create the workspace with:
+
+```bash
+git clone https://github.com/eo-tools/eozilla.git
+cd eozilla
+pixi install
+git clone https://github.com/eo-tools/eozilla-app.git eozilla-app
+cd eozilla-app
+npm install
+```
 
 ### Install Dependencies
 
@@ -74,32 +95,14 @@ npm run dev
 
 ### Run With The Local Dev Service
 
-The `eozilla:dev` script expects the `eozilla-app` repository to be checked out into the
-`eozilla` Python repository.
-
-First do
-
-```bash
-git clone https://github.com/eo-tools/eozilla.git`
-cd eozilla
-pixi install
-```
-
-then
-
-```bash
-git clone https://github.com/eo-tools/eozilla.app.git`
-cd eozilla-app
-npm install
-```
-
-and finally
+The `eozilla:dev` script expects the standard nested checkout described above.
+From `eozilla/eozilla-app/`, run:
 
 ```bash
 npm run eozilla:dev
 ```
 
-and in a second terminal
+In a second terminal in the same directory, run:
 
 ```bash
 npm run dev
@@ -159,6 +162,9 @@ VITE_BUILD_NUMBER=12 npm run build
 - Shared app state and actions belong in `src/store`.
 - Persisted app state belongs in `src/state`.
 - Tests live next to the implementation as `*.test.ts` files.
+- Substantial code changes must update the relevant canonical app documentation
+  in `../docs/eozilla-app/` (overview, service providers, schema forms, or
+  dynamic expressions).
 
 ## For LLMs
 
