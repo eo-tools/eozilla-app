@@ -13,7 +13,11 @@ import {
   type ServiceOptions,
   type ServiceProvider,
 } from "@/service";
-import { parseAppBootstrapConfig } from "@/config/bootstrap";
+import {
+  getCuimanModeSearch,
+  getCuimanWebSocketUrl,
+  parseAppBootstrapConfig,
+} from "@/config/bootstrap";
 import { exchangeCuimanLaunch } from "@/config/cuimanLaunch";
 import { configureLocalUrlProxy } from "@/config/localUrlProxy";
 import { CustomServiceProvider } from "@/service/providers/custom";
@@ -35,7 +39,9 @@ console.debug("bootstrapConfig:", bootstrapConfig);
 //
 //   ?launch=<one-shot-code>
 //     -> POST ./_cuiman/launch (sets an HttpOnly cookie)
+//     -> ?cuiman=1 (non-sensitive reload marker)
 //     -> one CustomServiceProvider using ./_cuiman/service/
+//     -> a RemoteState WebSocket derived from the visible app URL
 //
 // The relative paths are essential for remote JupyterLab.  Its Server Proxy
 // exposes the app below /user/.../proxy/<port>/, which must remain part of
@@ -43,11 +49,12 @@ console.debug("bootstrapConfig:", bootstrapConfig);
 void startApp();
 
 async function startApp(): Promise<void> {
-  const isCuimanLaunch = bootstrapConfig.launchCode !== null;
-  if (isCuimanLaunch) {
+  const isCuimanMode =
+    bootstrapConfig.cuiman || bootstrapConfig.launchCode !== null;
+  if (bootstrapConfig.launchCode !== null) {
     try {
       await exchangeCuimanLaunch(bootstrapConfig.launchCode!);
-      removeLaunchCodeFromUrl();
+      replaceLaunchCodeWithCuimanMode();
     } catch (error) {
       renderLaunchError(error);
       return;
@@ -55,7 +62,7 @@ async function startApp(): Promise<void> {
   }
 
   initAppStore(() => {
-    const providers: ServiceProvider<ServiceOptions>[] = isCuimanLaunch
+    const providers: ServiceProvider<ServiceOptions>[] = isCuimanMode
       ? [
           new CustomServiceProvider({
             id: "cuiman",
@@ -72,7 +79,7 @@ async function startApp(): Promise<void> {
           new TestingServiceProvider(),
         ];
 
-    if (isCuimanLaunch) {
+    if (isCuimanMode) {
       // Keep the Cuiman provider separate from a user's persistent standalone
       // choice.  Reloading this launched tab still works, while opening the
       // standalone app later does not unexpectedly select Cuiman.
@@ -96,7 +103,7 @@ async function startApp(): Promise<void> {
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       <AppRemoteStateProvider
-        url={bootstrapConfig.ws}
+        url={isCuimanMode ? getCuimanWebSocketUrl() : bootstrapConfig.ws}
         fallback={createFallbackAppRemoteStateClient}
         debug={bootstrapConfig.debug}
       >
@@ -109,12 +116,10 @@ async function startApp(): Promise<void> {
   );
 }
 
-function removeLaunchCodeFromUrl(): void {
-  // Retain public RemoteState/UI parameters such as `ws`, but remove the
-  // one-shot capability before the user can copy, bookmark, or refresh it.
-  const params = new URLSearchParams(window.location.search);
-  params.delete("launch");
-  const query = params.toString();
+function replaceLaunchCodeWithCuimanMode(): void {
+  // Keep an explicit, non-sensitive mode marker after removing the one-shot
+  // capability. This makes reloads register the Cuiman-only service provider.
+  const query = getCuimanModeSearch(window.location.search);
   window.history.replaceState(
     null,
     "",

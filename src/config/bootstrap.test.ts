@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { parseAppBootstrapConfig } from "./bootstrap";
+import {
+  getCuimanModeSearch,
+  getCuimanWebSocketUrl,
+  parseAppBootstrapConfig,
+} from "./bootstrap";
 
 describe("parseAppBootstrapConfig", () => {
   it("parses public UI and Jupyter Server Proxy options", () => {
@@ -15,6 +19,7 @@ describe("parseAppBootstrapConfig", () => {
       debug: true,
       proxy: "https://hub.example/user/test/proxy/",
       scheme: "dark",
+      cuiman: false,
       launchCode: null,
       ws: "ws://127.0.0.1:8743/ws",
     });
@@ -26,6 +31,7 @@ describe("parseAppBootstrapConfig", () => {
       debug: false,
       proxy: null,
       scheme: undefined,
+      cuiman: false,
       launchCode: null,
       ws: null,
     });
@@ -37,6 +43,7 @@ describe("parseAppBootstrapConfig", () => {
       debug: false,
       proxy: null,
       scheme: undefined,
+      cuiman: false,
       launchCode: null,
       ws: null,
     });
@@ -45,6 +52,7 @@ describe("parseAppBootstrapConfig", () => {
       debug: false,
       proxy: null,
       scheme: undefined,
+      cuiman: false,
       launchCode: null,
       ws: null,
     });
@@ -56,8 +64,40 @@ describe("parseAppBootstrapConfig", () => {
       debug: false,
       proxy: null,
       scheme: undefined,
+      cuiman: false,
       launchCode: "opaque-code",
       ws: null,
     });
+  });
+
+  it("parses the persistent Cuiman mode marker", () => {
+    expect(parseAppBootstrapConfig("?cuiman=1")).toEqual({
+      compact: false,
+      debug: false,
+      proxy: null,
+      scheme: undefined,
+      cuiman: true,
+      launchCode: null,
+      ws: null,
+    });
+  });
+
+  it("derives a same-origin WebSocket URL for local and proxied apps", () => {
+    expect(getCuimanWebSocketUrl("http://127.0.0.1:8765/index.html")).toBe(
+      "ws://127.0.0.1:8765/ws",
+    );
+    expect(
+      getCuimanWebSocketUrl(
+        "https://hub.example/user/test/proxy/8765/index.html?cuiman=1",
+      ),
+    ).toBe("wss://hub.example/user/test/proxy/8765/ws");
+  });
+
+  it("replaces launch-only bootstrap parameters with the Cuiman mode marker", () => {
+    expect(
+      getCuimanModeSearch(
+        "?compact=1&launch=opaque-code&ws=ws%3A%2F%2Flocalhost%2Fws&proxy=https%3A%2F%2Fhub.example%2Fproxy%2F&_t=123",
+      ),
+    ).toBe("compact=1&cuiman=1");
   });
 });

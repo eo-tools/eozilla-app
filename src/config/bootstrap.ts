@@ -4,9 +4,13 @@ const DEBUG_QUERY_PARAM = "debug";
 // enforces that only loopback service URLs use it.
 const PROXY_QUERY_PARAM = "proxy";
 const SCHEME_QUERY_PARAM = "scheme";
+const CUIMAN_QUERY_PARAM = "cuiman";
 // A Cuiman launch code is an opaque, one-shot bootstrap capability.  It never
 // contains provider configuration or processing-service credentials.
 const LAUNCH_QUERY_PARAM = "launch";
+// Standalone apps may provide their RemoteState endpoint explicitly. Cuiman
+// derives it from the browser-visible app URL so Jupyter path prefixes remain
+// intact without exposing a server URL in the query.
 const WEBSOCKET_QUERY_PARAM = "ws";
 
 export type AppColorScheme = "dark" | "light";
@@ -16,6 +20,8 @@ export interface AppBootstrapConfig {
   debug: boolean;
   proxy: string | null;
   scheme: AppColorScheme | undefined;
+  /** Whether this tab is a Cuiman-launched app session. */
+  cuiman: boolean;
   /** One-shot Cuiman bootstrap capability, or null for a standalone app. */
   launchCode: string | null;
   ws: string | null;
@@ -29,9 +35,30 @@ export function parseAppBootstrapConfig(
   const debug = parseBooleanParam(params.get(DEBUG_QUERY_PARAM));
   const proxy = params.get(PROXY_QUERY_PARAM);
   const scheme = parseSchemeParam(params.get(SCHEME_QUERY_PARAM));
+  const cuiman = parseBooleanParam(params.get(CUIMAN_QUERY_PARAM));
   const ws = params.get(WEBSOCKET_QUERY_PARAM);
   const launchCode = params.get(LAUNCH_QUERY_PARAM);
-  return { compact, debug, proxy, scheme, launchCode, ws };
+  return { compact, debug, proxy, scheme, cuiman, launchCode, ws };
+}
+
+/** Derive the RemoteState WebSocket URL from the browser-visible app URL. */
+export function getCuimanWebSocketUrl(
+  locationHref: string = window.location.href,
+): string {
+  const url = new URL("./ws", locationHref);
+  url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+  return url.toString();
+}
+
+/** Remove the one-shot code and retain only the non-sensitive Cuiman mode. */
+export function getCuimanModeSearch(search: string): string {
+  const params = new URLSearchParams(search);
+  params.delete(LAUNCH_QUERY_PARAM);
+  params.delete(WEBSOCKET_QUERY_PARAM);
+  params.delete(PROXY_QUERY_PARAM);
+  params.delete("_t");
+  params.set(CUIMAN_QUERY_PARAM, "1");
+  return params.toString();
 }
 
 function parseBooleanParam(value: string | null): boolean {
