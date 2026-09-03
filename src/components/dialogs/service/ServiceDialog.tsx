@@ -13,7 +13,7 @@ import {
 import { isPopup } from "@/utils/common";
 import { ServiceDialogContent } from "./ServiceDialogContent";
 import type { SerializedServiceProvider } from "@/config/bootstrap";
-import { canAutoConnect } from "./FixedServiceLogin";
+import { canAutoConnect } from "./fixedService";
 
 export function ServiceDialog({
   initialService,
