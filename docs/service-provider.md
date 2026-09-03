@@ -91,6 +91,47 @@ refreshes the access token before it expires. This only authenticates requests
 to the configured API; the API must accept the token or provide its own token
 exchange mechanism.
 
+## Cuiman-Launched Mode
+
+When Cuiman launches the app, the regular service/provider architecture remains
+in use, but the provider represents a same-origin Cuiman proxy rather than the
+processing API directly. This mode is intentionally separate from the
+stand-alone Custom Service flow described above.
+
+1. Cuiman puts only a short-lived, single-use opaque `launch` code in the app
+   URL. It never includes an API URL, headers, tokens, or other service
+   configuration in the query string.
+2. At startup, the app posts that code to the relative `./_cuiman/launch`
+   endpoint. The Cuiman app server consumes the code and creates an HttpOnly
+   browser session cookie; the app replaces `launch` in the displayed URL with
+   the non-sensitive `cuiman=1` mode marker. This lets a reload retain the
+   Cuiman-only provider without retaining a usable launch capability.
+   An expired, consumed, or unknown code receives `410 Gone` with the server's
+   launch-specific error detail. Other exchange failures retain their own
+   status and reason so the app does not misreport them as an expired launch.
+3. The app derives both its RemoteState WebSocket URL and its
+   `CustomServiceProvider` API URL from the browser-visible location. The API
+   URL is the relative `./_cuiman/service/` proxy and uses authentication type
+   `none`; the service and provider interfaces therefore remain unchanged for
+   UI code.
+4. The proxy selects the processing API URL and adds the server-owned
+   authentication headers for every request. The browser only sees the
+   same-origin proxy URL and cannot read the session cookie or upstream
+   credentials.
+
+The app does not offer a sign-out action in Cuiman-launched mode. The Cuiman
+client owns the launched session and is responsible for ending it.
+
+The relative paths are essential for remote JupyterLab and JupyterHub
+deployments, where Cuiman is reached through `jupyter-server-proxy` under a
+path prefix. The derived WebSocket URL retains that same prefix. The provider
+selection is kept only for the current browser session, so a previous
+stand-alone selection is not overwritten.
+
+This mode requires the Cuiman app server. A permanently deployed stand-alone
+SPA continues to use its normal Custom Service configuration and browser-based
+authentication flow.
+
 ### `signIn(options)`
 
 Called from a user-triggered action after a provider has been selected and its

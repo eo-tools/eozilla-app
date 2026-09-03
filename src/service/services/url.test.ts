@@ -237,4 +237,19 @@ describe("UrlService", () => {
       loadServiceRootMetadata("https://example.com/api/"),
     ).rejects.toBeInstanceOf(ServiceError);
   });
+
+  it("preserves an HTTP error when its body is not JSON", async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      status: 502,
+      statusText: "Bad Gateway",
+      json: async () => {
+        throw new SyntaxError("Unexpected token 'I'");
+      },
+    } as unknown as Response);
+
+    await expect(
+      loadServiceRootMetadata("https://example.com/api/"),
+    ).rejects.toThrow("HTTP 502 Bad Gateway");
+  });
 });

@@ -155,7 +155,7 @@ export function ServiceDialogContent({
           <ServiceSignedInView
             service={service}
             onContinue={onClose}
-            onSignOut={onSignOut}
+            onSignOut={service.providerId === "cuiman" ? undefined : onSignOut}
           />
         ) : null}
       </Box>
