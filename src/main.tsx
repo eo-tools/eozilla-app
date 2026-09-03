@@ -14,6 +14,7 @@ import {
   type ServiceProvider,
 } from "@/service";
 import { parseAppBootstrapConfig } from "@/config/bootstrap";
+import { exchangeCuimanLaunch } from "@/config/cuimanLaunch";
 import { configureLocalUrlProxy } from "@/config/localUrlProxy";
 import { CustomServiceProvider } from "@/service/providers/custom";
 import { DevServiceProvider } from "@/service/providers/dev";
@@ -106,19 +107,6 @@ async function startApp(): Promise<void> {
       </AppRemoteStateProvider>
     </StrictMode>,
   );
-}
-
-async function exchangeCuimanLaunch(launchCode: string): Promise<void> {
-  // Do not return provider options here.  The fixed, relative proxy route is
-  // enough for the app; resolved upstream auth headers remain on Cuiman.
-  const response = await fetch("./_cuiman/launch", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ launch: launchCode }),
-  });
-  if (!response.ok) {
-    throw new Error("The Cuiman app launch has expired or is no longer valid.");
-  }
 }
 
 function removeLaunchCodeFromUrl(): void {

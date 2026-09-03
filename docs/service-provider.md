@@ -104,6 +104,9 @@ stand-alone Custom Service flow described above.
 2. At startup, the app posts that code to the relative `./_cuiman/launch`
    endpoint. The Cuiman app server consumes the code and creates an HttpOnly
    browser session cookie; the app removes `launch` from the displayed URL.
+   An expired, consumed, or unknown code receives `410 Gone` with the server's
+   launch-specific error detail. Other exchange failures retain their own
+   status and reason so the app does not misreport them as an expired launch.
 3. The app registers one `CustomServiceProvider` whose API URL is the relative
    `./_cuiman/service/` proxy and whose authentication type is `none`. The
    service and provider interfaces therefore remain unchanged for UI code.

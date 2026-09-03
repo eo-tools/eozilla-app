@@ -13,6 +13,7 @@ import type {
 import { isObject } from "@/utils/common";
 import { ServiceError } from "@/service/errors";
 import { resolveAppUrl } from "@/config/localUrlProxy";
+import { HttpError, getResponseValueReason } from "@/utils/http";
 
 interface ApiCallOptions<T> {
   params?: [string, string][];
@@ -155,12 +156,23 @@ async function callApi<T>(
     headers: buildHeaders(await resolveHeaders(defaultHeaders), hasData),
     body: hasData ? JSON.stringify(options.data) : undefined,
   });
-  const returnValue = await response.json();
+  let returnValue: unknown;
+  try {
+    returnValue = await response.json();
+  } catch (error) {
+    // Gateways and other intermediaries commonly return plain-text or HTML
+    // error pages. Preserve their HTTP status instead of leaking a JSON parse
+    // error into the service-configuration dialog.
+    if (!response.ok) {
+      throw new HttpError(response);
+    }
+    throw error;
+  }
   if (isApiError(returnValue)) {
     throw new ServiceError(returnValue);
   }
   if (!response.ok) {
-    throw new HttpError(response);
+    throw new HttpError(response, getResponseValueReason(returnValue));
   }
   if (options?.validate) {
     return options?.validate(returnValue);
@@ -193,14 +205,6 @@ function isApiError(data: unknown): data is ApiError {
     "status" in data &&
     typeof data["status"] === "number"
   );
-}
-
-class HttpError extends Error {
-  readonly response: Response;
-  constructor(response: Response) {
-    super(response.statusText || `HTTP error ${response.status}`);
-    this.response = response;
-  }
 }
 
 const buildUrl = (
