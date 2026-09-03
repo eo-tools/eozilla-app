@@ -8,7 +8,7 @@ import { isObject } from "@/utils/common";
 export interface ServiceSignedInViewProps {
   service: Service;
   onContinue: () => void;
-  onSignOut: () => void;
+  onSignOut?: () => void;
 }
 
 export function ServiceSignedInView({
@@ -57,9 +57,11 @@ export function ServiceSignedInView({
       </Stack>
 
       <Group justify="flex-end" w="100%">
-        <Button onClick={onSignOut} variant="default">
-          Sign out
-        </Button>
+        {onSignOut ? (
+          <Button onClick={onSignOut} variant="default">
+            Sign out
+          </Button>
+        ) : null}
         <Button onClick={onContinue}>Done</Button>
       </Group>
     </Stack>

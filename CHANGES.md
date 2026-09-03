@@ -11,9 +11,9 @@
   `cuiman=1` marker so the Cuiman provider is restored on reload. The app
   derives its WebSocket endpoint from the browser-visible URL, including
   Jupyter Server Proxy path prefixes. Credentials and service configuration
-  are never included in the app URL or browser storage. This is a breaking
-  protocol change: the legacy `service` query parameter is no longer
-  supported. (#80)
+  are never included in the app URL or browser storage. Cuiman manages
+  sign-out in this mode. This is a breaking protocol change: the legacy
+  `service` query parameter is no longer supported. (#80)
 
 ### Fixes
 
