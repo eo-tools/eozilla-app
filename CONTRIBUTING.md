@@ -6,6 +6,20 @@ If you have suggestions, ideas, feature requests, or have found a bug, please [o
 
 If you would like to submit code or documentation changes, please open a [pull request](https://github.com/eo-tools/eozilla-app/pulls). Code and configuration changes should be linked to a corresponding issue.
 
+## Development workspace
+
+For team development, use Eozilla App as a separate Git checkout nested inside
+the Eozilla repository:
+
+```text
+eozilla/
+  eozilla-app/
+```
+
+This layout allows the app to run against the local Eozilla development service
+and build into Cuiman. The setup commands are in the
+[README](README.md#team-development-workspace).
+
 ## Pull request checklist
 
 Before opening a pull request, make sure that all applicable items below are complete:
@@ -16,7 +30,9 @@ Before opening a pull request, make sure that all applicable items below are com
 - [ ] Tests pass by running `npm run tests`.
 - [ ] A production build succeeds by running `npm run build`.
 - [ ] Tests were added or updated for behavior changes.
-- [ ] Documentation, including the README where relevant, was updated for user-facing changes.
+- [ ] Substantial code changes are reflected in the relevant canonical app
+      documentation under `../docs/eozilla-app/`, including the README where
+      relevant.
 
 ## Code style
 
