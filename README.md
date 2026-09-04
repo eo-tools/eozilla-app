@@ -57,8 +57,8 @@ Useful entry points when exploring the code:
 ### Prerequisites
 
 - Node.js and npm
-- [Pixi](https://pixi.sh/) and a checkout of `eozilla` for team development
-  and the local Eozilla Dev-Service backend
+- Optional: [Pixi](https://pixi.sh/) and a checkout of `eozilla` for team development
+  and the local Eozilla Dev-Service backend, see below.
 
 ### Team Development Workspace
 
