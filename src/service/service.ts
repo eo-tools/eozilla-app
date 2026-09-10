@@ -10,6 +10,8 @@ import type {
 
 export interface Service {
   providerId: string;
+  /**Stable identity used to separate browser-persisted service data.*/
+  storageId: string;
   user: UserIdentity;
   meta: ServiceMetadata;
   getProcesses(): Promise<ProcessList>;

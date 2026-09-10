@@ -159,6 +159,10 @@ export class TestingService implements Service {
     return "testing";
   }
 
+  get storageId() {
+    return "testing";
+  }
+
   get user(): UserIdentity {
     return { id: "unknown", displayName: "anonymous User" };
   }

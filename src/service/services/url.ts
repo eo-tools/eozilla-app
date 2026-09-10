@@ -27,6 +27,7 @@ export type ApiHeadersProvider = ApiHeaders | (() => Promise<ApiHeaders>);
 
 export class UrlService implements Service {
   readonly providerId: string;
+  readonly storageId: string;
   readonly apiUrl: string;
   readonly user: UserIdentity;
   readonly meta: ServiceMetadata;
@@ -41,6 +42,7 @@ export class UrlService implements Service {
   ) {
     this.providerId = providerId;
     this.apiUrl = apiUrl;
+    this.storageId = new URL(apiUrl).toString();
     this.user = user;
     this.meta = meta;
     this.defaultHeaders = defaultHeaders;
