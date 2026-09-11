@@ -27,7 +27,7 @@ describe("CustomServiceProvider", () => {
     const provider = new CustomServiceProvider({
       id: "notebook",
       meta: {
-        type: "system",
+        type: "dedicated",
         title: "Notebook Service",
         description: "Configured by Jupyter",
       },
@@ -35,7 +35,7 @@ describe("CustomServiceProvider", () => {
 
     expect(provider.id).toBe("notebook");
     expect(provider.meta).toEqual({
-      type: "system",
+      type: "dedicated",
       title: "Notebook Service",
       description: "Configured by Jupyter",
     });

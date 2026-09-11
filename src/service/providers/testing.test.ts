@@ -8,7 +8,7 @@ describe("TestingServiceProvider", () => {
 
     expect(provider.id).toBe("testing");
     expect(provider.meta).toEqual({
-      type: "testing",
+      type: "test",
       title: "Testing Server (in-memory)",
     });
     expect(provider.optionsSchema).toEqual({});
