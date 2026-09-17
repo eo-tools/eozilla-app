@@ -84,7 +84,8 @@ export default function JobPanel() {
               <UnavailableHint
                 message={
                   activeJobId
-                    ? "The original request is not available. It may have been created by another client or before request storage was enabled."
+                    ? ("No associated process request found. " + 
+                        "They are available only for your jobs and only in this browser.")
                     : "No job selected."
                 }
               />
