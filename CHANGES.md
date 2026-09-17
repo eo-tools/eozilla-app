@@ -22,6 +22,9 @@
 
 ### Fixes
 
+- Service provider metadata now uses the `test` and `dedicated` types instead
+  of `testing` and `system`. (#77)
+
 - Custom Service now treats **Login** as Cuiman's proprietary
   username/password login endpoint: it exchanges the credentials for an access
   token before making API requests. OAuth2 remains the browser-based flow.
