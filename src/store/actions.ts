@@ -127,7 +127,7 @@ export function setService(service: Service | null) {
     } catch (error) {
       console.error("Failed to load stored process requests", error);
       notifications.show({
-        message: "Stored job requests could not be loaded.",
+        message: "Failed to load process request for job.",
         color: "orange",
       });
     }

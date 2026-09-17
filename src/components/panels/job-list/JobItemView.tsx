@@ -11,7 +11,11 @@ import {
 import type { JobInfo } from "@/service";
 import { useHoverReveal } from "@/components/common/useHoverReveal";
 import { isNumber, isString, type Optional } from "@/utils/common";
-import { IconCancel, IconCopy, IconTrash } from "@tabler/icons-react";
+import {
+  IconCancel,
+  IconSquareRoundedArrowLeft,
+  IconTrash,
+} from "@tabler/icons-react";
 import styles from "@/components/common/styles";
 import { JobStatusIcon } from "./JobStatusIcon";
 
@@ -85,7 +89,7 @@ export function JobItemView({
                         onUseRequest(jobInfo);
                       }}
                     >
-                      <IconCopy {...styles.icon.sm} />
+                      <IconSquareRoundedArrowLeft {...styles.icon.sm} />
                     </ActionIcon>
                   </Tooltip>
                 )}

@@ -77,15 +77,33 @@ export default function JobPanel() {
             </ResourceView>
           </SubPanel.Item>
 
-          <SubPanel.Item value="request" title="Request">
+          <SubPanel.Item
+            value="request"
+            title="Request"
+            actions={
+              <ActionIcon
+                {...styles.actionIcon.sm}
+                style={revealStyle}
+                aria-label="Copy process request to clipboard"
+                disabled={!storedRequest}
+                onClick={() => {
+                  if (storedRequest) {
+                    copyJsonToClipboard(storedRequest.request);
+                  }
+                }}
+              >
+                <IconCopy {...styles.icon.sm} />
+              </ActionIcon>
+            }
+          >
             {storedRequest ? (
               <JsonCode value={storedRequest.request} />
             ) : (
               <UnavailableHint
                 message={
                   activeJobId
-                    ? ("No associated process request found. " + 
-                        "They are available only for your jobs and only in this browser.")
+                    ? "No associated process request found. " +
+                      "They are available only for your jobs and only in this browser."
                     : "No job selected."
                 }
               />
