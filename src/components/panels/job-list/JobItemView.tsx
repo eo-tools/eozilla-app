@@ -76,7 +76,7 @@ export function JobItemView({
               </Text>
               <ActionIcon.Group style={revealStyle}>
                 {canUseRequest && (
-                  <Tooltip label="Use request">
+                  <Tooltip label="Edit process request">
                     <ActionIcon
                       {...styles.actionIcon.sm}
                       aria-label="Use request"
