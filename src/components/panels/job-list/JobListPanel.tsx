@@ -58,7 +58,7 @@ export default function JobListPanel() {
       cloneProcessRequest(storedRequest.request),
     );
     notifications.show({
-      message: "The job request was copied to the process editor.",
+      message: "You can now edit and re-submit the job's process request.",
     });
   };
 
