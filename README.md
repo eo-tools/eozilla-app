@@ -30,6 +30,7 @@ and review inputs, outputs, and results in a split-panel interface.
 - Browse available processes
 - Inspect process descriptions, inputs, and outputs
 - View the job list and job details
+- Inspect and reuse the complete request submitted for jobs created in this browser
 - Open job results and error tracebacks
 - Persist selected service and UI state locally
 

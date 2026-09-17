@@ -5,6 +5,7 @@ import {
   type Service,
 } from "@/service";
 import { storage } from "@/state/storage";
+import type { StoredJobRequests } from "@/state/jobRequests";
 
 export interface ConfirmationData {
   title: string;
@@ -42,6 +43,7 @@ export interface AppState {
   processId?: string;
   processRequests: Record<string, ProcessRequest>;
   processExecution?: ProcessExecution;
+  jobRequests: StoredJobRequests;
   jobId?: string;
   dialogId: DialogId | null;
   dialogData?: unknown;
@@ -64,6 +66,7 @@ export function createInitialAppState(): AppState {
     dialogId: !serviceProviderId ? "service" : null,
     processId: undefined,
     processRequests: {},
+    jobRequests: {},
     jobId: undefined,
   };
 }

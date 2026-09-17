@@ -6,6 +6,7 @@ import {
   useActiveJobId,
   useActiveJobInfo,
   useActiveJobResults,
+  useJobRequests,
 } from "@/store/hooks";
 import type { JobInfo, JobResults } from "@/service";
 import styles from "@/components/common/styles";
@@ -18,6 +19,8 @@ import {
 import { useHoverReveal } from "@/components/common/useHoverReveal";
 import { Panel } from "@/components/common/Panel";
 import { SubPanel } from "@/components/common/SubPanel";
+import { JsonCode } from "@/components/common/JsonCode";
+import { UnavailableHint } from "@/components/common/UnavailableHint";
 
 import JobInfoView from "./JobInfoView";
 import JobResultsView from "./JobResultsView";
@@ -27,6 +30,8 @@ export default function JobPanel() {
   const activeJobId = useActiveJobId();
   const activeJobInfoState = useActiveJobInfo();
   const activeJobResultsState = useActiveJobResults();
+  const jobRequests = useJobRequests();
+  const storedRequest = activeJobId ? jobRequests[activeJobId] : undefined;
   const { containerProps, revealStyle } = useHoverReveal();
   return (
     <Panel>
@@ -70,6 +75,39 @@ export default function JobPanel() {
                 />
               )}
             </ResourceView>
+          </SubPanel.Item>
+
+          <SubPanel.Item
+            value="request"
+            title="Request"
+            actions={
+              <ActionIcon
+                {...styles.actionIcon.sm}
+                style={revealStyle}
+                aria-label="Copy process request to clipboard"
+                disabled={!storedRequest}
+                onClick={() => {
+                  if (storedRequest) {
+                    copyJsonToClipboard(storedRequest.request);
+                  }
+                }}
+              >
+                <IconCopy {...styles.icon.sm} />
+              </ActionIcon>
+            }
+          >
+            {storedRequest ? (
+              <JsonCode value={storedRequest.request} />
+            ) : (
+              <UnavailableHint
+                message={
+                  activeJobId
+                    ? "No associated process request found. " +
+                      "They are available only for your jobs and only in this browser."
+                    : "No job selected."
+                }
+              />
+            )}
           </SubPanel.Item>
 
           <SubPanel.Item

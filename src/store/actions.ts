@@ -16,6 +16,7 @@ import {
 import { invalidateSWRKeys } from "@/service/swr";
 import { getErrorMessage, type Optional } from "@/utils/common";
 import { storage } from "@/state/storage";
+import { cloneProcessRequest } from "@/state/jobRequests";
 
 ////////////////////////////////////////
 // Common actions
@@ -119,10 +120,23 @@ export async function signOut() {
 }
 
 export function setService(service: Service | null) {
+  let jobRequests = {};
+  if (service) {
+    try {
+      jobRequests = storage.getJobRequests(service);
+    } catch (error) {
+      console.error("Failed to load stored process requests", error);
+      notifications.show({
+        message: "Failed to load process request for job.",
+        color: "orange",
+      });
+    }
+  }
   setAppState({
     service,
     processId: undefined,
     jobId: undefined,
+    jobRequests,
   });
 }
 
@@ -140,7 +154,7 @@ export function executeActiveProcess(
   if (!service || !processId || !processRequests[processId]) {
     return;
   }
-  const processRequest = processRequests[processId];
+  const processRequest = cloneProcessRequest(processRequests[processId]);
   const processExecution = {
     processId,
     processRequest,
@@ -150,10 +164,30 @@ export function executeActiveProcess(
   service
     .executeProcess(processId, processRequest)
     .then((jobInfo) => {
+      try {
+        storage.saveJobRequest(service, jobInfo.jobID, {
+          processId,
+          request: processRequest,
+        });
+      } catch (error) {
+        console.error("Failed to persist submitted process request", error);
+        notifications.show({
+          message:
+            "The job was accepted, but its request could not be retained across browser restarts.",
+          color: "orange",
+        });
+      }
       notifications.show({
         message: "Process request accepted.",
       });
       setAppState({
+        jobRequests: {
+          ...getAppState().jobRequests,
+          [jobInfo.jobID]: {
+            processId,
+            request: cloneProcessRequest(processRequest),
+          },
+        },
         processExecution: { ...processExecution, submitting: false, jobInfo },
         jobId: jobInfo.jobID,
       });

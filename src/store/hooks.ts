@@ -34,6 +34,7 @@ const selectService = (state: AppState) => state.service;
 const selectProcessId = (state: AppState) => state.processId;
 const selectProcessEditorMode = (state: AppState) => state.processEditorMode;
 const selectProcessExecution = (state: AppState) => state.processExecution;
+const selectJobRequests = (state: AppState) => state.jobRequests;
 const selectJobId = (state: AppState) => state.jobId;
 const selectConfirmation = (state: AppState) => state.confirmation;
 const selectInformation = (state: AppState) => state.information;
@@ -209,6 +210,10 @@ export function useProcessList() {
 }
 export function useProcessExecution() {
   return useAppState(selectProcessExecution);
+}
+
+export function useJobRequests() {
+  return useAppState(selectJobRequests);
 }
 
 export function useActiveProcessDescription() {

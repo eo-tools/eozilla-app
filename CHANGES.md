@@ -2,7 +2,12 @@
 
 ### Enhancements
 
-- When generating titles for input fields without a title set, we skip a 
+- Submitted process requests are retained per service in the browser's localStorage.
+  The archive is capped at 500 requests or 2 MiB and evicts the oldest requests
+  first. Jobs created in the app expose the complete read-only request, which can
+  be copied to the clipboard. Its inputs and outputs can also be restored to the
+  process editor without automatically executing it. (#85)
+- When generating titles for input fields without a title set, we skip a
   prefix `x-` from the input's name before converting it. (#74)
 - Cuiman-launched apps now exchange a short-lived, single-use `launch` code
   for an HttpOnly session at the Cuiman app server, then use its same-origin

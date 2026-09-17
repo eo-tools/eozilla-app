@@ -104,4 +104,37 @@ describe("storage", () => {
       apiUrl: "https://cuiman.example.test/_cuiman/service/",
     });
   });
+
+  it("persists immutable job requests separately by service", () => {
+    const service = {
+      storageId: "https://example.test/api/",
+    };
+    const request = {
+      inputs: { value: "original" },
+      outputs: { result: { transmissionMode: "reference" as const } },
+    };
+
+    storageModule.storage.saveJobRequest(service, "job-1", {
+      processId: "process-a",
+      request,
+    });
+    request.inputs.value = "edited later";
+
+    expect(storageModule.storage.getJobRequests(service)).toEqual({
+      "job-1": {
+        processId: "process-a",
+        request: {
+          inputs: { value: "original" },
+          outputs: { result: { transmissionMode: "reference" } },
+        },
+      },
+    });
+    expect(
+      storageModule.storage.getJobRequests({
+        ...service,
+        storageId: "https://other.example.test/api/",
+      }),
+    ).toEqual({});
+  });
+
 });

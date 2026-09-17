@@ -5,12 +5,17 @@ import {
   Progress,
   Stack,
   Text,
+  Tooltip,
 } from "@mantine/core";
 
 import type { JobInfo } from "@/service";
 import { useHoverReveal } from "@/components/common/useHoverReveal";
 import { isNumber, isString, type Optional } from "@/utils/common";
-import { IconCancel, IconTrash } from "@tabler/icons-react";
+import {
+  IconCancel,
+  IconSquareRoundedArrowLeft,
+  IconTrash,
+} from "@tabler/icons-react";
 import styles from "@/components/common/styles";
 import { JobStatusIcon } from "./JobStatusIcon";
 
@@ -19,6 +24,8 @@ export interface JobItemViewProps {
   activeJobId?: string;
   activateJob: (jobId: Optional<string>) => void;
   dismissJob: (jobId: string) => void;
+  canUseRequest: boolean;
+  onUseRequest: (jobInfo: JobInfo) => void;
 }
 
 export function JobItemView({
@@ -26,6 +33,8 @@ export function JobItemView({
   activeJobId,
   activateJob,
   dismissJob,
+  canUseRequest,
+  onUseRequest,
 }: JobItemViewProps) {
   const {
     jobID: jobId,
@@ -70,6 +79,20 @@ export function JobItemView({
                 </Text>
               </Text>
               <ActionIcon.Group style={revealStyle}>
+                {canUseRequest && (
+                  <Tooltip label="Edit process request">
+                    <ActionIcon
+                      {...styles.actionIcon.sm}
+                      aria-label="Edit process request"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onUseRequest(jobInfo);
+                      }}
+                    >
+                      <IconSquareRoundedArrowLeft {...styles.icon.sm} />
+                    </ActionIcon>
+                  </Tooltip>
+                )}
                 <ActionIcon
                   {...styles.actionIcon.sm}
                   disabled={!canDismiss}

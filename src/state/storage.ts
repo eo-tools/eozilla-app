@@ -1,4 +1,10 @@
 import type { ServiceOptions, ServiceOptionsInput } from "@/service";
+import type { Service } from "@/service";
+import {
+  loadJobRequests as loadJobRequestsFromLocalStorage,
+  saveJobRequest as saveJobRequestToLocalStorage,
+  type StoredJobRequest,
+} from "@/state/jobRequests";
 
 class JsonProperty<T> {
   readonly name: string;
@@ -120,6 +126,21 @@ export const storage = {
   deleteServiceProviderSelection() {
     serviceProviderSelection.delete();
     serviceProviderSecrets.delete();
+  },
+  getJobRequests(service: Pick<Service, "storageId">) {
+    return loadJobRequestsFromLocalStorage(localStorage, service);
+  },
+  saveJobRequest(
+    service: Pick<Service, "storageId">,
+    jobId: string,
+    storedRequest: StoredJobRequest,
+  ) {
+    saveJobRequestToLocalStorage(
+      localStorage,
+      service,
+      jobId,
+      storedRequest,
+    );
   },
 };
 
