@@ -67,7 +67,7 @@ async function startApp(): Promise<void> {
           new CustomServiceProvider({
             id: "cuiman",
             meta: {
-              type: "custom",
+              type: "dedicated",
               title: "Cuiman Service",
               description: "Service configured by Cuiman.",
             },

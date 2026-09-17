@@ -9,7 +9,7 @@ import { TestingService } from "@/service/services/testing";
 export class TestingServiceProvider implements ServiceProvider {
   readonly id: string = "testing";
   readonly meta: ServiceProviderMeta = {
-    type: "testing",
+    type: "test",
     title: "Testing Server (in-memory)",
   };
   readonly optionsSchema = {};
