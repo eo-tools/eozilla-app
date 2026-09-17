@@ -16,7 +16,7 @@ export function FieldShell({ field, children, hideLabel }: FieldShellProps) {
   const { containerProps, revealStyle } = useHoverReveal();
   const description = getFieldDescription(field);
 
-  if (hideLabel) {
+  if (hideLabel || getFieldLabel(field) === "") {
     return <>{children}</>;
   }
 
