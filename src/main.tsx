@@ -68,8 +68,8 @@ async function startApp(): Promise<void> {
             id: "cuiman",
             meta: {
               type: "dedicated",
-              title: "Cuiman Service",
-              description: "Service configured by Cuiman.",
+              title: "Processing Service",
+              description: "Service configured by the Python client.",
             },
           }),
         ]
@@ -128,6 +128,7 @@ function replaceLaunchCodeWithCuimanMode(): void {
 }
 
 function renderLaunchError(error: unknown): void {
-  const message = error instanceof Error ? error.message : "Unable to launch Cuiman.";
+  const message =
+    error instanceof Error ? error.message : "Unable to launch the app.";
   createRoot(document.getElementById("root")!).render(message);
 }
