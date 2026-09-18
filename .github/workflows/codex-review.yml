@@ -1,25 +1,28 @@
 name: Requested AI review
 on:
-  # Temporary pre-merge test: add the codex-review-test label after CI passes.
-  pull_request:
-    types: [labeled]
+  issue_comment:
+    types: [created]
 permissions: {}
 concurrency:
   group: >-
-    codex-review-${{ github.event.pull_request.number }}-${{
+    codex-review-${{ github.event.issue.number }}-${{
     contains(fromJSON('["freds-dev","forman"]'), github.actor) &&
-    github.event.label.name == 'codex-review-test' }}
+    github.event.comment.body == '/codex-review' }}
   cancel-in-progress: false
 jobs:
   review:
     if: >-
       github.repository == 'eo-tools/eozilla-app' &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.label.name == 'codex-review-test' &&
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      github.event.comment.user.type == 'User' &&
+      github.event.comment.body == '/codex-review' &&
       contains(fromJSON('["freds-dev","forman"]'), github.actor) &&
       github.run_attempt == 1
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Store the API key here; restrict this environment to the main branch in GitHub.
+    environment: codex-review
     permissions:
       actions: read
       contents: read
@@ -36,6 +39,12 @@ jobs:
           script: |
             // Identify the repository where the comment was posted.
             const {owner, repo} = context.repo;
+            // Enforce the request in code too, before accessing PR data or publishing.
+            if (context.eventName !== 'issue_comment' || context.payload.action !== 'created' ||
+                !context.payload.issue?.pull_request || context.payload.comment?.body !== '/codex-review' ||
+                context.payload.comment?.user?.type !== 'User' ||
+                !['freds-dev', 'forman'].includes(context.actor) ||
+                Number(process.env.GITHUB_RUN_ATTEMPT) !== 1) throw new Error('Unauthorized request.');
             // The named requester must still have write/maintain/admin access.
             const {data: access} = await github.rest.repos.getCollaboratorPermissionLevel({owner, repo, username: context.actor});
             if (!['write', 'maintain', 'admin'].includes(access.permission)) throw new Error('Write permission required.');
@@ -70,18 +79,18 @@ jobs:
                 run.pull_requests.some(pr => pr.number === context.issue.number)
               ).sort((a, b) => b.id - a.id)[0];
               if (!latest || latest.status !== 'completed' || latest.conclusion !== 'success') {
-                throw new Error(`${workflow_id} must pass for this PR commit. Wait for CI or fix it, then remove and re-add codex-review-test.`);
+                throw new Error(`${workflow_id} must pass for this PR commit. Wait for CI or fix it, then post /codex-review again.`);
               }
             }
       # Keep trusted default-branch config in the working tree, never PR config.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
+          ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - name: Fetch PR snapshots without checking out or executing PR code
         env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_NUMBER: ${{ github.event.issue.number }}
           PR_BASE: ${{ steps.prepare.outputs.base }}
           PR_HEAD: ${{ steps.prepare.outputs.head }}
         run: |
@@ -103,7 +112,7 @@ jobs:
           safety-strategy: drop-sudo
           codex-home: ${{ runner.temp }}/codex-home
           prompt: |
-            Review PR #${{ github.event.pull_request.number }} in eo-tools/eozilla-app.
+            Review PR #${{ github.event.issue.number }} in eo-tools/eozilla-app.
             Base tip: ${{ steps.prepare.outputs.base }}
             PR head: ${{ steps.prepare.outputs.head }}
             Working tree is the trusted default branch, NOT the PR head.
@@ -141,7 +150,12 @@ jobs:
         with:
           script: |
             const {owner, repo} = context.repo;
-            if (!['freds-dev', 'forman'].includes(context.actor) || Number(process.env.GITHUB_RUN_ATTEMPT) !== 1) throw new Error('Unauthorized request.');
+            // Enforce the request in code too, before accessing PR data or publishing.
+            if (context.eventName !== 'issue_comment' || context.payload.action !== 'created' ||
+                !context.payload.issue?.pull_request || context.payload.comment?.body !== '/codex-review' ||
+                context.payload.comment?.user?.type !== 'User' ||
+                !['freds-dev', 'forman'].includes(context.actor) ||
+                Number(process.env.GITHUB_RUN_ATTEMPT) !== 1) throw new Error('Unauthorized request.');
             const {data: access} = await github.rest.repos.getCollaboratorPermissionLevel({owner, repo, username: context.actor});
             if (!['write', 'maintain', 'admin'].includes(access.permission)) throw new Error('Write permission revoked.');
             const {data: pr} = await github.rest.pulls.get({owner, repo, pull_number: context.issue.number});
