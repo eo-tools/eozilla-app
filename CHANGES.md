@@ -1,4 +1,4 @@
-## Changes in version 0.1.2 (in development)
+## Changes in version 0.2.0
 
 ### Enhancements
 
@@ -21,6 +21,9 @@
   `service` query parameter is no longer supported. (#80)
 
 ### Fixes
+
+- Form fields with an explicitly empty title no longer leave an empty label
+  row or extra spacing above the control. (#88)
 
 - Service provider metadata now uses the `test` and `dedicated` types instead
   of `testing` and `system`. (#77)
@@ -55,7 +58,7 @@
   the Custom Service form's default API URL, authentication type, client ID,
   authorization server URL, and OAuth2 protocol via `VITE_DEFAULT_SERVICE_*`
   env vars. Downstream consumers (e.g. S2GOS) can build a rebranded bundle
-  with their own `.env.<mode>` file and `vite build --mode <mode>.
+  with their own `.env.<mode>` file and `vite build --mode <mode>`.
 
 
 ### Fixes
