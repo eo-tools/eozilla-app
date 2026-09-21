@@ -1,9 +1,15 @@
+## Changes in version 0.2.1
+
+- Geometry process inputs that used the map editor (`x-ui-widget: map`)
+  failed to render the map in dark mode as of a missing Carto API key. Therefore,
+  the map editor now use the default OpenStreetMap (OSM) map in both light and 
+  dark mode, with a dark-mode filter applied only to the basemap.
+
+
 ## Changes in version 0.2.0
 
 ### Enhancements
 
-- Map process inputs now use OpenStreetMap tiles in both light and dark mode,
-  with a dark-mode filter applied only to the basemap.
 - Submitted process requests are retained per service in the browser's localStorage.
   The archive is capped at 500 requests or 2 MiB and evicts the oldest requests
   first. Jobs created in the app expose the complete read-only request, which can
