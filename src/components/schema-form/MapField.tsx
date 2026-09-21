@@ -11,12 +11,12 @@ import Modify from "ol/interaction/Modify";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
 import OSM from "ol/source/OSM";
-import XYZ from "ol/source/XYZ";
 import VectorSource from "ol/source/Vector";
 import WKT from "ol/format/WKT";
 import { transformExtent } from "ol/proj";
 import { Fill, Stroke, Style } from "ol/style";
 import "ol/ol.css";
+import "./MapField.css";
 
 import { FieldShell } from "./FieldShell";
 import type { Field } from "@/utils/field";
@@ -68,15 +68,10 @@ export function MapField({
 }: MapFieldProps) {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
-  const backgroundLayerRef = useRef<ReturnType<
-    typeof createBackgroundLayer
-  > | null>(null);
   const vectorSource = useMemo(() => new VectorSource(), []);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [drawMode, setDrawMode] = useState<DrawMode>("rectangle");
   const colorScheme = useComputedColorScheme();
-  const backgroundTheme = colorScheme === "dark" ? "dark" : "light";
-  const initialBackgroundThemeRef = useRef<"dark" | "light">(backgroundTheme);
   const hasGeometry = hasMapValue(valueType, value);
   const handleDelete = () => {
     setErrorMessage(null);
@@ -96,9 +91,10 @@ export function MapField({
       source: vectorSource,
       style: polygonStyle,
     });
-    const backgroundLayer = createBackgroundLayer(
-      initialBackgroundThemeRef.current,
-    );
+    const backgroundLayer = new TileLayer({
+      className: "map-field-basemap",
+      source: new OSM(),
+    });
     const map = new Map({
       target: mapElementRef.current,
       layers: [backgroundLayer, layer],
@@ -108,21 +104,13 @@ export function MapField({
       }),
     });
 
-    backgroundLayerRef.current = backgroundLayer;
     mapRef.current = map;
 
     return () => {
       map.setTarget(undefined);
-      backgroundLayerRef.current = null;
       mapRef.current = null;
     };
   }, [vectorSource]);
-
-  useEffect(() => {
-    backgroundLayerRef.current?.setSource(
-      createBackgroundSource(backgroundTheme),
-    );
-  }, [backgroundTheme]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -186,6 +174,7 @@ export function MapField({
         <Box pos="relative">
           <Box
             ref={mapElementRef}
+            data-map-color-scheme={colorScheme}
             style={{
               height: 320,
               overflow: "hidden",
@@ -254,22 +243,6 @@ export function MapField({
       </Stack>
     </FieldShell>
   );
-}
-
-function createBackgroundLayer(theme: "light" | "dark") {
-  return new TileLayer({
-    source: createBackgroundSource(theme),
-  });
-}
-
-function createBackgroundSource(theme: "light" | "dark") {
-  return theme === "dark"
-    ? new XYZ({
-        attributions: "© OpenStreetMap contributors © CARTO",
-        attributionsCollapsible: false,
-        url: "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-      })
-    : new OSM();
 }
 
 function syncSourceFromValue(
