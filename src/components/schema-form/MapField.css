@@ -1,0 +1,4 @@
+/* Filter only the tile layer, leaving geometry and controls unchanged. */
+[data-map-color-scheme="dark"] .map-field-basemap {
+  filter: invert(100%) hue-rotate(180deg) brightness(90%) contrast(90%);
+}
