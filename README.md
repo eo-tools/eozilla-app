@@ -13,6 +13,10 @@ services.
 It lets you connect to a _OGC API - Processes_ service, browse processes, inspect jobs,
 and review inputs, outputs, and results in a split-panel interface.
 
+**[Try the online demo](https://eo-tools.github.io/eozilla-app/)** — no installation
+required. Select **Testing Server (in-memory)** to explore the interface with
+simulated processes and jobs, or connect to your own OGC API - Processes service.
+
 ![Screenshot](docs/images/eozilla-app.png)
 
 ## At A Glance
