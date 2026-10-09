@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionIcon } from "@mantine/core";
+import { ActionIcon, Tooltip } from "@mantine/core";
 import { IconCopy, IconRun } from "@tabler/icons-react";
 
 import {
@@ -47,7 +47,25 @@ export default function JobPanel() {
           setValues={setOpenedSubPanels}
           containerProps={containerProps}
         >
-          <SubPanel.Item value="results" title="Results">
+          <SubPanel.Item
+            value="results"
+            title="Results"
+            actions={
+              <Tooltip label="Copy all results" withArrow>
+                <ActionIcon
+                  {...styles.actionIcon.sm}
+                  style={revealStyle}
+                  aria-label="Copy all results"
+                  disabled={!activeJobResultsState.jobResults}
+                  onClick={() =>
+                    copyJsonToClipboard(activeJobResultsState.jobResults)
+                  }
+                >
+                  <IconCopy {...styles.icon.sm} />
+                </ActionIcon>
+              </Tooltip>
+            }
+          >
             <ResourceView
               {...activeJobResultsState}
               nullText="No successful job selected."
