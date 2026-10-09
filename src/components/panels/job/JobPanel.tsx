@@ -19,7 +19,7 @@ import {
 import { useHoverReveal } from "@/components/common/useHoverReveal";
 import { Panel } from "@/components/common/Panel";
 import { SubPanel } from "@/components/common/SubPanel";
-import { JsonCode } from "@/components/common/JsonCode";
+import { JsonTree } from "@/components/common/JsonTree";
 import { UnavailableHint } from "@/components/common/UnavailableHint";
 
 import JobInfoView from "./JobInfoView";
@@ -69,6 +69,7 @@ export default function JobPanel() {
             >
               {(jobResults: JobResults) => (
                 <JobResultsView
+                  key={activeJobId}
                   jobResults={jobResults}
                   copyJsonToClipboard={copyJsonToClipboard}
                   openDialog={openDialog}
@@ -97,7 +98,7 @@ export default function JobPanel() {
             }
           >
             {storedRequest ? (
-              <JsonCode value={storedRequest.request} />
+              <JsonTree key={activeJobId} value={storedRequest.request} />
             ) : (
               <UnavailableHint
                 message={

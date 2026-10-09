@@ -1,6 +1,6 @@
 import { Table, Text, type TableProps } from "@mantine/core";
 
-import { JsonCode } from "@/components/common/JsonCode";
+import { JsonTree } from "@/components/common/JsonTree";
 import {
   isInlineValue,
   isLink,
@@ -75,7 +75,7 @@ export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
           <Table.Tr>
             <Table.Th w={80}>Value</Table.Th>
             <Table.Td>
-              <JsonCode value={jobResult.value} maxHeight="8rem" />
+              <JsonTree value={jobResult.value} maxHeight="8rem" />
             </Table.Td>
           </Table.Tr>
 
@@ -93,7 +93,7 @@ export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
             <Table.Th>Schema</Table.Th>
             <Table.Td>
               {jobResult.schema ? (
-                <JsonCode value={jobResult.schema} maxHeight="8rem" />
+                <JsonTree value={jobResult.schema} maxHeight="8rem" />
               ) : (
                 "-"
               )}
@@ -105,7 +105,7 @@ export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
   }
 
   if (isInlineValue(jobResult)) {
-    return <JsonCode value={jobResult} />;
+    return <JsonTree value={jobResult} />;
   }
 
   return (

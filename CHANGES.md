@@ -1,3 +1,10 @@
+## Unreleased
+
+- Job results and stored requests now display JSON as a collapsible tree, with
+  previews of nested objects and arrays. Large objects and arrays show five
+  entries initially and can be expanded in a scrollable view. Complete JSON
+  can still be copied.
+
 ## Changes in version 0.2.1
 
 - Geometry process inputs that used the map editor (`x-ui-widget: map`)

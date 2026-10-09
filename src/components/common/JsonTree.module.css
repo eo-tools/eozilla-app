@@ -1,0 +1,63 @@
+.tree {
+  padding: var(--mantine-spacing-xs);
+  border-radius: var(--mantine-radius-sm);
+  background: light-dark(
+    var(--mantine-color-gray-1),
+    var(--mantine-color-dark-5)
+  );
+  color: var(--mantine-color-text);
+  font-family: var(--mantine-font-family-monospace);
+  font-size: var(--mantine-font-size-xs);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.content {
+  overflow: auto;
+}
+
+.toggle {
+  display: block;
+  margin-top: var(--mantine-spacing-xs);
+  color: var(--mantine-color-blue-text);
+  font: inherit;
+}
+
+.toggle:hover {
+  text-decoration: underline;
+}
+
+.tree summary {
+  cursor: pointer;
+}
+
+.toggle:focus-visible,
+.tree summary:focus-visible {
+  outline: 2px solid var(--mantine-primary-color-filled);
+  outline-offset: 2px;
+}
+
+.children {
+  padding-inline-start: var(--mantine-spacing-md);
+}
+
+.key {
+  color: var(--mantine-color-blue-text);
+}
+
+.string {
+  color: var(--mantine-color-green-text);
+}
+
+.number {
+  color: var(--mantine-color-orange-text);
+}
+
+.boolean {
+  color: var(--mantine-color-violet-text);
+}
+
+.null,
+.count {
+  color: var(--mantine-color-dimmed);
+}

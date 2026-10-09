@@ -35,6 +35,7 @@ simulated processes and jobs, or connect to your own OGC API - Processes service
 - Inspect process descriptions, inputs, and outputs
 - View the job list and job details
 - Inspect and reuse the complete request submitted for jobs created in this browser
+- Explore JSON job results and stored requests in a collapsible tree
 - Open job results and error tracebacks
 - Persist selected service and UI state locally
 
