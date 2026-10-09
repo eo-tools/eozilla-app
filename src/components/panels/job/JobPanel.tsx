@@ -47,22 +47,7 @@ export default function JobPanel() {
           setValues={setOpenedSubPanels}
           containerProps={containerProps}
         >
-          <SubPanel.Item
-            value="results"
-            title="Results"
-            actions={
-              <ActionIcon
-                {...styles.actionIcon.sm}
-                style={revealStyle}
-                disabled={!activeJobResultsState.jobResults}
-                onClick={() => {
-                  copyJsonToClipboard(activeJobResultsState.jobResults);
-                }}
-              >
-                <IconCopy {...styles.icon.sm} />
-              </ActionIcon>
-            }
-          >
+          <SubPanel.Item value="results" title="Results">
             <ResourceView
               {...activeJobResultsState}
               nullText="No successful job selected."
@@ -70,32 +55,13 @@ export default function JobPanel() {
               {(jobResults: JobResults) => (
                 <JobResultsView
                   jobResults={jobResults}
-                  copyJsonToClipboard={copyJsonToClipboard}
                   openDialog={openDialog}
                 />
               )}
             </ResourceView>
           </SubPanel.Item>
 
-          <SubPanel.Item
-            value="request"
-            title="Request"
-            actions={
-              <ActionIcon
-                {...styles.actionIcon.sm}
-                style={revealStyle}
-                aria-label="Copy process request to clipboard"
-                disabled={!storedRequest}
-                onClick={() => {
-                  if (storedRequest) {
-                    copyJsonToClipboard(storedRequest.request);
-                  }
-                }}
-              >
-                <IconCopy {...styles.icon.sm} />
-              </ActionIcon>
-            }
-          >
+          <SubPanel.Item value="request" title="Request">
             {storedRequest ? (
               <JsonCode value={storedRequest.request} />
             ) : (

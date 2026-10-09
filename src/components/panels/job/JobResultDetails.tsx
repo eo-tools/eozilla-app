@@ -1,4 +1,5 @@
 import { Table, Text, type TableProps } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 
 import { JsonCode } from "@/components/common/JsonCode";
 import {
@@ -7,6 +8,7 @@ import {
   isQualifiedValue,
   type JobResult,
 } from "@/service";
+import { getOutputUrlError } from "./jobResultUtils";
 
 const dataTableProps: TableProps = {
   variant: "vertical",
@@ -30,8 +32,18 @@ export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
           <Table.Tr>
             <Table.Th w={80}>Href</Table.Th>
             <Table.Td>
-              <a href={jobResult.href} title={jobResult.title}>
-                {jobResult.href}
+              <a
+                href={getOutputUrlError(jobResult.href) ? "#" : jobResult.href}
+                title={jobResult.title}
+                onClick={(event) => {
+                  const error = getOutputUrlError(jobResult.href);
+                  if (error) {
+                    event.preventDefault();
+                    notifications.show({ message: error, color: "red" });
+                  }
+                }}
+              >
+                {String(jobResult.href ?? "")}
               </a>
             </Table.Td>
           </Table.Tr>

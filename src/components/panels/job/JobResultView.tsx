@@ -1,17 +1,18 @@
 import { ActionIcon, Flex, Group, Stack, Text, Tooltip } from "@mantine/core";
-import { IconCopy, IconDownload, IconEye } from "@tabler/icons-react";
+import { IconDownload, IconEye } from "@tabler/icons-react";
+import { notifications } from "@mantine/notifications";
 
 import { isLink, type JobResult } from "@/service";
 import styles from "@/components/common/styles";
 
 import { JobResultDetails } from "./JobResultDetails";
+import { getOutputUrlError } from "./jobResultUtils";
 import type { DialogId } from "@/state/types";
 
 interface JobResultViewProps {
   outputName: string;
   outputIndex: number;
   jobResult: JobResult;
-  copyJsonToClipboard: (data: unknown) => void;
   openDialog: (dialogId: DialogId, dialogData?: unknown) => void;
 }
 
@@ -19,7 +20,6 @@ export default function JobResultView({
   outputName,
   outputIndex,
   jobResult,
-  copyJsonToClipboard,
   openDialog,
 }: JobResultViewProps) {
   return (
@@ -32,16 +32,6 @@ export default function JobResultView({
           </Text>
         </Group>
         <ActionIcon.Group>
-          <Tooltip label="Copy output" withArrow>
-            <ActionIcon
-              {...styles.actionIcon.sm}
-              aria-label={`Copy output ${outputName}`}
-              onClick={() => copyJsonToClipboard(jobResult)}
-            >
-              <IconCopy {...styles.icon.sm} />
-            </ActionIcon>
-          </Tooltip>
-
           <Tooltip label="View output" withArrow>
             <ActionIcon
               {...styles.actionIcon.sm}
@@ -55,12 +45,19 @@ export default function JobResultView({
           </Tooltip>
 
           {isLink(jobResult) && (
-            <Tooltip label="Download link" withArrow>
+            <Tooltip label="Download output" withArrow>
               <ActionIcon
                 {...styles.actionIcon.sm}
                 component="a"
                 aria-label={`Download output ${outputName}`}
-                href={jobResult.href}
+                href={getOutputUrlError(jobResult.href) ? "#" : jobResult.href}
+                onClick={(event) => {
+                  const error = getOutputUrlError(jobResult.href);
+                  if (error) {
+                    event.preventDefault();
+                    notifications.show({ message: error, color: "red" });
+                  }
+                }}
                 download
                 target="_blank"
                 rel="noreferrer"

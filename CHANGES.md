@@ -1,3 +1,13 @@
+## Unreleased
+
+- Job output previews now show errors for invalid or unsupported URLs and
+  image, audio, or video load failures. Invalid output links and downloads show
+  an error notification. The download action is labelled "Download output".
+- JSON and plain-text outputs now open in a single view with a copy action.
+  Preview/Raw tabs are shown only for rendered previews. Unsupported linked
+  formats show their details and download action directly.
+- Code snippets now have a format header with a copy button.
+
 ## Changes in version 0.2.1
 
 - Geometry process inputs that used the map editor (`x-ui-widget: map`)

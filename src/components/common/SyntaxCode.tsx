@@ -1,5 +1,15 @@
 import type { CSSProperties, ReactNode } from "react";
-import { Code, type CodeProps } from "@mantine/core";
+import {
+  ActionIcon,
+  Box,
+  Code,
+  CopyButton,
+  Group,
+  Text,
+  Tooltip,
+  type CodeProps,
+} from "@mantine/core";
+import { IconCheck, IconCode, IconCopy } from "@tabler/icons-react";
 
 import {
   tokenizeJsonCode,
@@ -38,21 +48,64 @@ export function SyntaxCode({
 }: SyntaxCodeProps) {
   const mergedTheme = { ...defaultSyntaxTheme, ...theme };
   const tokens = tokenizeSyntax(code, language);
+  const label =
+    language === "json" ? "JSON" : language === "text" ? "Text" : language;
 
   return (
     <Code
+      component="div"
       block
       style={{
         color: mergedTheme.plain,
-        maxHeight,
-        overflow: maxHeight ? "auto" : undefined,
-        whiteSpace: "pre-wrap",
-        wordBreak: "break-word",
+        padding: 0,
+        border: "1px solid var(--mantine-color-default-border)",
+        borderRadius: "var(--mantine-radius-md)",
+        overflow: "hidden",
         ...style,
       }}
       {...props}
     >
-      {renderTokens(tokens, mergedTheme)}
+      <Group justify="space-between" wrap="nowrap" px="xs" py={6}>
+        <Group gap={6} wrap="nowrap">
+          <IconCode size={16} stroke={1.5} />
+          <Text size="xs" fw={500}>
+            {label}
+          </Text>
+        </Group>
+        <CopyButton value={code}>
+          {({ copied, copy }) => (
+            <Tooltip label={copied ? "Copied" : `Copy ${label}`}>
+              <ActionIcon
+                variant="subtle"
+                color={copied ? "teal" : "gray"}
+                size="sm"
+                aria-label={`Copy ${label}`}
+                onClick={copy}
+              >
+                {copied ? (
+                  <IconCheck size={16} />
+                ) : (
+                  <IconCopy size={16} stroke={1.5} />
+                )}
+              </ActionIcon>
+            </Tooltip>
+          )}
+        </CopyButton>
+      </Group>
+      <Box
+        component="pre"
+        m={0}
+        p="xs"
+        style={{
+          maxHeight,
+          overflow: "auto",
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word",
+          font: "inherit",
+        }}
+      >
+        {renderTokens(tokens, mergedTheme)}
+      </Box>
     </Code>
   );
 }

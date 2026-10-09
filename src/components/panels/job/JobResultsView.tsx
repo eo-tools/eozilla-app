@@ -5,13 +5,11 @@ import type { DialogId } from "@/state/types";
 
 interface JobResultsViewProps {
   jobResults: JobResults;
-  copyJsonToClipboard: (data: unknown) => void;
   openDialog: (dialogId: DialogId, dialogData?: unknown) => void;
 }
 
 export default function JobResultsView({
   jobResults,
-  copyJsonToClipboard,
   openDialog,
 }: JobResultsViewProps) {
   return Object.keys(jobResults).map((outputName, outputIndex) => {
@@ -22,7 +20,6 @@ export default function JobResultsView({
         outputName={outputName}
         outputIndex={outputIndex}
         jobResult={jobResult}
-        copyJsonToClipboard={copyJsonToClipboard}
         openDialog={openDialog}
       />
     );

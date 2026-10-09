@@ -1,5 +1,26 @@
 import { isLink, isQualifiedValue, type JobResult } from "@/service";
 
+export function getOutputUrlError(
+  href: unknown,
+  baseUrl = globalThis.document?.baseURI ?? "http://localhost/",
+): string | undefined {
+  if (typeof href !== "string" || !href.trim()) {
+    return "The output URL is missing or invalid.";
+  }
+  let url: URL;
+  try {
+    url = new URL(href, baseUrl);
+  } catch {
+    return "The output URL is missing or invalid.";
+  }
+  if (url.protocol === "file:") {
+    return "Browsers cannot open local file URLs from this app. The service must provide an HTTP(S) output URL.";
+  }
+  if (!["http:", "https:", "data:", "blob:"].includes(url.protocol)) {
+    return `The output URL uses the unsupported ${url.protocol} scheme. The service must provide an HTTP(S) output URL.`;
+  }
+}
+
 export function getJobResultMimeType(jobResult: JobResult) {
   if (isLink(jobResult)) {
     return jobResult.type;
@@ -10,6 +31,28 @@ export function getJobResultMimeType(jobResult: JobResult) {
   }
 
   return undefined;
+}
+
+export function hasRenderedPreview(jobResult: JobResult) {
+  const mimeType = getJobResultMimeType(jobResult);
+  const media =
+    isImageMimeType(mimeType) ||
+    isAudioMimeType(mimeType) ||
+    isVideoMimeType(mimeType);
+  if (isLink(jobResult)) {
+    return media || isIframeMimeType(mimeType);
+  }
+  if (!isQualifiedValue(jobResult)) return false;
+  const source = createPreviewSource(
+    mimeType,
+    jobResult.value,
+    jobResult.encoding,
+  );
+  return (
+    ((media || isIframeMimeType(mimeType)) && !!source) ||
+    ((mimeType === "text/html" || isMarkdownMimeType(mimeType)) &&
+      typeof jobResult.value === "string")
+  );
 }
 
 export function isImageMimeType(mimeType?: string) {
