@@ -1,4 +1,4 @@
-## Changes in 0.2.2 (in development)
+## Changes in version 0.2.2 (in development)
 
 - Job output previews now show errors for invalid or unsupported URLs and
   image, audio, or video load failures. Invalid output links and downloads show
