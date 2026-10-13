@@ -87,7 +87,7 @@ export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
           <Table.Tr>
             <Table.Th w={80}>Value</Table.Th>
             <Table.Td>
-              <JsonCode value={jobResult.value} maxHeight="8rem" />
+              <JsonCode value={jobResult.value} height="8rem" />
             </Table.Td>
           </Table.Tr>
 
@@ -105,7 +105,7 @@ export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
             <Table.Th>Schema</Table.Th>
             <Table.Td>
               {jobResult.schema ? (
-                <JsonCode value={jobResult.schema} maxHeight="8rem" />
+                <JsonCode value={jobResult.schema} height="8rem" />
               ) : (
                 "-"
               )}
@@ -117,7 +117,7 @@ export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
   }
 
   if (isInlineValue(jobResult)) {
-    return <JsonCode value={jobResult} />;
+    return <JsonCode value={jobResult} height="8rem" />;
   }
 
   return (

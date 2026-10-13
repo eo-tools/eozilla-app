@@ -4,6 +4,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { JsonCode } from "./JsonCode";
+import { JobResultDetails } from "@/components/panels/job/JobResultDetails";
 
 // Use vite.config.ts for browser interactions; the default Node suite skips these.
 describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
@@ -27,9 +28,12 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
     );
   }
   async function click(selector: string) {
-    await act(async () =>
-      container.querySelector<HTMLButtonElement>(selector)!.click(),
-    );
+    await act(async () => {
+      container.querySelector<HTMLButtonElement>(selector)!.click();
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      );
+    });
   }
   it("parses JSON strings and renders untrusted values as text", async () => {
     await render(
@@ -75,6 +79,30 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
     await click('[role="treeitem"][aria-expanded="false"]');
     expect(container.textContent).toContain("input-999");
   });
+  it.each(["inline", "qualified"])(
+    "keeps a %s result box fixed when nested values expand",
+    async (kind) => {
+      const value = {
+        nested: { values: Array.from({ length: 100 }, (_, index) => index) },
+      };
+      const jobResult =
+        kind === "qualified" ? { value, mediaType: "application/json" } : value;
+      await render(<JobResultDetails jobResult={jobResult} />);
+      const panel = Array.from(
+        container.querySelectorAll<HTMLElement>("[style]"),
+      ).find((element) => element.style.height === "8rem")!;
+      const height = panel.getBoundingClientRect().height;
+      const viewport = panel.querySelector<HTMLElement>(
+        ".mantine-ScrollArea-viewport",
+      )!;
+      const contentHeight = viewport.scrollHeight;
+      expect(height).toBe(128);
+      await click('[role="treeitem"][aria-expanded="false"]');
+      expect(panel.getBoundingClientRect().height).toBe(height);
+      expect(viewport.scrollHeight).toBeGreaterThan(contentHeight);
+      expect(viewport.scrollHeight).toBeGreaterThan(viewport.clientHeight);
+    },
+  );
   it("reveals the JSON copy action on keyboard focus", async () => {
     await render(<JsonCode value={{ count: 7 }} />);
     const copy = container.querySelector<HTMLButtonElement>(
