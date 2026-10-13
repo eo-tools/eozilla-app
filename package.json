@@ -18,10 +18,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@mantine/core": "^9.2.1",
-    "@mantine/dates": "^9.4.0",
-    "@mantine/hooks": "^9.2.1",
-    "@mantine/notifications": "^9.2.2",
+    "@mantine/code-highlight": "^9.7.2",
+    "@mantine/core": "^9.7.2",
+    "@mantine/dates": "^9.7.2",
+    "@mantine/hooks": "^9.7.2",
+    "@mantine/notifications": "^9.7.2",
     "@tabler/icons-react": "^3.44.0",
     "dayjs": "^1.11.21",
     "jsep": "^1.4.0",

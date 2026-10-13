@@ -72,6 +72,7 @@ export default function JobPanel() {
             >
               {(jobResults: JobResults) => (
                 <JobResultsView
+                  key={activeJobId}
                   jobResults={jobResults}
                   openDialog={openDialog}
                 />
@@ -81,7 +82,7 @@ export default function JobPanel() {
 
           <SubPanel.Item value="request" title="Request">
             {storedRequest ? (
-              <JsonCode value={storedRequest.request} />
+              <JsonCode key={activeJobId} value={storedRequest.request} />
             ) : (
               <UnavailableHint
                 message={

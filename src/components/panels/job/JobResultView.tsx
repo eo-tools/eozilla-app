@@ -8,6 +8,7 @@ import styles from "@/components/common/styles";
 import { JobResultDetails } from "./JobResultDetails";
 import { getOutputUrlError } from "./jobResultUtils";
 import type { DialogId } from "@/state/types";
+import { useHoverReveal } from "@/components/common/useHoverReveal";
 
 interface JobResultViewProps {
   outputName: string;
@@ -22,8 +23,9 @@ export default function JobResultView({
   jobResult,
   openDialog,
 }: JobResultViewProps) {
+  const { containerProps, revealStyle } = useHoverReveal(200, 0, 1);
   return (
-    <Stack w={"100%"} pb="sm">
+    <Stack w={"100%"} pb="sm" {...containerProps}>
       <Flex justify="space-between" align="flex-start" gap="sm">
         <Group>
           <Text size="sm">{`Result #${outputIndex + 1}`}</Text>
@@ -31,7 +33,7 @@ export default function JobResultView({
             {outputName}
           </Text>
         </Group>
-        <ActionIcon.Group>
+        <ActionIcon.Group style={revealStyle}>
           <Tooltip label="View output" withArrow>
             <ActionIcon
               {...styles.actionIcon.sm}

@@ -1,4 +1,4 @@
-## Unreleased
+## Changes in 0.2.2 (in development)
 
 - Job output previews now show errors for invalid or unsupported URLs and
   image, audio, or video load failures. Invalid output links and downloads show
@@ -6,7 +6,7 @@
 - JSON and plain-text outputs now open in a single view with a copy action.
   Preview/Raw tabs are shown only for rendered previews. Unsupported linked
   formats show their details and download action directly.
-- Code snippets now have a format header with a copy button.
+- Updated Mantine to 9.7.2.
 
 ## Changes in version 0.2.1
 

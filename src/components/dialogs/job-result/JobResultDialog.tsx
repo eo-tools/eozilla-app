@@ -21,7 +21,6 @@ import {
 import ReactMarkdown from "react-markdown";
 
 import { JsonCode } from "@/components/common/JsonCode";
-import { SyntaxCode } from "@/components/common/SyntaxCode";
 import styles from "@/components/common/styles";
 import { closeDialog, copyTextToClipboard } from "@/store/actions";
 import { useAppState, useDialogOpened } from "@/store/hooks";
@@ -147,14 +146,14 @@ export function JobResultContent({ jobResult }: { jobResult: JobResult }) {
           </Tabs.Panel>
         </Tabs>
       ) : (
-        <ScrollArea.Autosize mah="50vh">
+        <ScrollArea.Autosize mah="60vh">
           {!linked ? (
             isString(value) &&
             isTextMimeType(mimeType) &&
             !isJsonMimeType(mimeType) ? (
-              <SyntaxCode code={value} language="text" />
+              <JsonCode value={value} language="text" maxHeight="50vh" />
             ) : (
-              <JsonCode value={value} />
+              <JsonCode value={value} maxHeight="50vh" />
             )
           ) : !isTextMimeType(mimeType) ? (
             <Stack gap="sm">
@@ -334,7 +333,9 @@ function renderPreview(
     }
 
     if (isTextMimeType(mimeType) && isString(jobResult.value)) {
-      return renderTextCodeBlock(jobResult.value);
+      return (
+        <JsonCode value={jobResult.value} language="text" maxHeight="50vh" />
+      );
     }
 
     return renderJsonPreview(jobResult.value);
@@ -344,9 +345,5 @@ function renderPreview(
 }
 
 function renderJsonPreview(value: unknown) {
-  return <JsonCode value={value} />;
-}
-
-function renderTextCodeBlock(text: string) {
-  return <SyntaxCode code={text} language="text" />;
+  return <JsonCode value={value} maxHeight="50vh" />;
 }
