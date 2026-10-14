@@ -8,14 +8,12 @@ import { useHoverReveal } from "./useHoverReveal";
 export interface JsonCodeProps {
   value: unknown;
   language?: "json" | "text";
-  height?: CSSProperties["height"];
   maxHeight?: CSSProperties["maxHeight"];
 }
 
 export function JsonCode({
   value,
   language = "json",
-  height,
   maxHeight = "16rem",
 }: JsonCodeProps) {
   const { containerProps, revealStyle } = useHoverReveal(200, 0, 1);
@@ -33,7 +31,7 @@ export function JsonCode({
       text = true;
     }
   }
-  const scrollarea = { height, maxHeight, overflow: "auto" };
+  const scrollarea = { maxHeight, overflow: "auto" };
   return (
     <Box ref={ref}>
       {text ? (

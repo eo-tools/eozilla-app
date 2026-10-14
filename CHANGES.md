@@ -7,6 +7,8 @@
   Preview/Raw tabs are shown only for rendered previews. Unsupported linked
   formats show their details and download action directly.
 - Linked JSON outputs now use the same expandable JSON viewer as inline outputs.
+- Inline result code blocks fit their content up to a maximum height, with
+  scrolling for longer values.
 - Updated Mantine to 9.7.2.
 
 ## Changes in version 0.2.1

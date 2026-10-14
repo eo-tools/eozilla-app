@@ -80,7 +80,7 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
     expect(container.textContent).toContain("input-999");
   });
   it.each(["inline", "qualified"])(
-    "keeps a %s result box fixed when nested values expand",
+    "keeps a %s result box capped when nested values expand",
     async (kind) => {
       const value = {
         nested: { values: Array.from({ length: 100 }, (_, index) => index) },
@@ -90,17 +90,29 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
       await render(<JobResultDetails jobResult={jobResult} />);
       const panel = Array.from(
         container.querySelectorAll<HTMLElement>("[style]"),
-      ).find((element) => element.style.height === "8rem")!;
+      ).find((element) => element.style.maxHeight === "8rem")!;
       const height = panel.getBoundingClientRect().height;
-      const viewport = panel.querySelector<HTMLElement>(
-        ".mantine-ScrollArea-viewport",
-      )!;
-      const contentHeight = viewport.scrollHeight;
-      expect(height).toBe(128);
+      const contentHeight = panel.scrollHeight;
+      expect(height).toBeLessThanOrEqual(128);
       await click('[role="treeitem"][aria-expanded="false"]');
-      expect(panel.getBoundingClientRect().height).toBe(height);
-      expect(viewport.scrollHeight).toBeGreaterThan(contentHeight);
-      expect(viewport.scrollHeight).toBeGreaterThan(viewport.clientHeight);
+      expect(panel.getBoundingClientRect().height).toBeLessThanOrEqual(128);
+      expect(panel.scrollHeight).toBeGreaterThan(contentHeight);
+      expect(panel.scrollHeight).toBeGreaterThan(panel.clientHeight);
+    },
+  );
+  it.each([
+    { value: 7, mediaType: "application/json" },
+    { value: "One line", mediaType: "text/plain" },
+  ])(
+    "fits single-line result content without filling the height limit",
+    async (jobResult) => {
+      await render(<JobResultDetails jobResult={jobResult} />);
+      const panel = Array.from(
+        container.querySelectorAll<HTMLElement>("[style]"),
+      ).find((element) => element.style.maxHeight === "8rem")!;
+      expect(panel.getBoundingClientRect().height).toBeGreaterThan(0);
+      expect(panel.getBoundingClientRect().height).toBeLessThan(128);
+      expect(panel.scrollHeight).toBeLessThanOrEqual(panel.clientHeight);
     },
   );
   it("reveals the JSON copy action on keyboard focus", async () => {
