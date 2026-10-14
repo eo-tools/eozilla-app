@@ -11,7 +11,7 @@ import {
   Text,
   ScrollArea,
 } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import {
   IconCopy,
@@ -209,6 +209,10 @@ function renderPreview(
   if (isLink(jobResult)) {
     const source = jobResult.href;
 
+    if (isJsonMimeType(mimeType)) {
+      return <LinkedJsonPreview key={source} source={source} />;
+    }
+
     if (isImageMimeType(mimeType)) {
       return (
         <Image
@@ -346,4 +350,38 @@ function renderPreview(
 
 function renderJsonPreview(value: unknown) {
   return <JsonCode value={value} maxHeight="50vh" />;
+}
+
+function LinkedJsonPreview({ source }: { source: string }) {
+  const [result, setResult] = useState<
+    { value: unknown } | { error: true } | undefined
+  >();
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(source, { credentials: "include", signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((value: unknown) => {
+        if (!controller.signal.aborted) setResult({ value });
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setResult({ error: true });
+      });
+    return () => controller.abort();
+  }, [source]);
+
+  if (!result) return <Text role="status">Loading JSON…</Text>;
+  if ("error" in result) {
+    return (
+      <Alert color="red" title="Cannot preview output" role="alert">
+        The JSON output could not be loaded. The file may be unavailable,
+        invalid, or blocked by the browser.
+      </Alert>
+    );
+  }
+  return renderJsonPreview(result.value);
 }

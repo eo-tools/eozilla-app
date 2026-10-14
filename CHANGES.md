@@ -6,6 +6,7 @@
 - JSON and plain-text outputs now open in a single view with a copy action.
   Preview/Raw tabs are shown only for rendered previews. Unsupported linked
   formats show their details and download action directly.
+- Linked JSON outputs now use the same expandable JSON viewer as inline outputs.
 - Updated Mantine to 9.7.2.
 
 ## Changes in version 0.2.1
