@@ -24,6 +24,8 @@ export default function JobResultView({
   openDialog,
 }: JobResultViewProps) {
   const { containerProps, revealStyle } = useHoverReveal(200, 0, 1);
+  const showViewAction = isLink(jobResult);
+  const viewOutput = () => openDialog("job-result", { outputName, jobResult });
   return (
     <Stack w={"100%"} pb="sm" {...containerProps}>
       <Flex justify="space-between" align="flex-start" gap="sm">
@@ -33,44 +35,49 @@ export default function JobResultView({
             {outputName}
           </Text>
         </Group>
-        <ActionIcon.Group style={revealStyle}>
-          <Tooltip label="View output" withArrow>
-            <ActionIcon
-              {...styles.actionIcon.sm}
-              aria-label={`View output ${outputName}`}
-              onClick={() =>
-                openDialog("job-result", { outputName, jobResult })
-              }
-            >
-              <IconEye {...styles.icon.sm} />
-            </ActionIcon>
-          </Tooltip>
-
-          {isLink(jobResult) && (
-            <Tooltip label="Download output" withArrow>
+        {showViewAction && (
+          <ActionIcon.Group style={revealStyle}>
+            <Tooltip label="View output" withArrow>
               <ActionIcon
                 {...styles.actionIcon.sm}
-                component="a"
-                aria-label={`Download output ${outputName}`}
-                href={getOutputUrlError(jobResult.href) ? "#" : jobResult.href}
-                onClick={(event) => {
-                  const error = getOutputUrlError(jobResult.href);
-                  if (error) {
-                    event.preventDefault();
-                    notifications.show({ message: error, color: "red" });
-                  }
-                }}
-                download
-                target="_blank"
-                rel="noreferrer"
+                aria-label={`View output ${outputName}`}
+                onClick={viewOutput}
               >
-                <IconDownload {...styles.icon.sm} />
+                <IconEye {...styles.icon.sm} />
               </ActionIcon>
             </Tooltip>
-          )}
-        </ActionIcon.Group>
+
+            {isLink(jobResult) && (
+              <Tooltip label="Download output" withArrow>
+                <ActionIcon
+                  {...styles.actionIcon.sm}
+                  component="a"
+                  aria-label={`Download output ${outputName}`}
+                  href={
+                    getOutputUrlError(jobResult.href) ? "#" : jobResult.href
+                  }
+                  onClick={(event) => {
+                    const error = getOutputUrlError(jobResult.href);
+                    if (error) {
+                      event.preventDefault();
+                      notifications.show({ message: error, color: "red" });
+                    }
+                  }}
+                  download
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <IconDownload {...styles.icon.sm} />
+                </ActionIcon>
+              </Tooltip>
+            )}
+          </ActionIcon.Group>
+        )}
       </Flex>
-      <JobResultDetails jobResult={jobResult} />
+      <JobResultDetails
+        jobResult={jobResult}
+        onEnlarge={showViewAction ? undefined : viewOutput}
+      />
     </Stack>
   );
 }

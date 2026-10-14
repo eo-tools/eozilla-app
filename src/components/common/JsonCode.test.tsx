@@ -5,6 +5,8 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { JsonCode } from "./JsonCode";
 import { JobResultDetails } from "@/components/panels/job/JobResultDetails";
+import JobResultView from "@/components/panels/job/JobResultView";
+import type { JobResult } from "@/service";
 
 // Use vite.config.ts for browser interactions; the default Node suite skips these.
 describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
@@ -26,6 +28,11 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
     await act(async () =>
       root.render(<MantineProvider env="test">{children}</MantineProvider>),
     );
+    await act(async () => {
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      );
+    });
   }
   async function click(selector: string) {
     await act(async () => {
@@ -121,17 +128,115 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
       'button[aria-label="Copy JSON"]',
     )!;
     await act(async () => copy.focus());
-    expect(copy.style.opacity).toBe("1");
+    expect(copy.parentElement!.style.opacity).toBe("1");
   });
-  it("copies plain text with Mantine's built-in button and wraps lines", async () => {
-    await render(<JsonCode value="  Plain text output" language="text" />);
+  it.each<JobResult>([
+    { count: 7 },
+    { value: "One line", mediaType: "text/plain" },
+    { value: "AAAA", mediaType: "image/png", encoding: "base64" },
+    { value: "AAAA", mediaType: "audio/wav", encoding: "base64" },
+    { value: "AAAA", mediaType: "video/mp4", encoding: "base64" },
+    { value: "<p>Sample</p>", mediaType: "text/html" },
+    { value: "# Sample", mediaType: "text/markdown" },
+  ])("groups Copy and View inside the result panel", async (jobResult) => {
+    const openDialog = vi.fn();
+    await render(
+      <JobResultView
+        outputName="result"
+        outputIndex={0}
+        jobResult={jobResult}
+        openDialog={openDialog}
+      />,
+    );
+    const copy = container.querySelector<HTMLButtonElement>(
+      '[aria-label^="Copy"]',
+    )!;
+    const enlarge = container.querySelector<HTMLButtonElement>(
+      '[aria-label="Open larger view"], [aria-label="Preview output"]',
+    )!;
+    expect(copy.parentElement).toBe(enlarge.parentElement);
+    const panel = copy.parentElement!.parentElement!.getBoundingClientRect();
+    expect(enlarge.getBoundingClientRect().right).toBeCloseTo(panel.right - 8);
+    expect(copy.dataset.variant).toBe("default");
+    expect(enlarge.dataset.variant).toBe(copy.dataset.variant);
+    expect(
+      container.querySelector('[aria-label="View output result"]'),
+    ).toBeNull();
+    await act(async () => copy.focus());
+    expect(enlarge.parentElement!.style.opacity).toBe("1");
+    await click(
+      '[aria-label="Open larger view"], [aria-label="Preview output"]',
+    );
+    expect(openDialog).toHaveBeenCalledWith("job-result", {
+      outputName: "result",
+      jobResult,
+    });
+  });
+  it("copies plain text without changing whitespace and wraps lines", async () => {
+    await render(
+      <JsonCode value={"  Plain text output  \n"} language="text" />,
+    );
     const write = vi
       .spyOn(navigator.clipboard, "writeText")
       .mockResolvedValue();
     await click('button[aria-label="Copy code"]');
-    expect(write).toHaveBeenCalledWith("  Plain text output");
+    expect(write).toHaveBeenCalledWith("  Plain text output  \n");
     expect(getComputedStyle(container.querySelector("pre")!).whiteSpace).toBe(
       "pre-wrap",
     );
+    const pre = container.querySelector("pre")!;
+    const code = container.querySelector("code")!;
+    const line = document.createRange();
+    line.selectNodeContents(code);
+    const copy = container.querySelector<HTMLButtonElement>(
+      '[aria-label="Copy code"]',
+    )!;
+    expect(line.getBoundingClientRect().top).toBeLessThan(
+      copy.getBoundingClientRect().bottom,
+    );
+    expect(pre.getBoundingClientRect().height).toBeLessThan(48);
+    expect(code.getBoundingClientRect().right).toBeCloseTo(
+      pre.getBoundingClientRect().right,
+    );
   });
+  it.each(["json", "text"] as const)(
+    "keeps %s controls clear of the scrollbar",
+    async (language) => {
+      async function renderOutput(value: unknown) {
+        await render(
+          <div style={{ width: 320 }}>
+            <JsonCode
+              value={value}
+              language={language}
+              maxHeight="8rem"
+              onEnlarge={vi.fn()}
+            />
+          </div>,
+        );
+      }
+      await renderOutput(
+        language === "json"
+          ? Array.from({ length: 100 }, (_, index) => index)
+          : "Long output\n".repeat(100),
+      );
+      const panel = Array.from(
+        container.querySelectorAll<HTMLElement>("[style]"),
+      ).find((element) => element.style.maxHeight === "8rem")!;
+      expect(panel.scrollHeight).toBeGreaterThan(panel.clientHeight);
+      const toolbar = container.querySelector<HTMLButtonElement>(
+        '[aria-label="Open larger view"]',
+      )!.parentElement!;
+      expect(toolbar.getBoundingClientRect().right).toBeLessThanOrEqual(
+        panel.getBoundingClientRect().left + panel.clientWidth - 4,
+      );
+      expect(toolbar.getBoundingClientRect().right).toBeCloseTo(
+        toolbar.parentElement!.getBoundingClientRect().right - 24,
+      );
+      await renderOutput(language === "json" ? [1] : "Short output.");
+      expect(panel.scrollHeight).toBeLessThanOrEqual(panel.clientHeight);
+      expect(toolbar.getBoundingClientRect().right).toBeCloseTo(
+        toolbar.parentElement!.getBoundingClientRect().right - 8,
+      );
+    },
+  );
 });

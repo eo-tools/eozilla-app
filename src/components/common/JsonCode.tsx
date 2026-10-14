@@ -1,24 +1,42 @@
 import type { CSSProperties } from "react";
-import { Box } from "@mantine/core";
+import { ActionIcon, Box, CopyButton, Tooltip } from "@mantine/core";
+import {
+  IconArrowsMaximize,
+  IconCheck,
+  IconCopy,
+  IconEye,
+} from "@tabler/icons-react";
 import { CodeHighlight, JsonViewer } from "@mantine/code-highlight";
-import { useFocusWithin, useMediaQuery, useMergedRef } from "@mantine/hooks";
+import {
+  useFocusWithin,
+  useMediaQuery,
+  useMergedRef,
+  useResizeObserver,
+} from "@mantine/hooks";
 import "@mantine/code-highlight/styles.css";
 import { useHoverReveal } from "./useHoverReveal";
+import styles from "./styles";
 
 export interface JsonCodeProps {
   value: unknown;
   language?: "json" | "text";
   maxHeight?: CSSProperties["maxHeight"];
+  onEnlarge?: () => void;
+  preview?: boolean;
 }
 
 export function JsonCode({
   value,
   language = "json",
   maxHeight = "16rem",
+  onEnlarge,
+  preview = false,
 }: JsonCodeProps) {
   const { containerProps, revealStyle } = useHoverReveal(200, 0, 1);
   const { focused, ref: focusRef } = useFocusWithin();
-  const ref = useMergedRef(containerProps.ref, focusRef);
+  const [panelRef, panelSize] = useResizeObserver<HTMLDivElement>();
+  const [contentRef, contentSize] = useResizeObserver<HTMLDivElement>();
+  const ref = useMergedRef(containerProps.ref, focusRef, panelRef);
   const touch = useMediaQuery("(hover: none)");
   const copyStyle =
     focused || touch ? { ...revealStyle, opacity: 1 } : revealStyle;
@@ -32,8 +50,52 @@ export function JsonCode({
     }
   }
   const scrollarea = { maxHeight, overflow: "auto" };
+  const toolbarRight = contentSize.height > panelSize.height ? 24 : 8;
+  const paddingRight = toolbarRight + (onEnlarge ? 44 : 22) + 12;
+  const viewLabel = preview ? "Preview output" : "Open larger view";
   return (
-    <Box ref={ref}>
+    <Box ref={ref} pos="relative">
+      <ActionIcon.Group
+        pos="absolute"
+        top={8}
+        right={toolbarRight}
+        style={{ ...copyStyle, zIndex: 1 }}
+      >
+        <CopyButton
+          value={text ? String(value) : (JSON.stringify(data, null, 2) ?? "")}
+        >
+          {({ copied, copy }) => (
+            <Tooltip label={copied ? "Copied" : "Copy"} withArrow>
+              <ActionIcon
+                {...styles.actionIcon.sm}
+                aria-label={text ? "Copy code" : "Copy JSON"}
+                onClick={copy}
+              >
+                {copied ? (
+                  <IconCheck {...styles.icon.sm} />
+                ) : (
+                  <IconCopy {...styles.icon.sm} />
+                )}
+              </ActionIcon>
+            </Tooltip>
+          )}
+        </CopyButton>
+        {onEnlarge && (
+          <Tooltip label={viewLabel} withArrow>
+            <ActionIcon
+              {...styles.actionIcon.sm}
+              aria-label={viewLabel}
+              onClick={onEnlarge}
+            >
+              {preview ? (
+                <IconEye {...styles.icon.sm} />
+              ) : (
+                <IconArrowsMaximize {...styles.icon.sm} />
+              )}
+            </ActionIcon>
+          </Tooltip>
+        )}
+      </ActionIcon.Group>
       {text ? (
         <CodeHighlight
           code={String(value)}
@@ -41,10 +103,15 @@ export function JsonCode({
           radius="md"
           withBorder
           withFirstLineIndentation
+          withCopyButton={false}
+          attributes={{ codeWrapper: { ref: contentRef } }}
           styles={{
             scrollarea,
-            pre: { whiteSpace: "pre-wrap", overflowWrap: "anywhere" },
-            controls: copyStyle,
+            pre: {
+              whiteSpace: "pre-wrap",
+              overflowWrap: "anywhere",
+            },
+            code: { paddingRight },
           }}
         />
       ) : (
@@ -52,13 +119,13 @@ export function JsonCode({
           value={data}
           defaultExpandDepth={2}
           maxDisplayLength={Infinity}
-          withCopyButton
           withKeyQuotes
           withSize
           withChevrons
           withBorder
           radius="md"
-          styles={{ scrollarea, copyAllButton: copyStyle }}
+          attributes={{ wrapper: { ref: contentRef } }}
+          styles={{ scrollarea, content: { paddingRight } }}
         />
       )}
     </Box>

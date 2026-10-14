@@ -9,6 +9,8 @@
 - Linked JSON outputs now use the same expandable JSON viewer as inline outputs.
 - Inline result code blocks fit their content up to a maximum height, with
   scrolling for longer values.
+- Copy and Enlarge/Preview actions are grouped inside inline result code panels
+  and use the same button styling as other result actions.
 - Updated Mantine to 9.7.2.
 
 ## Changes in version 0.2.1

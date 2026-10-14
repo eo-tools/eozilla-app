@@ -8,7 +8,7 @@ import {
   isQualifiedValue,
   type JobResult,
 } from "@/service";
-import { getOutputUrlError } from "./jobResultUtils";
+import { getOutputUrlError, hasRenderedPreview } from "./jobResultUtils";
 
 const dataTableProps: TableProps = {
   variant: "vertical",
@@ -22,9 +22,13 @@ const dataTableProps: TableProps = {
 
 export interface JobResultDetailsProps {
   jobResult: JobResult;
+  onEnlarge?: () => void;
 }
 
-export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
+export function JobResultDetails({
+  jobResult,
+  onEnlarge,
+}: JobResultDetailsProps) {
   if (isLink(jobResult)) {
     return (
       <Table {...dataTableProps} withTableBorder withRowBorders>
@@ -87,7 +91,12 @@ export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
           <Table.Tr>
             <Table.Th w={80}>Value</Table.Th>
             <Table.Td>
-              <JsonCode value={jobResult.value} maxHeight="8rem" />
+              <JsonCode
+                value={jobResult.value}
+                maxHeight="8rem"
+                onEnlarge={onEnlarge}
+                preview={hasRenderedPreview(jobResult)}
+              />
             </Table.Td>
           </Table.Tr>
 
@@ -117,7 +126,9 @@ export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
   }
 
   if (isInlineValue(jobResult)) {
-    return <JsonCode value={jobResult} maxHeight="8rem" />;
+    return (
+      <JsonCode value={jobResult} maxHeight="8rem" onEnlarge={onEnlarge} />
+    );
   }
 
   return (
