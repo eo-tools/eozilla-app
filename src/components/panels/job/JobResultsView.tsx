@@ -12,16 +12,12 @@ export default function JobResultsView({
   jobResults,
   openDialog,
 }: JobResultsViewProps) {
-  return Object.keys(jobResults).map((outputName, outputIndex) => {
-    const jobResult = jobResults[outputName]!;
-    return (
-      <JobResultView
-        key={outputName}
-        outputName={outputName}
-        outputIndex={outputIndex}
-        jobResult={jobResult}
-        openDialog={openDialog}
-      />
-    );
-  });
+  return Object.entries(jobResults).map(([outputName, jobResult]) => (
+    <JobResultView
+      key={outputName}
+      outputName={outputName}
+      jobResult={jobResult}
+      openDialog={openDialog}
+    />
+  ));
 }

@@ -8,7 +8,7 @@ import {
   isQualifiedValue,
   type JobResult,
 } from "@/service";
-import { getOutputUrlError, hasRenderedPreview } from "./jobResultUtils";
+import { isJsonMimeType, getOutputUrlError } from "./jobResultUtils";
 
 const dataTableProps: TableProps = {
   variant: "vertical",
@@ -22,20 +22,16 @@ const dataTableProps: TableProps = {
 
 export interface JobResultDetailsProps {
   jobResult: JobResult;
-  onEnlarge?: () => void;
 }
 
-export function JobResultDetails({
-  jobResult,
-  onEnlarge,
-}: JobResultDetailsProps) {
+export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
   if (isLink(jobResult)) {
     return (
       <Table {...dataTableProps} withTableBorder withRowBorders>
         <Table.Tbody>
           <Table.Tr>
             <Table.Th w={80}>Href</Table.Th>
-            <Table.Td>
+            <Table.Td style={{ overflowWrap: "anywhere" }}>
               <a
                 href={getOutputUrlError(jobResult.href) ? "#" : jobResult.href}
                 title={jobResult.title}
@@ -93,9 +89,14 @@ export function JobResultDetails({
             <Table.Td>
               <JsonCode
                 value={jobResult.value}
+                plainText={
+                  typeof jobResult.value === "string" &&
+                  !!jobResult.mediaType &&
+                  !isJsonMimeType(jobResult.mediaType)
+                }
+                mediaType={jobResult.mediaType}
+                encoding={jobResult.encoding}
                 maxHeight="8rem"
-                onEnlarge={onEnlarge}
-                preview={hasRenderedPreview(jobResult)}
               />
             </Table.Td>
           </Table.Tr>
@@ -126,9 +127,7 @@ export function JobResultDetails({
   }
 
   if (isInlineValue(jobResult)) {
-    return (
-      <JsonCode value={jobResult} maxHeight="8rem" onEnlarge={onEnlarge} />
-    );
+    return <JsonCode value={jobResult} maxHeight="8rem" />;
   }
 
   return (

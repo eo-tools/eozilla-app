@@ -6,6 +6,7 @@ import "@mantine/dates/styles.css";
 import "@mantine/notifications/styles.css";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
+import { CodeHighlightProvider } from "@/components/common/CodeHighlightProvider";
 import { RemoteStateProvider } from "remotestate";
 
 import {
@@ -108,8 +109,10 @@ async function startApp(): Promise<void> {
         debug={bootstrapConfig.debug}
       >
         <MantineProvider forceColorScheme={bootstrapConfig.scheme}>
-          <Notifications />
-          <App compact={bootstrapConfig.compact} />
+          <CodeHighlightProvider>
+            <Notifications />
+            <App compact={bootstrapConfig.compact} />
+          </CodeHighlightProvider>
         </MantineProvider>
       </AppRemoteStateProvider>
     </StrictMode>,

@@ -1,47 +1,49 @@
-import type { CSSProperties } from "react";
-import { ActionIcon, Box, CopyButton, Tooltip } from "@mantine/core";
+import { useState, type CSSProperties } from "react";
 import {
-  IconArrowsMaximize,
-  IconCheck,
-  IconCopy,
-  IconEye,
-} from "@tabler/icons-react";
+  ActionIcon,
+  CopyButton,
+  Divider,
+  Group,
+  Paper,
+  Modal,
+  Text,
+  Tooltip,
+} from "@mantine/core";
+import { IconArrowsMaximize, IconCheck, IconCopy } from "@tabler/icons-react";
 import { CodeHighlight, JsonViewer } from "@mantine/code-highlight";
-import {
-  useFocusWithin,
-  useMediaQuery,
-  useMergedRef,
-  useResizeObserver,
-} from "@mantine/hooks";
 import "@mantine/code-highlight/styles.css";
+import { useFocusWithin, useMediaQuery, useMergedRef } from "@mantine/hooks";
 import { useHoverReveal } from "./useHoverReveal";
 import styles from "./styles";
 
 export interface JsonCodeProps {
   value: unknown;
-  language?: "json" | "text";
+  plainText?: boolean;
+  mediaType?: string;
+  encoding?: string;
   maxHeight?: CSSProperties["maxHeight"];
-  onEnlarge?: () => void;
-  preview?: boolean;
+  withExpandButton?: boolean;
 }
 
 export function JsonCode({
   value,
-  language = "json",
+  plainText = false,
+  mediaType,
+  encoding,
   maxHeight = "16rem",
-  onEnlarge,
-  preview = false,
+  withExpandButton = true,
 }: JsonCodeProps) {
+  const [expanded, setExpanded] = useState(false);
   const { containerProps, revealStyle } = useHoverReveal(200, 0, 1);
-  const { focused, ref: focusRef } = useFocusWithin();
-  const [panelRef, panelSize] = useResizeObserver<HTMLDivElement>();
-  const [contentRef, contentSize] = useResizeObserver<HTMLDivElement>();
-  const ref = useMergedRef(containerProps.ref, focusRef, panelRef);
+  const { ref: focusRef, focused } = useFocusWithin();
+  const ref = useMergedRef(containerProps.ref, focusRef);
   const touch = useMediaQuery("(hover: none)");
-  const copyStyle =
-    focused || touch ? { ...revealStyle, opacity: 1 } : revealStyle;
+  const actionStyle = {
+    ...revealStyle,
+    ...(focused || touch ? { opacity: 1 } : {}),
+  };
   let data = value;
-  let text = language === "text";
+  let text = plainText || !!encoding;
   if (!text && typeof value === "string") {
     try {
       data = JSON.parse(value);
@@ -49,69 +51,77 @@ export function JsonCode({
       text = true;
     }
   }
+  const type = mediaType
+    ?.split(";", 1)[0]
+    ?.trim()
+    .toLowerCase()
+    .split("/")[1]
+    ?.replace(/^x-/, "");
+  const format = encoding || type;
+  const label = format ? format.toUpperCase() : text ? "Text" : "JSON";
   const scrollarea = { maxHeight, overflow: "auto" };
-  const toolbarRight = contentSize.height > panelSize.height ? 24 : 8;
-  const paddingRight = toolbarRight + (onEnlarge ? 44 : 22) + 12;
-  const viewLabel = preview ? "Preview output" : "Open larger view";
+  const code = text ? String(value) : (JSON.stringify(data, null, 2) ?? "");
   return (
-    <Box ref={ref} pos="relative">
-      <ActionIcon.Group
-        pos="absolute"
-        top={8}
-        right={toolbarRight}
-        style={{ ...copyStyle, zIndex: 1 }}
+    <Paper ref={ref} withBorder radius="md" style={{ overflow: "hidden" }}>
+      <Group
+        justify="space-between"
+        wrap="nowrap"
+        px="sm"
+        py={6}
+        bg="var(--mantine-color-default-hover)"
       >
-        <CopyButton
-          value={text ? String(value) : (JSON.stringify(data, null, 2) ?? "")}
-        >
-          {({ copied, copy }) => (
-            <Tooltip label={copied ? "Copied" : "Copy"} withArrow>
+        <Text size="xs" c="dimmed" fw={500}>
+          {label}
+        </Text>
+        <ActionIcon.Group style={actionStyle}>
+          <CopyButton value={code}>
+            {({ copied, copy }) => (
+              <Tooltip label={copied ? "Copied" : "Copy"} withArrow>
+                <ActionIcon
+                  {...styles.actionIcon.sm}
+                  aria-label={text ? "Copy code" : "Copy JSON"}
+                  onClick={copy}
+                >
+                  {copied ? (
+                    <IconCheck {...styles.icon.sm} />
+                  ) : (
+                    <IconCopy {...styles.icon.sm} />
+                  )}
+                </ActionIcon>
+              </Tooltip>
+            )}
+          </CopyButton>
+          {withExpandButton && (
+            <Tooltip label="Expand code" withArrow>
               <ActionIcon
                 {...styles.actionIcon.sm}
-                aria-label={text ? "Copy code" : "Copy JSON"}
-                onClick={copy}
+                aria-label="Expand code"
+                onClick={() => setExpanded(true)}
               >
-                {copied ? (
-                  <IconCheck {...styles.icon.sm} />
-                ) : (
-                  <IconCopy {...styles.icon.sm} />
-                )}
+                <IconArrowsMaximize {...styles.icon.sm} />
               </ActionIcon>
             </Tooltip>
           )}
-        </CopyButton>
-        {onEnlarge && (
-          <Tooltip label={viewLabel} withArrow>
-            <ActionIcon
-              {...styles.actionIcon.sm}
-              aria-label={viewLabel}
-              onClick={onEnlarge}
-            >
-              {preview ? (
-                <IconEye {...styles.icon.sm} />
-              ) : (
-                <IconArrowsMaximize {...styles.icon.sm} />
-              )}
-            </ActionIcon>
-          </Tooltip>
-        )}
-      </ActionIcon.Group>
+        </ActionIcon.Group>
+      </Group>
+      <Divider color="var(--panel-divider)" />
       {text ? (
         <CodeHighlight
-          code={String(value)}
-          language="text"
-          radius="md"
-          withBorder
+          code={code}
+          language={encoding ? "plaintext" : type?.split("+").pop()}
+          radius={0}
           withFirstLineIndentation
           withCopyButton={false}
-          attributes={{ codeWrapper: { ref: contentRef } }}
           styles={{
             scrollarea,
+            code: {
+              padding: "var(--mantine-spacing-xs) var(--mantine-spacing-md)",
+              backgroundColor: "var(--ch-background)",
+            },
             pre: {
               whiteSpace: "pre-wrap",
               overflowWrap: "anywhere",
             },
-            code: { paddingRight },
           }}
         />
       ) : (
@@ -122,12 +132,28 @@ export function JsonCode({
           withKeyQuotes
           withSize
           withChevrons
-          withBorder
-          radius="md"
-          attributes={{ wrapper: { ref: contentRef } }}
-          styles={{ scrollarea, content: { paddingRight } }}
+          radius={0}
+          styles={{ scrollarea }}
         />
       )}
-    </Box>
+      {expanded && (
+        <Modal
+          opened
+          onClose={() => setExpanded(false)}
+          title={label}
+          size="lg"
+          centered
+        >
+          <JsonCode
+            value={value}
+            plainText={plainText}
+            mediaType={mediaType}
+            encoding={encoding}
+            maxHeight="70vh"
+            withExpandButton={false}
+          />
+        </Modal>
+      )}
+    </Paper>
   );
 }

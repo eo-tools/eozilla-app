@@ -148,13 +148,18 @@ export function JobResultContent({ jobResult }: { jobResult: JobResult }) {
       ) : (
         <ScrollArea.Autosize mah="60vh">
           {!linked ? (
-            isString(value) &&
-            isTextMimeType(mimeType) &&
-            !isJsonMimeType(mimeType) ? (
-              <JsonCode value={value} language="text" maxHeight="50vh" />
-            ) : (
-              <JsonCode value={value} maxHeight="50vh" />
-            )
+            <JsonCode
+              value={value}
+              plainText={
+                isString(value) && !!mimeType && !isJsonMimeType(mimeType)
+              }
+              mediaType={mimeType}
+              encoding={
+                isQualifiedValue(jobResult) ? jobResult.encoding : undefined
+              }
+              maxHeight="50vh"
+              withExpandButton={false}
+            />
           ) : !isTextMimeType(mimeType) ? (
             <Stack gap="sm">
               {error && (
@@ -201,6 +206,41 @@ export function JobResultPreview({
   return renderPreview(jobResult, mimeType, () => setFailed(true));
 }
 
+function renderMediaPreview(
+  source: string,
+  mimeType: string | undefined,
+  title: string,
+  onError: () => void,
+) {
+  if (isImageMimeType(mimeType)) {
+    return <Image src={source} alt={title} fit="contain" onError={onError} />;
+  }
+
+  if (isAudioMimeType(mimeType)) {
+    return (
+      <audio
+        controls
+        src={source}
+        onError={onError}
+        style={{ width: "100%" }}
+      />
+    );
+  }
+
+  if (isVideoMimeType(mimeType)) {
+    return (
+      <video
+        controls
+        onError={onError}
+        src={source}
+        style={{ width: "100%", maxHeight: 360 }}
+      />
+    );
+  }
+
+  return undefined;
+}
+
 function renderPreview(
   jobResult: JobResult,
   mimeType: string | undefined,
@@ -213,38 +253,13 @@ function renderPreview(
       return <LinkedJsonPreview key={source} source={source} />;
     }
 
-    if (isImageMimeType(mimeType)) {
-      return (
-        <Image
-          src={source}
-          alt={jobResult.title || jobResult.href}
-          fit="contain"
-          onError={onError}
-        />
-      );
-    }
-
-    if (isAudioMimeType(mimeType)) {
-      return (
-        <audio
-          controls
-          src={source}
-          onError={onError}
-          style={{ width: "100%" }}
-        />
-      );
-    }
-
-    if (isVideoMimeType(mimeType)) {
-      return (
-        <video
-          controls
-          onError={onError}
-          src={source}
-          style={{ width: "100%", maxHeight: 360 }}
-        />
-      );
-    }
+    const mediaPreview = renderMediaPreview(
+      source,
+      mimeType,
+      jobResult.title || jobResult.href,
+      onError,
+    );
+    if (mediaPreview) return mediaPreview;
 
     if (isTextMimeType(mimeType) || isIframeMimeType(mimeType)) {
       return (
@@ -273,37 +288,14 @@ function renderPreview(
       jobResult.encoding,
     );
 
-    if (isImageMimeType(mimeType) && source) {
-      return (
-        <Image
-          src={source}
-          alt={jobResult.mediaType || "Job result"}
-          fit="contain"
-          onError={onError}
-        />
+    if (source) {
+      const mediaPreview = renderMediaPreview(
+        source,
+        mimeType,
+        jobResult.mediaType || "Job result",
+        onError,
       );
-    }
-
-    if (isAudioMimeType(mimeType) && source) {
-      return (
-        <audio
-          controls
-          src={source}
-          onError={onError}
-          style={{ width: "100%" }}
-        />
-      );
-    }
-
-    if (isVideoMimeType(mimeType) && source) {
-      return (
-        <video
-          controls
-          onError={onError}
-          src={source}
-          style={{ width: "100%", maxHeight: 360 }}
-        />
-      );
+      if (mediaPreview) return mediaPreview;
     }
 
     if (isIframeMimeType(mimeType) && source) {
@@ -338,7 +330,14 @@ function renderPreview(
 
     if (isTextMimeType(mimeType) && isString(jobResult.value)) {
       return (
-        <JsonCode value={jobResult.value} language="text" maxHeight="50vh" />
+        <JsonCode
+          value={jobResult.value}
+          plainText
+          mediaType={mimeType}
+          encoding={jobResult.encoding}
+          maxHeight="50vh"
+          withExpandButton={false}
+        />
       );
     }
 
@@ -349,7 +348,7 @@ function renderPreview(
 }
 
 function renderJsonPreview(value: unknown) {
-  return <JsonCode value={value} maxHeight="50vh" />;
+  return <JsonCode value={value} maxHeight="50vh" withExpandButton={false} />;
 }
 
 function LinkedJsonPreview({ source }: { source: string }) {

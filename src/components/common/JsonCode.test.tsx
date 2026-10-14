@@ -4,6 +4,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { JsonCode } from "./JsonCode";
+import { CodeHighlightProvider } from "./CodeHighlightProvider";
 import { JobResultDetails } from "@/components/panels/job/JobResultDetails";
 import JobResultView from "@/components/panels/job/JobResultView";
 import type { JobResult } from "@/service";
@@ -24,9 +25,16 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
-  async function render(children: React.ReactNode) {
+  async function render(
+    children: React.ReactNode,
+    scheme: "light" | "dark" = "light",
+  ) {
     await act(async () =>
-      root.render(<MantineProvider env="test">{children}</MantineProvider>),
+      root.render(
+        <MantineProvider env="test" forceColorScheme={scheme}>
+          <CodeHighlightProvider>{children}</CodeHighlightProvider>
+        </MantineProvider>,
+      ),
     );
     await act(async () => {
       await new Promise<void>((resolve) =>
@@ -122,13 +130,102 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
       expect(panel.scrollHeight).toBeLessThanOrEqual(panel.clientHeight);
     },
   );
-  it("reveals the JSON copy action on keyboard focus", async () => {
+  it.each([
+    {
+      mediaType: "text/html; charset=utf-8",
+      value: "<p>Hello</p><script>alert(1)</script>",
+      label: "HTML",
+    },
+    {
+      mediaType: "text/markdown",
+      value: "# Heading\n**Bold**",
+      label: "MARKDOWN",
+    },
+    {
+      mediaType: "image/svg+xml",
+      value: '<svg><rect width="20" /></svg>',
+      label: "SVG+XML",
+    },
+    {
+      mediaType: "application/json",
+      encoding: "base64",
+      value: "eyJjb3VudCI6N30=",
+      label: "BASE64",
+    },
+  ])(
+    "labels $label from output metadata and preserves Copy and Expand",
+    async ({ mediaType, value, label, encoding }) => {
+      await render(
+        <JobResultDetails
+          jobResult={{ mediaType, value, ...(encoding ? { encoding } : {}) }}
+        />,
+      );
+      expect(container.textContent).toContain(label);
+      expect(container.querySelector("code")!.textContent).toBe(value);
+      expect(!!container.querySelector('code [class^="hljs-"]')).toBe(
+        !encoding,
+      );
+      expect(container.querySelector("script, h1, svg rect")).toBeNull();
+      if (mediaType.startsWith("text/html"))
+        expect(container.querySelector("code .hljs-tag")).not.toBeNull();
+      const write = vi
+        .spyOn(navigator.clipboard, "writeText")
+        .mockResolvedValue();
+      await click('[aria-label="Copy code"]');
+      expect(write).toHaveBeenCalledWith(value);
+      await click('[aria-label="Expand code"]');
+      const dialog = document.querySelector('[role="dialog"]')!;
+      expect(dialog.textContent).toContain(label);
+      expect(dialog.querySelector("code")!.textContent).toBe(value);
+      expect(!!dialog.querySelector('code [class^="hljs-"]')).toBe(!encoding);
+    },
+  );
+  it("detects HTML source without language or MIME metadata", async () => {
+    const value = '<section class="result"><h1>Complete</h1></section>';
+    await render(<JsonCode value={value} />);
+    expect(container.querySelector("code")!.textContent).toBe(value);
+    expect(container.querySelector('code [class^="hljs-"]')).not.toBeNull();
+    expect(container.querySelector("section, h1")).toBeNull();
+  });
+  it("switches the supplied theme with the app color scheme", async () => {
+    const source = <JsonCode value='<p class="result">Complete</p>' />;
+    async function tokenColor() {
+      await vi.waitFor(() =>
+        expect(
+          container.querySelector<HTMLLinkElement>('link[rel="stylesheet"]')!
+            .sheet,
+        ).not.toBeNull(),
+      );
+      return getComputedStyle(container.querySelector(".hljs-name")!).color;
+    }
+    await render(source, "light");
+    const light = await tokenColor();
+    await render(source, "dark");
+    expect(await tokenColor()).not.toBe(light);
+    await render(source, "light");
+    expect(await tokenColor()).toBe(light);
+  });
+  it("reveals the JSON copy action on hover and keyboard focus", async () => {
     await render(<JsonCode value={{ count: 7 }} />);
     const copy = container.querySelector<HTMLButtonElement>(
       'button[aria-label="Copy JSON"]',
     )!;
+    expect(copy.parentElement!.style.opacity).toBe("0");
+    await act(async () => {
+      copy
+        .closest(".mantine-Paper-root")!
+        .dispatchEvent(new MouseEvent("mouseenter"));
+    });
+    expect(copy.parentElement!.style.opacity).toBe("1");
+    await act(async () => {
+      copy
+        .closest(".mantine-Paper-root")!
+        .dispatchEvent(new MouseEvent("mouseleave"));
+    });
+    expect(copy.parentElement!.style.opacity).toBe("0");
     await act(async () => copy.focus());
     expect(copy.parentElement!.style.opacity).toBe("1");
+    expect(document.activeElement).toBe(copy);
   });
   it.each<JobResult>([
     { count: 7 },
@@ -138,44 +235,173 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
     { value: "AAAA", mediaType: "video/mp4", encoding: "base64" },
     { value: "<p>Sample</p>", mediaType: "text/html" },
     { value: "# Sample", mediaType: "text/markdown" },
-  ])("groups Copy and View inside the result panel", async (jobResult) => {
+  ])(
+    "keeps result Open distinct from code Copy and Expand",
+    async (jobResult) => {
+      const openDialog = vi.fn();
+      await render(
+        <JobResultView
+          outputName="result"
+          jobResult={jobResult}
+          openDialog={openDialog}
+        />,
+      );
+      const open = container.querySelector<HTMLButtonElement>(
+        '[aria-label="Open result result"]',
+      )!;
+      expect(open.textContent).toContain("Open result");
+      expect(container.textContent).not.toContain("Result #");
+      expect(getComputedStyle(open).opacity).toBe("1");
+      const copy = container.querySelector('[aria-label^="Copy"]')!;
+      const expand = container.querySelector('[aria-label="Expand code"]')!;
+      expect(copy.parentElement).toBe(expand.parentElement);
+      expect(open.closest(".mantine-Paper-root")).toBeNull();
+      expect(
+        container.querySelectorAll('[aria-label="Open result result"]'),
+      ).toHaveLength(1);
+      expect(container.querySelector('[aria-label^="Download"]')).toBeNull();
+      expect(
+        container.querySelector(
+          '[aria-label="Open larger view"], [aria-label="Preview output"]',
+        ),
+      ).toBeNull();
+      await click('[aria-label="Open result result"]');
+      expect(openDialog).toHaveBeenCalledWith("job-result", {
+        outputName: "result",
+        jobResult,
+      });
+    },
+  );
+  it("opens linked results without inline Download or Copy actions", async () => {
     const openDialog = vi.fn();
+    const jobResult = {
+      href: "https://example.com/result.nc",
+      type: "application/x-netcdf",
+    };
     await render(
       <JobResultView
-        outputName="result"
-        outputIndex={0}
+        outputName="file"
         jobResult={jobResult}
         openDialog={openDialog}
       />,
     );
-    const copy = container.querySelector<HTMLButtonElement>(
-      '[aria-label^="Copy"]',
-    )!;
-    const enlarge = container.querySelector<HTMLButtonElement>(
-      '[aria-label="Open larger view"], [aria-label="Preview output"]',
-    )!;
-    expect(copy.parentElement).toBe(enlarge.parentElement);
-    const panel = copy.parentElement!.parentElement!.getBoundingClientRect();
-    expect(enlarge.getBoundingClientRect().right).toBeCloseTo(panel.right - 8);
-    expect(copy.dataset.variant).toBe("default");
-    expect(enlarge.dataset.variant).toBe(copy.dataset.variant);
-    expect(
-      container.querySelector('[aria-label="View output result"]'),
-    ).toBeNull();
-    await act(async () => copy.focus());
-    expect(enlarge.parentElement!.style.opacity).toBe("1");
-    await click(
-      '[aria-label="Open larger view"], [aria-label="Preview output"]',
-    );
+    const open = container.querySelector('[aria-label="Open result file"]')!;
+    expect(open.textContent).toContain("Open result");
+    expect(getComputedStyle(open).opacity).toBe("1");
+    expect(container.querySelector('[aria-label^="Download"]')).toBeNull();
+    expect(container.querySelector('[aria-label^="Copy"]')).toBeNull();
+    await click('[aria-label="Open result file"]');
     expect(openDialog).toHaveBeenCalledWith("job-result", {
-      outputName: "result",
+      outputName: "file",
       jobResult,
     });
   });
-  it("copies plain text without changing whitespace and wraps lines", async () => {
+  it.each([
+    `https://example.com/${"a".repeat(500)}`,
+    `data:application/pdf;base64,${"AAAA".repeat(200)}`,
+    `data:application/json,${encodeURIComponent(JSON.stringify({ message: "a".repeat(500) }))}`,
+  ])("wraps long result hrefs within a narrow panel", async (href) => {
+    container.style.width = "300px";
     await render(
-      <JsonCode value={"  Plain text output  \n"} language="text" />,
+      <JobResultView
+        outputName="file"
+        jobResult={{ href }}
+        openDialog={vi.fn()}
+      />,
     );
+    const link = container.querySelector<HTMLAnchorElement>("td a")!;
+    const cell = link.closest("td")!;
+    expect(link.getAttribute("href")).toBe(href);
+    expect(link.textContent).toBe(href);
+    expect(cell.scrollWidth).toBeLessThanOrEqual(cell.clientWidth);
+    expect(container.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
+  });
+  it("provides Copy and Expand for the schema as well as the value", async () => {
+    await render(
+      <JobResultDetails
+        jobResult={{
+          value: { count: 7 },
+          mediaType: "application/json",
+          schema: { type: "object" },
+        }}
+      />,
+    );
+    expect(container.querySelectorAll('[aria-label^="Copy"]')).toHaveLength(2);
+    expect(
+      container.querySelectorAll('[aria-label="Expand code"]'),
+    ).toHaveLength(2);
+    expect(container.querySelectorAll('[role="tree"]')).toHaveLength(2);
+  });
+  it.each<{ count: number } | { value: string; mediaType: string }>([
+    { count: 7 },
+    { value: "One line", mediaType: "text/plain" },
+  ])("keeps copying available after opening a result", async (jobResult) => {
+    const { JobResultContent } =
+      await import("@/components/dialogs/job-result/JobResultDialog");
+    await render(<JobResultContent jobResult={jobResult} />);
+    const write = vi
+      .spyOn(navigator.clipboard, "writeText")
+      .mockResolvedValue();
+    expect(container.querySelectorAll('[aria-label^="Copy"]')).toHaveLength(1);
+    await click('[aria-label^="Copy"]');
+    expect(write).toHaveBeenCalledWith(
+      "value" in jobResult
+        ? jobResult.value
+        : JSON.stringify(jobResult, null, 2),
+    );
+  });
+  it("keeps download available inside the linked result dialog", async () => {
+    const { JobResultContent } =
+      await import("@/components/dialogs/job-result/JobResultDialog");
+    await render(
+      <JobResultContent
+        jobResult={{
+          href: "https://example.com/result.nc",
+          type: "application/x-netcdf",
+        }}
+      />,
+    );
+    const download = container.querySelector("a[download]")!;
+    expect(download.textContent).toContain("Download output");
+    expect(download.getAttribute("href")).toBe("https://example.com/result.nc");
+  });
+  it.each(["json", "text"] as const)(
+    "expands the exact %s content and keeps full copying available",
+    async (language) => {
+      const value =
+        language === "json"
+          ? Array.from({ length: 1000 }, (_, i) => i)
+          : "Long output\n".repeat(100);
+      await render(
+        <JsonCode
+          value={value}
+          plainText={language === "text"}
+          maxHeight="8rem"
+        />,
+      );
+      await click('[aria-label="Expand code"]');
+      const dialog = document.querySelector('[role="dialog"]')!;
+      expect(dialog).not.toBeNull();
+      expect(dialog.querySelector('[aria-label="Expand code"]')).toBeNull();
+      const write = vi
+        .spyOn(navigator.clipboard, "writeText")
+        .mockResolvedValue();
+      await act(async () =>
+        dialog
+          .querySelector<HTMLButtonElement>('[aria-label^="Copy"]')!
+          .click(),
+      );
+      expect(write).toHaveBeenCalledWith(
+        language === "json" ? JSON.stringify(value, null, 2) : value,
+      );
+      expect(
+        container.querySelector<HTMLElement>('[style*="max-height"]')!.style
+          .maxHeight,
+      ).toBe("8rem");
+    },
+  );
+  it("copies plain text without changing whitespace and wraps lines", async () => {
+    await render(<JsonCode value={"  Plain text output  \n"} plainText />);
     const write = vi
       .spyOn(navigator.clipboard, "writeText")
       .mockResolvedValue();
@@ -191,7 +417,7 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
     const copy = container.querySelector<HTMLButtonElement>(
       '[aria-label="Copy code"]',
     )!;
-    expect(line.getBoundingClientRect().top).toBeLessThan(
+    expect(line.getBoundingClientRect().top).toBeGreaterThan(
       copy.getBoundingClientRect().bottom,
     );
     expect(pre.getBoundingClientRect().height).toBeLessThan(48);
@@ -207,9 +433,8 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
           <div style={{ width: 320 }}>
             <JsonCode
               value={value}
-              language={language}
+              plainText={language === "text"}
               maxHeight="8rem"
-              onEnlarge={vi.fn()}
             />
           </div>,
         );
@@ -224,18 +449,21 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
       ).find((element) => element.style.maxHeight === "8rem")!;
       expect(panel.scrollHeight).toBeGreaterThan(panel.clientHeight);
       const toolbar = container.querySelector<HTMLButtonElement>(
-        '[aria-label="Open larger view"]',
+        '[aria-label^="Copy"]',
       )!.parentElement!;
-      expect(toolbar.getBoundingClientRect().right).toBeLessThanOrEqual(
-        panel.getBoundingClientRect().left + panel.clientWidth - 4,
+      const toolbarPosition = toolbar.getBoundingClientRect();
+      expect(toolbarPosition.bottom).toBeLessThanOrEqual(
+        panel.getBoundingClientRect().top,
       );
-      expect(toolbar.getBoundingClientRect().right).toBeCloseTo(
-        toolbar.parentElement!.getBoundingClientRect().right - 24,
-      );
+      await act(async () => {
+        panel.scrollTop = 100;
+      });
+      expect(toolbar.getBoundingClientRect().top).toBe(toolbarPosition.top);
       await renderOutput(language === "json" ? [1] : "Short output.");
       expect(panel.scrollHeight).toBeLessThanOrEqual(panel.clientHeight);
-      expect(toolbar.getBoundingClientRect().right).toBeCloseTo(
-        toolbar.parentElement!.getBoundingClientRect().right - 8,
+      expect(toolbar.getBoundingClientRect().right).toBe(toolbarPosition.right);
+      expect(toolbar.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+        panel.getBoundingClientRect().top,
       );
     },
   );

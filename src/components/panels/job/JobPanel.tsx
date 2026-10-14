@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionIcon, Tooltip } from "@mantine/core";
+import { ActionIcon, Group, Tabs, Tooltip } from "@mantine/core";
 import { IconCopy, IconRun } from "@tabler/icons-react";
 
 import {
@@ -16,9 +16,7 @@ import {
   copyTextToClipboard,
   openDialog,
 } from "@/store/actions";
-import { useHoverReveal } from "@/components/common/useHoverReveal";
 import { Panel } from "@/components/common/Panel";
-import { SubPanel } from "@/components/common/SubPanel";
 import { JsonCode } from "@/components/common/JsonCode";
 import { UnavailableHint } from "@/components/common/UnavailableHint";
 
@@ -26,13 +24,18 @@ import JobInfoView from "./JobInfoView";
 import JobResultsView from "./JobResultsView";
 
 export default function JobPanel() {
-  const [openedSubPanels, setOpenedSubPanels] = useState(["results", "info"]);
+  const [activeTab, setActiveTab] = useState<string | null>("results");
   const activeJobId = useActiveJobId();
   const activeJobInfoState = useActiveJobInfo();
   const activeJobResultsState = useActiveJobResults();
   const jobRequests = useJobRequests();
   const storedRequest = activeJobId ? jobRequests[activeJobId] : undefined;
-  const { containerProps, revealStyle } = useHoverReveal();
+  const copyData =
+    activeTab === "results"
+      ? activeJobResultsState.jobResults
+      : activeJobInfoState.jobInfo;
+  const copyLabel =
+    activeTab === "results" ? "Copy all results" : "Copy job info";
   return (
     <Panel>
       <Panel.Header
@@ -41,31 +44,47 @@ export default function JobPanel() {
         idStyle={"id3"}
         icon={<IconRun {...styles.panel.header.icon} />}
       />
-      <Panel.Section grow scroll>
-        <SubPanel
-          values={openedSubPanels}
-          setValues={setOpenedSubPanels}
-          containerProps={containerProps}
-        >
-          <SubPanel.Item
-            value="results"
-            title="Results"
-            actions={
-              <Tooltip label="Copy all results" withArrow>
-                <ActionIcon
-                  {...styles.actionIcon.sm}
-                  style={revealStyle}
-                  aria-label="Copy all results"
-                  disabled={!activeJobResultsState.jobResults}
-                  onClick={() =>
-                    copyJsonToClipboard(activeJobResultsState.jobResults)
-                  }
-                >
-                  <IconCopy {...styles.icon.sm} />
-                </ActionIcon>
-              </Tooltip>
-            }
-          >
+      <Tabs
+        value={activeTab}
+        onChange={setActiveTab}
+        keepMounted={false}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          minHeight: 0,
+        }}
+      >
+        <Group gap="xs" wrap="nowrap">
+          <Tabs.List style={{ flex: 1 }}>
+            <Tabs.Tab value="results" px="xs">
+              Results
+              {activeJobResultsState.jobResults
+                ? ` (${Object.keys(activeJobResultsState.jobResults).length})`
+                : ""}
+            </Tabs.Tab>
+            <Tabs.Tab value="request" px="xs">
+              Request
+            </Tabs.Tab>
+            <Tabs.Tab value="info" px="xs">
+              Info
+            </Tabs.Tab>
+          </Tabs.List>
+          {activeTab !== "request" && (
+            <Tooltip label={copyLabel} withArrow>
+              <ActionIcon
+                {...styles.actionIcon.sm}
+                aria-label={copyLabel}
+                disabled={!copyData}
+                onClick={() => copyJsonToClipboard(copyData)}
+              >
+                <IconCopy {...styles.icon.sm} />
+              </ActionIcon>
+            </Tooltip>
+          )}
+        </Group>
+        <Panel.Section grow scroll>
+          <Tabs.Panel value="results" pt="sm">
             <ResourceView
               {...activeJobResultsState}
               nullText="No successful job selected."
@@ -78,9 +97,9 @@ export default function JobPanel() {
                 />
               )}
             </ResourceView>
-          </SubPanel.Item>
+          </Tabs.Panel>
 
-          <SubPanel.Item value="request" title="Request">
+          <Tabs.Panel value="request" pt="sm">
             {storedRequest ? (
               <JsonCode key={activeJobId} value={storedRequest.request} />
             ) : (
@@ -93,24 +112,9 @@ export default function JobPanel() {
                 }
               />
             )}
-          </SubPanel.Item>
+          </Tabs.Panel>
 
-          <SubPanel.Item
-            value="info"
-            title="Info"
-            actions={
-              <ActionIcon
-                {...styles.actionIcon.sm}
-                style={revealStyle}
-                disabled={!activeJobInfoState.jobInfo}
-                onClick={() => {
-                  copyJsonToClipboard(activeJobInfoState.jobInfo);
-                }}
-              >
-                <IconCopy {...styles.icon.sm} />
-              </ActionIcon>
-            }
-          >
+          <Tabs.Panel value="info" pt="sm">
             <ResourceView {...activeJobInfoState} nullText="No job selected.">
               {(jobInfo: JobInfo) => (
                 <JobInfoView
@@ -122,9 +126,9 @@ export default function JobPanel() {
                 />
               )}
             </ResourceView>
-          </SubPanel.Item>
-        </SubPanel>
-      </Panel.Section>
+          </Tabs.Panel>
+        </Panel.Section>
+      </Tabs>
     </Panel>
   );
 }

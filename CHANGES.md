@@ -9,8 +9,14 @@
 - Linked JSON outputs now use the same expandable JSON viewer as inline outputs.
 - Inline result code blocks fit their content up to a maximum height, with
   scrolling for longer values.
-- Copy and Enlarge/Preview actions are grouped inside inline result code panels
-  and use the same button styling as other result actions.
+- Code panels provide Copy and Expand actions together in their header.
+  Expand shows the same code in a larger view; "Open result" opens the full
+  result preview and download options.
+- Job details now use Results, Request, and Info tabs instead of collapsible
+  sections, with the tab bar kept above the scrolling content. Results show
+  the output count, and individual outputs are identified by their name.
+- Output code blocks use highlight.js for syntax highlighting, with automatic
+  detection for unknown formats.
 - Updated Mantine to 9.7.2.
 
 ## Changes in version 0.2.1
