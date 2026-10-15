@@ -163,7 +163,7 @@ export function JobResultContent({ jobResult }: { jobResult: JobResult }) {
           ) : !isTextMimeType(mimeType) ? (
             <Stack gap="sm">
               {error && (
-                <Alert color="red" title="Cannot open output" role="alert">
+                <Alert color="red" title="Cannot view output" role="alert">
                   {error}
                 </Alert>
               )}

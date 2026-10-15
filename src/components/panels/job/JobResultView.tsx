@@ -33,12 +33,17 @@ export default function JobResultView({
           component="button"
           type="button"
           size="xs"
-          aria-label={`Open result ${outputName}`}
+          aria-label={`View result ${outputName}`}
           onClick={() => openDialog("job-result", { outputName, jobResult })}
           style={{ flexShrink: 0 }}
         >
           <Group gap={4} wrap="nowrap">
-            <IconWindowMaximize {...styles.icon.sm}  style={{ transform: "scaleX(-1)" }} aria-hidden /> Open result
+            <IconWindowMaximize
+              {...styles.icon.sm}
+              style={{ transform: "scaleX(-1)" }}
+              aria-hidden
+            />{" "}
+            View result
           </Group>
         </Anchor>
       </Flex>

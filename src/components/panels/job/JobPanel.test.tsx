@@ -69,7 +69,7 @@ describe.skipIf(typeof document === "undefined")("job detail tabs", () => {
     await select("Request");
     expect(container.textContent).toContain("Submitted input");
     expect(
-      container.querySelector('[aria-label="Open result output"]'),
+      container.querySelector('[aria-label="View result output"]'),
     ).toBeNull();
     expect(container.querySelector('[aria-label="Copy JSON"]')).not.toBeNull();
     expect(

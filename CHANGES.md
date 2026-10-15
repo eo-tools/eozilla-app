@@ -1,23 +1,10 @@
 ## Changes in version 0.2.2 (in development)
 
-- Job output previews now show errors for invalid or unsupported URLs and
-  image, audio, or video load failures. Invalid output links and downloads show
-  an error notification. The download action is labelled "Download output".
-- JSON and plain-text outputs now open in a single view with a copy action.
-  Preview/Raw tabs are shown only for rendered previews. Unsupported linked
-  formats show their details and download action directly.
-- Linked JSON outputs now use the same expandable JSON viewer as inline outputs.
-- Inline result code blocks fit their content up to a maximum height, with
-  scrolling for longer values.
-- Code panels provide Copy and Expand actions together in their header.
-  Expand shows the same code in a larger view; "Open result" opens the full
-  result preview and download options.
-- Job details now use Results, Request, and Info tabs instead of collapsible
-  sections, with the tab bar kept above the scrolling content. Results show
-  the output count, and individual outputs are identified by their name.
-- Output code blocks use highlight.js for syntax highlighting, with automatic
-  detection for unknown formats.
-- Updated Mantine to 9.7.2.
+- Redesigned job details with Results, Request, and Info tabs, clearer result
+  previews, and consistent Copy and Expand actions. Invalid output links and
+  failed media previews now show error feedback.
+- Output values now use `highlight.js` syntax highlighting and Mantine's
+  expandable JSON viewer. Updated Mantine to 9.7.2.
 
 ## Changes in version 0.2.1
 

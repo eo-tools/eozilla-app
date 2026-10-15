@@ -236,7 +236,7 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
     { value: "<p>Sample</p>", mediaType: "text/html" },
     { value: "# Sample", mediaType: "text/markdown" },
   ])(
-    "keeps result Open distinct from code Copy and Expand",
+    "keeps result View distinct from code Copy and Expand",
     async (jobResult) => {
       const openDialog = vi.fn();
       await render(
@@ -247,9 +247,9 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
         />,
       );
       const open = container.querySelector<HTMLButtonElement>(
-        '[aria-label="Open result result"]',
+        '[aria-label="View result result"]',
       )!;
-      expect(open.textContent).toContain("Open result");
+      expect(open.textContent).toContain("View result");
       expect(container.textContent).not.toContain("Result #");
       expect(getComputedStyle(open).opacity).toBe("1");
       const copy = container.querySelector('[aria-label^="Copy"]')!;
@@ -257,7 +257,7 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
       expect(copy.parentElement).toBe(expand.parentElement);
       expect(open.closest(".mantine-Paper-root")).toBeNull();
       expect(
-        container.querySelectorAll('[aria-label="Open result result"]'),
+        container.querySelectorAll('[aria-label="View result result"]'),
       ).toHaveLength(1);
       expect(container.querySelector('[aria-label^="Download"]')).toBeNull();
       expect(
@@ -265,7 +265,7 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
           '[aria-label="Open larger view"], [aria-label="Preview output"]',
         ),
       ).toBeNull();
-      await click('[aria-label="Open result result"]');
+      await click('[aria-label="View result result"]');
       expect(openDialog).toHaveBeenCalledWith("job-result", {
         outputName: "result",
         jobResult,
@@ -285,12 +285,12 @@ describe.skipIf(typeof document === "undefined")("Mantine code viewers", () => {
         openDialog={openDialog}
       />,
     );
-    const open = container.querySelector('[aria-label="Open result file"]')!;
-    expect(open.textContent).toContain("Open result");
+    const open = container.querySelector('[aria-label="View result file"]')!;
+    expect(open.textContent).toContain("View result");
     expect(getComputedStyle(open).opacity).toBe("1");
     expect(container.querySelector('[aria-label^="Download"]')).toBeNull();
     expect(container.querySelector('[aria-label^="Copy"]')).toBeNull();
-    await click('[aria-label="Open result file"]');
+    await click('[aria-label="View result file"]');
     expect(openDialog).toHaveBeenCalledWith("job-result", {
       outputName: "file",
       jobResult,
