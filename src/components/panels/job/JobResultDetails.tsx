@@ -1,4 +1,5 @@
 import { Table, Text, type TableProps } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 
 import { JsonCode } from "@/components/common/JsonCode";
 import {
@@ -7,6 +8,7 @@ import {
   isQualifiedValue,
   type JobResult,
 } from "@/service";
+import { isJsonMimeType, getOutputUrlError } from "./jobResultUtils";
 
 const dataTableProps: TableProps = {
   variant: "vertical",
@@ -29,9 +31,19 @@ export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
         <Table.Tbody>
           <Table.Tr>
             <Table.Th w={80}>Href</Table.Th>
-            <Table.Td>
-              <a href={jobResult.href} title={jobResult.title}>
-                {jobResult.href}
+            <Table.Td style={{ overflowWrap: "anywhere" }}>
+              <a
+                href={getOutputUrlError(jobResult.href) ? "#" : jobResult.href}
+                title={jobResult.title}
+                onClick={(event) => {
+                  const error = getOutputUrlError(jobResult.href);
+                  if (error) {
+                    event.preventDefault();
+                    notifications.show({ message: error, color: "red" });
+                  }
+                }}
+              >
+                {String(jobResult.href ?? "")}
               </a>
             </Table.Td>
           </Table.Tr>
@@ -75,7 +87,17 @@ export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
           <Table.Tr>
             <Table.Th w={80}>Value</Table.Th>
             <Table.Td>
-              <JsonCode value={jobResult.value} maxHeight="8rem" />
+              <JsonCode
+                value={jobResult.value}
+                plainText={
+                  typeof jobResult.value === "string" &&
+                  !!jobResult.mediaType &&
+                  !isJsonMimeType(jobResult.mediaType)
+                }
+                mediaType={jobResult.mediaType}
+                encoding={jobResult.encoding}
+                maxHeight="8rem"
+              />
             </Table.Td>
           </Table.Tr>
 
@@ -105,7 +127,7 @@ export function JobResultDetails({ jobResult }: JobResultDetailsProps) {
   }
 
   if (isInlineValue(jobResult)) {
-    return <JsonCode value={jobResult} />;
+    return <JsonCode value={jobResult} maxHeight="8rem" />;
   }
 
   return (

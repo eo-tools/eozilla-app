@@ -1,3 +1,11 @@
+## Changes in version 0.2.2 (in development)
+
+- Redesigned job details with Results, Request, and Info tabs, clearer result
+  previews, and consistent Copy and Expand actions. Invalid output links and
+  failed media previews now show error feedback.
+- Output values now use `highlight.js` syntax highlighting and Mantine's
+  expandable JSON viewer. Updated Mantine to 9.7.2.
+
 ## Changes in version 0.2.1
 
 - Geometry process inputs that used the map editor (`x-ui-widget: map`)
