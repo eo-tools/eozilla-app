@@ -117,43 +117,23 @@ In the app, select the `Dev Service` provider.
 
 ## Runtime configuration
 
-Deploy an optional `config.json` beside `index.html` to customize branding and
-the intended standalone service without rebuilding:
+Deploy an optional `config.json` beside `index.html` to change branding and the
+intended standalone service without rebuilding:
 
 ```json
 {
-  "branding": {
-    "title": "Sen4CAP",
-    "favicon": "./assets/favicon.svg",
-    "icon": { "url": "./assets/logo.svg" }
-  },
-  "service": {
-    "apiUrl": "https://api.example.org/",
-    "authType": "oauth2",
-    "oauth2Protocol": "oidc",
-    "authorizationServerUrl": "https://auth.example.org/",
-    "clientId": "sen4cap-browser"
-  }
+  "branding": { "title": "My App", "icon": { "emoji": "🌍" } },
+  "service": { "apiUrl": "https://api.example.org/", "authType": "none" }
 }
 ```
 
-For Vite development/builds, place the file in `public/config.json`. Deploy
-referenced images too. App-relative image URLs preserve hosting/proxy prefixes.
-An icon has exactly one `emoji` or `url`. Missing/null branding fields use
-`Eozilla`, `./eozilla-small.svg`, and `🦖`. Branding and service defaults no longer
-come from `VITE_*` environment variables; version/build metadata still does.
-
-Only HTTP 404 means absent configuration; other load/validation failures show
-a startup error. Static hosting must return a real 404 for missing JSON instead
-of an HTML SPA fallback. `service` takes precedence over a saved selection,
-while an absent entry preserves the existing selection/dialog behavior. It
-contains public connection settings only; users authenticate through the
-existing service dialog. Do not include credentials in this file.
-
-In Cuiman mode, the browser exchanges its one-shot launch code before fetching
-Python's authenticated `config.json`; it ignores any `service` entry and uses
-the existing Python proxy. Branding query overrides are not supported.
-See the workspace's `docs/eozilla-app/` for the full configuration contract.
+For Vite development, put the file in `public/`. Keep credentials out of it;
+users authenticate through the existing service dialog. Cuiman supplies its
+configuration from Python and uses its existing authenticated proxy.
+See [Runtime Configuration](https://eo-tools.github.io/eozilla/eozilla-app/runtime-configuration/)
+for the full example, public service fields, image paths, defaults, and startup
+errors. Branding/service-default `VITE_*` settings have moved to this file;
+version/build metadata remains build-time configuration.
 
 ## Useful Scripts
 
