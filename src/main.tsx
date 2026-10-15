@@ -18,6 +18,8 @@ import {
   getCuimanModeSearch,
   getCuimanWebSocketUrl,
   parseAppBootstrapConfig,
+  loadAppRuntimeConfig,
+  applyAppBranding,
 } from "@/config/bootstrap";
 import { exchangeCuimanLaunch } from "@/config/cuimanLaunch";
 import { configureLocalUrlProxy } from "@/config/localUrlProxy";
@@ -47,7 +49,7 @@ console.debug("bootstrapConfig:", bootstrapConfig);
 // The relative paths are essential for remote JupyterLab.  Its Server Proxy
 // exposes the app below /user/.../proxy/<port>/, which must remain part of
 // every request rather than being replaced by window.location.origin.
-void startApp();
+void startApp().catch(renderLaunchError);
 
 async function startApp(): Promise<void> {
   const isCuimanMode =
@@ -62,7 +64,17 @@ async function startApp(): Promise<void> {
     }
   }
 
+  const runtimeConfig = await loadAppRuntimeConfig(isCuimanMode);
+  applyAppBranding(runtimeConfig.branding);
+
   initAppStore(() => {
+    const configuredProvider = runtimeConfig.service
+      ? new CustomServiceProvider({
+          id: "configured",
+          meta: { type: "dedicated", title: "Configured Service" },
+          defaultOptions: runtimeConfig.service,
+        })
+      : null;
     const providers: ServiceProvider<ServiceOptions>[] = isCuimanMode
       ? [
           new CustomServiceProvider({
@@ -75,6 +87,7 @@ async function startApp(): Promise<void> {
           }),
         ]
       : [
+          ...(configuredProvider ? [configuredProvider] : []),
           new CustomServiceProvider(),
           new DevServiceProvider(),
           new TestingServiceProvider(),
@@ -94,6 +107,14 @@ async function startApp(): Promise<void> {
           authType: "none",
         },
       });
+    } else {
+      storage.clearTransientServiceProviderSelection();
+      if (runtimeConfig.service) {
+        storage.saveTransientServiceProviderSelection({
+          id: "configured",
+          options: runtimeConfig.service,
+        });
+      }
     }
 
     registerServiceProviders(providers);
@@ -111,7 +132,10 @@ async function startApp(): Promise<void> {
         <MantineProvider forceColorScheme={bootstrapConfig.scheme}>
           <CodeHighlightProvider>
             <Notifications />
-            <App compact={bootstrapConfig.compact} />
+            <App
+              compact={bootstrapConfig.compact}
+              branding={runtimeConfig.branding}
+            />
           </CodeHighlightProvider>
         </MantineProvider>
       </AppRemoteStateProvider>

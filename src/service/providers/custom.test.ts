@@ -64,6 +64,25 @@ describe("CustomServiceProvider", () => {
     expect(service.apiUrl).toBe("http://localhost:8008");
   });
 
+  it("prefills deployment settings without changing the shared schema", () => {
+    const provider = new CustomServiceProvider({
+      defaultOptions: {
+        apiUrl: "https://deployed.test/",
+        authType: "oauth2",
+        clientId: "browser",
+      },
+    });
+    expect(provider.optionsSchema.apiUrl.default).toBe(
+      "https://deployed.test/",
+    );
+    expect(provider.optionsSchema.authType.default).toBe("oauth2");
+    expect(provider.optionsSchema.clientId.default).toBe("browser");
+    expect(URL_SERVICE_OPTIONS_SCHEMA.apiUrl.default).toBe(
+      "http://localhost:8008",
+    );
+    expect(URL_SERVICE_OPTIONS_SCHEMA.clientId.default).toBeUndefined();
+  });
+
   it("passes bearer token auth headers to the URL service", async () => {
     const provider = new CustomServiceProvider();
 

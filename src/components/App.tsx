@@ -5,12 +5,17 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Main from "@/components/Main";
 import styles from "@/components/common/styles";
+import { DEFAULT_APP_BRANDING, type AppBranding } from "@/config/bootstrap";
 
 interface AppProps {
   compact?: boolean;
+  branding?: AppBranding;
 }
 
-export default function App({ compact = false }: AppProps) {
+export default function App({
+  compact = false,
+  branding = DEFAULT_APP_BRANDING,
+}: AppProps) {
   return (
     <AppShell
       withBorder={false}
@@ -21,7 +26,7 @@ export default function App({ compact = false }: AppProps) {
     >
       {!compact && (
         <AppShell.Header px={styles.shell.px} pb={0}>
-          <Header />
+          <Header branding={branding} />
         </AppShell.Header>
       )}
 

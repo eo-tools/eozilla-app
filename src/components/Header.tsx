@@ -14,11 +14,13 @@ import { ResourceView } from "@/components/common/ResourceView";
 import { useLoadService } from "@/store/hooks";
 import { openDialog } from "@/store/actions";
 import styles from "@/components/common/styles";
+import { DEFAULT_APP_BRANDING, type AppBranding } from "@/config/bootstrap";
 
-const appIcon = import.meta.env.VITE_APP_ICON || "🦖";
-const appIconIsImage = appIcon.startsWith("/");
-
-export default function Header() {
+export default function Header({
+  branding = DEFAULT_APP_BRANDING,
+}: {
+  branding?: AppBranding;
+}) {
   const [navbarOpened, { toggle: toggleNavbar }] = useDisclosure();
   const { toggleColorScheme } = useMantineColorScheme();
   const colorScheme = useComputedColorScheme();
@@ -36,13 +38,13 @@ export default function Header() {
         <Flex flex={1} justify={"center"}>
           <Group gap={5}>
             <Text size={"xl"} fw={600}>
-              {import.meta.env.VITE_APP_TITLE}
+              {branding.title}
             </Text>
-            {appIconIsImage ? (
-              <img src={appIcon} alt="" height={24} />
+            {"url" in branding.icon ? (
+              <img src={branding.icon.url} alt="" height={24} />
             ) : (
               <Text size={"xl"} fw={200}>
-                {appIcon}
+                {branding.icon.emoji}
               </Text>
             )}
           </Group>
