@@ -1,5 +1,10 @@
 ## Changes in version 0.2.2 (in development)
 
+- Branding (title, favicon, and header icon) and standalone service settings now
+  load from `config.json` without rebuilding, replacing the corresponding
+  `VITE_*` settings from `.env`. 
+  If launched by Cuiman, use server-provided branding and retain their authenticated 
+  service proxy. (#69, #73)
 - Redesigned job details with Results, Request, and Info tabs, clearer result
   previews, and consistent Copy and Expand actions. Invalid output links and
   failed media previews now show error feedback.

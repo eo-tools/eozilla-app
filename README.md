@@ -117,23 +117,58 @@ In the app, select the `Dev Service` provider.
 
 ## Runtime configuration
 
+### Standalone mode
+
+Eozilla App can run as a standalone website without Cuiman. It connects directly
+to an OGC API - Processes service, which must allow requests from the app's
+browser origin (CORS).
+
 Deploy an optional `config.json` beside `index.html` to change branding and the
-intended standalone service without rebuilding:
+intended service without rebuilding:
 
 ```json
 {
-  "branding": { "title": "My App", "icon": { "emoji": "🌍" } },
+  "branding": {
+    "title": "My App",
+    "favicon": "./images/favicon.svg",
+    "icon": { "emoji": "🌍" }
+  },
   "service": { "apiUrl": "https://api.example.org/", "authType": "none" }
 }
 ```
 
-For Vite development, put the file in `public/`. Keep credentials out of it;
-users authenticate through the existing service dialog. Cuiman supplies its
-configuration from Python and uses its existing authenticated proxy.
+Both sections are optional. For Vite development, put the file and any images
+in `public/`. For an existing deployment, add or replace them alongside the
+deployed app, then reload the page.
+
+The title appears in the browser tab and app header. To use a header image,
+replace the emoji with `"icon": { "url": "./images/logo.svg" }`. Relative image
+URLs resolve from the app's URL, including any hosting path prefix; a leading
+`/` resolves from the site root. Omitted branding fields retain Eozilla's defaults.
+
+The `service` section selects **Configured Service** ahead of a previously saved
+service and prefills the connection form. Users authenticate through the service
+dialog when needed. Without this section, the app restores the saved selection
+or opens the usual service dialog. Only public connection settings belong in
+`config.json`; keep passwords, tokens, API keys, and client secrets out of it.
+
+If `config.json` is absent, the app uses its defaults. Invalid configuration or
+a failure to load the file produces a startup error; static hosting must return
+HTTP 404 for a missing file.
+
+### Cuiman branding
+
+For an app launched by Cuiman, set `ClientConfig.branding` in Python to customize
+the title, favicon, and header emoji or image without rebuilding. Images can be
+local files or browser URLs. See the
+[Cuiman customization guide](https://eo-tools.github.io/eozilla/cuiman/customization/#browser-branding-and-local-images)
+for examples. Cuiman supplies the service connection and authentication;
+standalone `service` settings do not apply.
+
 See [Runtime Configuration](https://eo-tools.github.io/eozilla/eozilla-app/runtime-configuration/)
 for the full example, public service fields, image paths, defaults, and startup
-errors. Branding/service-default `VITE_*` settings have moved to this file;
-version/build metadata remains build-time configuration.
+errors. Branding/service-default `VITE_*` settings have moved from `.env` to
+`config.json`; version/build metadata remains build-time configuration.
 
 ## Useful Scripts
 
