@@ -39,8 +39,7 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
   apiUrl: {
     type: "string",
     title: "Service API URL",
-    default:
-      import.meta.env.VITE_DEFAULT_SERVICE_API_URL || "http://localhost:8008",
+    default: "http://localhost:8008",
     format: "uri",
   },
 
@@ -48,7 +47,7 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
     type: "string",
     title: "Authentication Type",
     description: "Choose how requests to the service are authorized.",
-    default: import.meta.env.VITE_DEFAULT_SERVICE_AUTH_TYPE || "none",
+    default: "none",
     enum: ["none", "basic", "token", "login", "oauth2", "api-key"],
   },
 
@@ -95,7 +94,6 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
     title: "Client ID",
     description:
       "The public browser client registered with the authorization server.",
-    default: import.meta.env.VITE_DEFAULT_SERVICE_CLIENT_ID || undefined,
     "x-ui-visible": "authType === 'oauth2'",
     "x-ui-required": "authType === 'oauth2'",
   },
@@ -162,9 +160,6 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
     type: "string",
     title: "Authorization server URL",
     description: "The OIDC issuer URL used to discover its endpoints.",
-    default:
-      import.meta.env.VITE_DEFAULT_SERVICE_AUTHORIZATION_SERVER_URL ||
-      undefined,
     format: "uri",
     "x-ui-visible": "authType === 'oauth2' && oauth2Protocol === 'oidc'",
     "x-ui-required": "authType === 'oauth2' && oauth2Protocol === 'oidc'",
@@ -172,7 +167,7 @@ export const URL_SERVICE_OPTIONS_SCHEMA: UrlServiceOptionsSchema = {
   oauth2Protocol: {
     type: "string",
     title: "Authorization protocol",
-    default: import.meta.env.VITE_DEFAULT_SERVICE_OAUTH2_PROTOCOL || "oidc",
+    default: "oidc",
     enum: ["oauth2", "oidc"],
     "x-ui-visible": "authType === 'oauth2'",
     "x-ui-required": "authType === 'oauth2'",

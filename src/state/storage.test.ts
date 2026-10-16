@@ -137,4 +137,92 @@ describe("storage", () => {
     ).toEqual({});
   });
 
+  it("keeps runtime service precedence and uses credentials only for the same connection", () => {
+    const { storage } = storageModule;
+    storage.saveServiceProviderSelection({
+      id: "configured",
+      options: {
+        apiUrl: "https://old.test/",
+        authType: "token",
+        accessToken: "old-secret",
+      },
+    });
+    storage.saveTransientServiceProviderSelection({
+      id: "configured",
+      options: {
+        apiUrl: "https://new.test/",
+        authType: "token",
+      },
+    });
+    expect(storage.getServiceProviderOptions("configured")).toEqual({
+      apiUrl: "https://new.test/",
+      authType: "token",
+    });
+    storage.saveServiceProviderSelection({
+      id: "configured",
+      options: {
+        apiUrl: "https://new.test/",
+        authType: "token",
+        accessToken: "new-secret",
+      },
+    });
+    expect(storage.getServiceProviderOptions("configured")).toEqual({
+      apiUrl: "https://new.test/",
+      authType: "token",
+      accessToken: "new-secret",
+    });
+    expect(
+      sessionStorage.getItem("eozilla.transientServiceProviderSelection"),
+    ).not.toContain("secret");
+    storage.deleteServiceProviderSelection();
+    expect(storage.getActiveServiceProviderSelection()).toBeNull();
+  });
+
+  it("clears transient selections when returning to ordinary standalone startup", () => {
+    const { storage } = storageModule;
+    storage.saveServiceProviderSelection({ id: "testing", options: {} });
+    storage.saveTransientServiceProviderSelection({
+      id: "cuiman",
+      options: {},
+    });
+    storage.clearTransientServiceProviderSelection();
+    expect(storage.getActiveServiceProviderSelection()?.id).toBe("testing");
+  });
+
+  it("retains login inputs for the same configured connection after reload", () => {
+    const { storage } = storageModule;
+    const options = {
+      apiUrl: "https://api.test/",
+      authType: "login",
+      loginUrl: "https://auth.test/login",
+    };
+    storage.saveServiceProviderSelection({
+      id: "configured",
+      options: {
+        ...options,
+        username: "user",
+        password: "secret",
+      },
+    });
+    storage.saveTransientServiceProviderSelection({
+      id: "configured",
+      options,
+    });
+    expect(storage.getServiceProviderOptions("configured")).toEqual({
+      ...options,
+      username: "user",
+      password: "secret",
+    });
+    storage.saveTransientServiceProviderSelection({
+      id: "configured",
+      options: {
+        ...options,
+        loginUrl: "https://other.test/login",
+      },
+    });
+    expect(storage.getServiceProviderOptions("configured")).toEqual({
+      ...options,
+      loginUrl: "https://other.test/login",
+    });
+  });
 });
