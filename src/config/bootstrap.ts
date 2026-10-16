@@ -83,6 +83,8 @@ export interface AppBranding {
   title: string;
   favicon: string;
   icon: AppIcon;
+  /** Header icon position relative to the title in reading order. */
+  iconPosition: "before" | "after";
 }
 
 /** Built-in branding used when deployment fields are absent or null. */
@@ -90,6 +92,7 @@ export const DEFAULT_APP_BRANDING: AppBranding = {
   title: "Eozilla",
   favicon: "./eozilla-small.svg",
   icon: { emoji: "🦖" },
+  iconPosition: "after",
 };
 
 const publicServiceFields = [
@@ -157,12 +160,18 @@ function parseBranding(value: unknown, baseUrl: string): AppBranding {
   if (value == null) return branding;
   requireObject(value, "branding");
   for (const name of Object.keys(value)) {
-    if (!["title", "favicon", "icon"].includes(name)) {
+    if (!["title", "favicon", "icon", "iconPosition"].includes(name)) {
       throw new Error(`Unknown branding field: ${name}.`);
     }
   }
   if (value.title != null)
     branding.title = requireText(value.title, "branding.title");
+  if (value.iconPosition != null) {
+    if (value.iconPosition !== "before" && value.iconPosition !== "after") {
+      throw new Error('branding.iconPosition must be "before" or "after".');
+    }
+    branding.iconPosition = value.iconPosition;
+  }
   if (value.favicon != null) {
     branding.favicon = new URL(
       requireText(value.favicon, "branding.favicon"),

@@ -26,6 +26,14 @@ export default function Header({
   const colorScheme = useComputedColorScheme();
   const serviceState = useLoadService();
   const IconColorScheme = colorScheme === "dark" ? IconSun : IconMoon;
+  const icon =
+    "url" in branding.icon ? (
+      <img src={branding.icon.url} alt="" height={24} />
+    ) : (
+      <Text size={"xl"} fw={200}>
+        {branding.icon.emoji}
+      </Text>
+    );
   return (
     <>
       <Flex h="100%" align={"center"}>
@@ -37,16 +45,11 @@ export default function Header({
         />
         <Flex flex={1} justify={"center"}>
           <Group gap={5}>
+            {branding.iconPosition === "before" && icon}
             <Text size={"xl"} fw={600}>
               {branding.title}
             </Text>
-            {"url" in branding.icon ? (
-              <img src={branding.icon.url} alt="" height={24} />
-            ) : (
-              <Text size={"xl"} fw={200}>
-                {branding.icon.emoji}
-              </Text>
-            )}
+            {branding.iconPosition === "after" && icon}
           </Group>
         </Flex>
         <Group>

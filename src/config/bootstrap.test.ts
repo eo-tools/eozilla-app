@@ -147,13 +147,16 @@ describe("runtime app configuration", () => {
       title: "Sen4CAP",
       favicon: "https://hub.test/user/me/proxy/8765/assets/favicon.ico",
       icon: { url: "https://hub.test/user/me/proxy/8765/_cuiman/assets/icon" },
+      iconPosition: "after",
     });
   });
 
   it.each([
     {},
     { branding: null },
-    { branding: { title: null, favicon: null, icon: null } },
+    {
+      branding: { title: null, favicon: null, icon: null, iconPosition: null },
+    },
   ])("merges missing and null fields with defaults: %j", async (value) => {
     respond(value);
     expect((await loadAppRuntimeConfig(false)).branding).toEqual(
@@ -170,12 +173,29 @@ describe("runtime app configuration", () => {
       title: "Eozilla",
       favicon: "https://app.test/favicon.ico",
       icon: { emoji: "🌍" },
+      iconPosition: "after",
     });
     respond({ branding: { icon: { url: "https://images.test/logo.svg" } } });
     expect((await loadAppRuntimeConfig(false)).branding.icon).toEqual({
       url: "https://images.test/logo.svg",
     });
   });
+
+  it.each([false, true])(
+    "loads icon positions, including after reload (Cuiman: %s)",
+    async (cuiman) => {
+      for (const iconPosition of ["before", "after"]) {
+        respond({ branding: { iconPosition } });
+        expect((await loadAppRuntimeConfig(cuiman)).branding.iconPosition).toBe(
+          iconPosition,
+        );
+        respond({ branding: { iconPosition } });
+        expect((await loadAppRuntimeConfig(cuiman)).branding.iconPosition).toBe(
+          iconPosition,
+        );
+      }
+    },
+  );
 
   it("uses defaults only when config.json is absent", async () => {
     respond({}, 404);
@@ -214,6 +234,9 @@ describe("runtime app configuration", () => {
     { branding: [] },
     { branding: { title: "" } },
     { branding: { title: 42 } },
+    { branding: { iconPosition: "left" } },
+    { branding: { iconPosition: "" } },
+    { branding: { iconPosition: false } },
     { branding: { extra: true } },
     { branding: { icon: {} } },
     { branding: { icon: { emoji: "🌍", url: "./logo.svg" } } },

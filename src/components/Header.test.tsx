@@ -33,30 +33,59 @@ describe.skipIf(typeof document === "undefined")("Header branding", () => {
         </MantineProvider>,
       ),
     );
-    expect(container.textContent).toContain("Eozilla");
-    expect(container.textContent).toContain("🦖");
+    expect(container.textContent).toContain("Eozilla🦖");
     expect(container.querySelector("img")).toBeNull();
   });
 
-  it("renders an explicit header image and title as text", async () => {
-    await act(async () =>
-      root.render(
-        <MantineProvider>
-          <Header
-            branding={{
-              ...DEFAULT_APP_BRANDING,
-              title: "<b>Sen4CAP</b>",
-              icon: { url: "https://example.test/logo.svg" },
-            }}
-          />
-        </MantineProvider>,
-      ),
-    );
-    expect(container.textContent).toContain("<b>Sen4CAP</b>");
-    expect(container.querySelector("b")).toBeNull();
-    expect(container.querySelector("img")?.src).toBe(
-      "https://example.test/logo.svg",
-    );
-    expect(container.textContent).not.toContain("🦖");
-  });
+  it.each(["before", "after"] as const)(
+    "renders an emoji %s the title",
+    async (iconPosition) => {
+      await act(async () =>
+        root.render(
+          <MantineProvider>
+            <Header
+              branding={{
+                ...DEFAULT_APP_BRANDING,
+                title: "My App",
+                icon: { emoji: "🌍" },
+                iconPosition,
+              }}
+            />
+          </MantineProvider>,
+        ),
+      );
+      expect(container.textContent).toContain(
+        iconPosition === "before" ? "🌍My App" : "My App🌍",
+      );
+    },
+  );
+
+  it.each(["before", "after"] as const)(
+    "renders an image %s the title as text",
+    async (iconPosition) => {
+      await act(async () =>
+        root.render(
+          <MantineProvider>
+            <Header
+              branding={{
+                ...DEFAULT_APP_BRANDING,
+                title: "<b>Sen4CAP</b>",
+                icon: { url: "https://example.test/logo.svg" },
+                iconPosition,
+              }}
+            />
+          </MantineProvider>,
+        ),
+      );
+      expect(container.textContent).toContain("<b>Sen4CAP</b>");
+      expect(container.querySelector("b")).toBeNull();
+      expect(container.querySelector("img")?.src).toBe(
+        "https://example.test/logo.svg",
+      );
+      expect(container.textContent).not.toContain("🦖");
+      const image = container.querySelector("img")!;
+      const siblings = Array.from(image.parentElement!.children);
+      expect(siblings.indexOf(image)).toBe(iconPosition === "before" ? 0 : 1);
+    },
+  );
 });

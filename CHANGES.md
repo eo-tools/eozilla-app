@@ -1,5 +1,8 @@
 ## Changes in version 0.2.2 (in development)
 
+- Set `branding.iconPosition` to `"before"` or `"after"` in `config.json` to
+  choose the header icon's position relative to the title. The default is
+  `"after"`, for both emoji and image icons.
 - Branding (title, favicon, and header icon) and standalone service settings now
   load from `config.json` without rebuilding, replacing the corresponding
   `VITE_*` settings from `.env`. 
