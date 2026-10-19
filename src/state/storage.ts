@@ -68,9 +68,9 @@ const transientServiceProviderSelection =
     sessionStorage,
     "eozilla.transientServiceProviderSelection",
   );
-// Cuiman launches use this session-only record so they do not overwrite a
-// user's saved standalone provider.  It contains only the relative proxy URL
-// and `authType: "none"`; credentials are never stored in the browser.
+// Cuiman and runtime deployment selections use a session-only record so startup
+// does not overwrite the user's saved provider. Cuiman stores only its proxy
+// URL and `authType: "none"`; upstream credentials stay in Python.
 
 export const storage = {
   serviceProviderSelection,
@@ -82,6 +82,9 @@ export const storage = {
   saveTransientServiceProviderSelection(selection: ServiceProviderSelection) {
     transientServiceProviderSelection.set(selection);
   },
+  clearTransientServiceProviderSelection() {
+    transientServiceProviderSelection.delete();
+  },
   saveServiceProviderSelection(selection: ServiceProviderSelection) {
     const [options, secrets] = splitSecretOptions(selection.options);
     serviceProviderSelection.set({
@@ -89,6 +92,13 @@ export const storage = {
       options,
       hasSecrets: Object.keys(secrets).length > 0,
     });
+    // Once the user signs in, the active deployment selection must use the
+    // submitted options and the existing session-only credential store.
+    if (transientServiceProviderSelection.get()?.id === selection.id) {
+      transientServiceProviderSelection.set({ id: selection.id, options });
+    } else {
+      transientServiceProviderSelection.delete();
+    }
     if (Object.keys(secrets).length > 0) {
       serviceProviderSecrets.set({ id: selection.id, options: secrets });
     } else {
@@ -98,7 +108,18 @@ export const storage = {
   getServiceProviderOptions(id: string): ServiceOptionsInput<ServiceOptions> {
     const transientSelection = transientServiceProviderSelection.get();
     if (transientSelection?.id === id) {
-      return transientSelection.options;
+      const selection = serviceProviderSelection.get();
+      const secrets = serviceProviderSecrets.get();
+      const sameConnection =
+        selection?.id === id &&
+        Object.entries(transientSelection.options).every(
+          ([name, value]) => selection.options[name] === value,
+        );
+      return {
+        ...(sameConnection ? selection.options : {}),
+        ...transientSelection.options,
+        ...(sameConnection && secrets?.id === id ? secrets.options : {}),
+      };
     }
     const selection = serviceProviderSelection.get();
     if (!selection || selection.id !== id) {
@@ -124,6 +145,7 @@ export const storage = {
     );
   },
   deleteServiceProviderSelection() {
+    transientServiceProviderSelection.delete();
     serviceProviderSelection.delete();
     serviceProviderSecrets.delete();
   },
@@ -135,12 +157,7 @@ export const storage = {
     jobId: string,
     storedRequest: StoredJobRequest,
   ) {
-    saveJobRequestToLocalStorage(
-      localStorage,
-      service,
-      jobId,
-      storedRequest,
-    );
+    saveJobRequestToLocalStorage(localStorage, service, jobId, storedRequest);
   },
 };
 

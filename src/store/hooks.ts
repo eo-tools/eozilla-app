@@ -55,13 +55,13 @@ export function useLoadService() {
       const options = storage.getServiceProviderOptions(serviceProviderId);
       return await serviceProvider.createService(options);
     },
-    serviceProviderId === "testing" || serviceProviderId === "custom"
-      ? {
-          revalidateOnFocus: false,
-          revalidateOnReconnect: false,
-          revalidateIfStale: false,
-        }
-      : undefined,
+    {
+      // Recreating a service resets its state and the selected process/job.
+      // Refresh service data through its separate hooks instead.
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+    },
   );
 
   // Sync state if the service changes

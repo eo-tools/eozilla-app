@@ -12,6 +12,7 @@ import { OAuth2Auth } from "./oauth2";
 export interface CustomServiceProviderConfig {
   id?: string;
   meta?: ServiceProviderMeta;
+  defaultOptions?: Partial<UrlServiceOptions>;
 }
 
 const DEFAULT_CUSTOM_SERVICE_PROVIDER_META: ServiceProviderMeta = {
@@ -22,13 +23,26 @@ const DEFAULT_CUSTOM_SERVICE_PROVIDER_META: ServiceProviderMeta = {
 export class CustomServiceProvider implements ServiceProvider<UrlServiceOptions> {
   readonly id: string;
   readonly meta: ServiceProviderMeta;
-  readonly optionsSchema = URL_SERVICE_OPTIONS_SCHEMA;
+  readonly optionsSchema: typeof URL_SERVICE_OPTIONS_SCHEMA;
   private oauth2Auth: OAuth2Auth | null = null;
   private loginSession: { key: string; accessToken: string } | null = null;
 
   constructor(config: CustomServiceProviderConfig = {}) {
     this.id = config.id ?? "custom";
     this.meta = config.meta ?? DEFAULT_CUSTOM_SERVICE_PROVIDER_META;
+    this.optionsSchema = config.defaultOptions
+      ? (Object.fromEntries(
+          Object.entries(URL_SERVICE_OPTIONS_SCHEMA).map(([name, schema]) => [
+            name,
+            {
+              ...schema,
+              ...(config.defaultOptions?.[name] !== undefined
+                ? { default: config.defaultOptions[name] }
+                : {}),
+            },
+          ]),
+        ) as typeof URL_SERVICE_OPTIONS_SCHEMA)
+      : URL_SERVICE_OPTIONS_SCHEMA;
   }
 
   async signIn(options: ServiceOptionsInput<UrlServiceOptions>): Promise<void> {
