@@ -1,5 +1,8 @@
 ## Changes in version 0.2.2 (in development)
 
+- Token, API-key, and Basic service connections now reject missing or blank
+  credentials before contacting the API, avoiding misleading connection success
+  when the landing page is public. (#104)
 - Set `branding.iconPosition` to `"before"` or `"after"` in `config.json` to
   choose the header icon's position relative to the title. The default is
   `"after"`, for both emoji and image icons.
