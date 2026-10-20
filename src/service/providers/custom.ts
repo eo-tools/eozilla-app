@@ -122,6 +122,7 @@ function getAuthorizationCodeOptions(
   options: ServiceOptionsInput<UrlServiceOptions>,
 ): Pick<
   UrlServiceOptions,
+  | "apiUrl"
   | "authorizationServerUrl"
   | "authorizationEndpoint"
   | "tokenEndpoint"
@@ -137,6 +138,8 @@ function getAuthorizationCodeOptions(
     return null;
   }
   return {
+    apiUrl:
+      options.apiUrl ?? (URL_SERVICE_OPTIONS_SCHEMA.apiUrl.default as string),
     authorizationServerUrl: options.authorizationServerUrl,
     authorizationEndpoint: options.authorizationEndpoint,
     tokenEndpoint: options.tokenEndpoint,

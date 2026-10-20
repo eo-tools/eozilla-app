@@ -1,5 +1,9 @@
 ## Changes in version 0.2.2 (in development)
 
+- Plain OAuth2 sessions and pending sign-in callbacks are now bound to their
+  service connection, preventing tokens from being reused for another API or
+  authentication configuration. Existing unbound sessions require a new sign-in.
+  (#103)
 - Set `branding.iconPosition` to `"before"` or `"after"` in `config.json` to
   choose the header icon's position relative to the title. The default is
   `"after"`, for both emoji and image icons.
