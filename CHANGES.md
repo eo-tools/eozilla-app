@@ -3,6 +3,10 @@
 - Token, API-key, and Basic service connections now reject missing or blank
   credentials before contacting the API, avoiding misleading connection success
   when the landing page is public. (#104)
+- Plain OAuth2 sessions and pending sign-in callbacks are now bound to their
+  service connection, preventing tokens from being reused for another API or
+  authentication configuration. Existing unbound sessions require a new sign-in.
+  (#103)
 - Set `branding.iconPosition` to `"before"` or `"after"` in `config.json` to
   choose the header icon's position relative to the title. The default is
   `"after"`, for both emoji and image icons.

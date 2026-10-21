@@ -4,6 +4,7 @@ import { OidcAuth } from "./oidc";
 
 type OAuth2Options = Pick<
   UrlServiceOptions,
+  | "apiUrl"
   | "authorizationServerUrl"
   | "authorizationEndpoint"
   | "tokenEndpoint"
@@ -19,6 +20,7 @@ interface OAuth2Token {
 }
 
 interface OAuth2CallbackState {
+  connectionKey: string;
   authorizationEndpoint: string;
   tokenEndpoint: string;
   clientId: string;
@@ -39,7 +41,10 @@ export class OAuth2Auth {
   private readonly oidcAuth: OidcAuth | null;
   private readonly scopes: string | undefined;
   private readonly options: Required<
-    Pick<OAuth2Options, "authorizationEndpoint" | "tokenEndpoint" | "clientId">
+    Pick<
+      OAuth2Options,
+      "apiUrl" | "authorizationEndpoint" | "tokenEndpoint" | "clientId"
+    >
   > | null;
 
   constructor(options: Partial<OAuth2Options>) {
@@ -58,6 +63,7 @@ export class OAuth2Auth {
       ),
       tokenEndpoint: requireHttpUrl(options.tokenEndpoint, "token endpoint"),
       clientId: requireText(options.clientId, "client ID"),
+      apiUrl: requireHttpUrl(options.apiUrl, "service API URL"),
     };
     this.scopes = options.oauth2Scopes?.trim() || undefined;
   }
@@ -74,6 +80,7 @@ export class OAuth2Auth {
     const redirectUri = getRedirectUri();
     const callbackState: OAuth2CallbackState = {
       ...options,
+      connectionKey: this.getConnectionKey(),
       codeVerifier,
       redirectUri,
     };
@@ -101,7 +108,9 @@ export class OAuth2Auth {
       await this.oidcAuth.signOut();
       return;
     }
-    window.sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+    if (this.getStoredToken()) {
+      window.sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+    }
   }
 
   async createAuth(): Promise<{
@@ -142,6 +151,11 @@ export class OAuth2Auth {
     window.sessionStorage.removeItem(stateKey);
     if (!callbackState) {
       throw new Error("No matching state found in storage.");
+    }
+    if (callbackState.connectionKey !== this.getConnectionKey()) {
+      throw new Error(
+        "The service connection has changed. Please sign in again.",
+      );
     }
     if (params.has("error")) {
       throw new Error(
@@ -198,15 +212,28 @@ export class OAuth2Auth {
       return null;
     }
     try {
-      const token = JSON.parse(rawToken) as OAuth2Token;
-      return typeof token.accessToken === "string" ? token : null;
+      const stored = JSON.parse(rawToken) as {
+        connectionKey: string;
+        token: OAuth2Token;
+      };
+      return stored.connectionKey === this.getConnectionKey() &&
+        typeof stored.token?.accessToken === "string"
+        ? stored.token
+        : null;
     } catch (_error) {
       return null;
     }
   }
 
   private storeToken(token: OAuth2Token): void {
-    window.sessionStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(token));
+    window.sessionStorage.setItem(
+      TOKEN_STORAGE_KEY,
+      JSON.stringify({ connectionKey: this.getConnectionKey(), token }),
+    );
+  }
+
+  private getConnectionKey(): string {
+    return JSON.stringify({ ...this.requireOptions(), scopes: this.scopes });
   }
 
   private requireOptions(): NonNullable<OAuth2Auth["options"]> {
@@ -260,7 +287,8 @@ function readCallbackState(value: string | null): OAuth2CallbackState | null {
   }
   try {
     const state = JSON.parse(value) as OAuth2CallbackState;
-    return typeof state.authorizationEndpoint === "string" &&
+    return typeof state.connectionKey === "string" &&
+      typeof state.authorizationEndpoint === "string" &&
       typeof state.tokenEndpoint === "string" &&
       typeof state.clientId === "string" &&
       typeof state.codeVerifier === "string" &&
