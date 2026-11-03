@@ -156,6 +156,8 @@ function createTokenAuthHeaders(
     case "basic":
       return createBasicAuthHeaders(options);
     case "token":
+      requireText(options.accessToken, "valid access token");
+      return createAccessTokenHeaders(options);
     case "login":
     case "oauth2":
       return createAccessTokenHeaders(options);
@@ -169,9 +171,8 @@ function createTokenAuthHeaders(
 function createBasicAuthHeaders(
   options: ServiceOptionsInput<UrlServiceOptions>,
 ): Record<string, string> {
-  if (!options.username || !options.password) {
-    return {};
-  }
+  requireText(options.username, "username");
+  requireText(options.password, "password");
   return {
     Authorization: `Basic ${btoa(`${options.username}:${options.password}`)}`,
   };
@@ -192,10 +193,8 @@ function createAccessTokenHeaders(
 function createApiKeyAuthHeaders(
   options: ServiceOptionsInput<UrlServiceOptions>,
 ): Record<string, string> {
-  if (!options.apiKey) {
-    return {};
-  }
-  return { [options.apiKeyHeader ?? "X-API-Key"]: options.apiKey };
+  const apiKey = requireText(options.apiKey, "valid API key");
+  return { [options.apiKeyHeader ?? "X-API-Key"]: apiKey };
 }
 
 function requireText(value: string | undefined, name: string): string {

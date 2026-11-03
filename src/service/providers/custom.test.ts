@@ -64,6 +64,46 @@ describe("CustomServiceProvider", () => {
     expect(service.apiUrl).toBe("http://localhost:8008");
   });
 
+  describe.each([
+    {
+      name: "valid access token",
+      field: "accessToken",
+      options: { authType: "token" },
+    },
+    {
+      name: "valid API key",
+      field: "apiKey",
+      options: { authType: "api-key" },
+    },
+    {
+      name: "username",
+      field: "username",
+      options: { authType: "basic", password: "secret" },
+    },
+    {
+      name: "password",
+      field: "password",
+      options: { authType: "basic", username: "user" },
+    },
+  ] as const)("required $name", ({ name, field, options }) => {
+    it.each([undefined, "", "   "])(
+      "rejects %j before loading even a public landing page",
+      async (value) => {
+        const provider = new CustomServiceProvider();
+
+        await expect(
+          provider.createService({
+            apiUrl: "https://example.com/api/",
+            ...options,
+            [field]: value,
+          }),
+        ).rejects.toThrow(`Please provide a ${name}.`);
+
+        expect(loadServiceRootMetadata).not.toHaveBeenCalled();
+      },
+    );
+  });
+
   it("prefills deployment settings without changing the shared schema", () => {
     const provider = new CustomServiceProvider({
       defaultOptions: {
