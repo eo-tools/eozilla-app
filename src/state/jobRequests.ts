@@ -126,11 +126,9 @@ function removeOldestRecord(
 ): boolean {
   const oldest = records
     .filter((record) => record !== newRecord)
-    .reduce<JobRequestRecord | undefined>(
-      (result, record) =>
-        !result || record.storedAt < result.storedAt ? record : result,
-      undefined,
-    );
+    .reduce<
+      JobRequestRecord | undefined
+    >((result, record) => (!result || record.storedAt < result.storedAt ? record : result), undefined);
   if (!oldest) {
     return false;
   }

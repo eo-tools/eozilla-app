@@ -25,10 +25,7 @@ describe("job request localStorage archive", () => {
         ...createRequest(String(index)),
       }),
     );
-    storage.setItem(
-      JOB_REQUEST_ARCHIVE_KEY,
-      JSON.stringify(records),
-    );
+    storage.setItem(JOB_REQUEST_ARCHIVE_KEY, JSON.stringify(records));
 
     saveJobRequest(storage, service, "job-new", createRequest("new"));
 
@@ -61,19 +58,9 @@ describe("job request localStorage archive", () => {
 
   it("removes old requests and retries when the browser quota is lower", () => {
     const storage = createStorage(1_000);
-    saveJobRequest(
-      storage,
-      service,
-      "job-old",
-      createRequest("a".repeat(400)),
-    );
+    saveJobRequest(storage, service, "job-old", createRequest("a".repeat(400)));
 
-    saveJobRequest(
-      storage,
-      service,
-      "job-new",
-      createRequest("b".repeat(400)),
-    );
+    saveJobRequest(storage, service, "job-new", createRequest("b".repeat(400)));
 
     expect(loadJobRequests(storage, service)).toEqual({
       "job-new": createRequest("b".repeat(400)),

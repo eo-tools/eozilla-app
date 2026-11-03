@@ -1,4 +1,20 @@
-## Changes in version 0.2.2 (in development)
+## Changes in version 0.3.0
+
+### Enhancements
+
+- Branding (title, favicon, and header icon) and standalone service settings now
+  load from `config.json` without rebuilding, replacing the corresponding
+  `VITE_*` settings from `.env`. 
+  If launched by Cuiman, use server-provided branding and retain their authenticated 
+  service proxy. (#69, #73)
+- Set `branding.iconPosition` to `"before"` or `"after"` in `config.json` to
+  choose the header icon's position relative to the title. The default is
+  `"after"`, for both emoji and image icons.
+- Redesigned job details with Results, Request, and Info tabs, clearer result
+  previews, and consistent Copy and Expand actions. Invalid output links and
+  failed media previews now show error feedback.
+
+### Fixes
 
 - Token, API-key, and Basic service connections now reject missing or blank
   credentials before contacting the API, avoiding misleading connection success
@@ -7,19 +23,12 @@
   service connection, preventing tokens from being reused for another API or
   authentication configuration. Existing unbound sessions require a new sign-in.
   (#103)
-- Set `branding.iconPosition` to `"before"` or `"after"` in `config.json` to
-  choose the header icon's position relative to the title. The default is
-  `"after"`, for both emoji and image icons.
-- Branding (title, favicon, and header icon) and standalone service settings now
-  load from `config.json` without rebuilding, replacing the corresponding
-  `VITE_*` settings from `.env`. 
-  If launched by Cuiman, use server-provided branding and retain their authenticated 
-  service proxy. (#69, #73)
-- Redesigned job details with Results, Request, and Info tabs, clearer result
-  previews, and consistent Copy and Expand actions. Invalid output links and
-  failed media previews now show error feedback.
+
+### Other Changes
+
 - Output values now use `highlight.js` syntax highlighting and Mantine's
   expandable JSON viewer. Updated Mantine to 9.7.2.
+
 
 ## Changes in version 0.2.1
 
