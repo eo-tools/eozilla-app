@@ -9,6 +9,7 @@ vi.mock("@/components/common/CodeHighlightProvider", () => ({
   CodeHighlightProvider: () => null,
 }));
 vi.mock("remotestate", () => ({ RemoteStateProvider: () => () => null }));
+vi.mock("@/service/swr", () => ({ invalidateSWRKeys: vi.fn() }));
 
 describe.skipIf(typeof document !== "undefined")("app startup", () => {
   beforeEach(() => {
@@ -143,6 +144,27 @@ describe.skipIf(typeof document !== "undefined")("app startup", () => {
         expect(fetchMock.mock.calls[0][0]).toBe("./_cuiman/launch");
     },
   );
+
+  it("rejects direct service configuration after resetting a Cuiman connection", async () => {
+    window.history.replaceState(null, "", "/index.html?cuiman=1");
+    const fetchMock = vi.fn().mockResolvedValue(new Response("{}"));
+    vi.stubGlobal("fetch", fetchMock);
+    await start();
+    const { resetState, signIn } = await import("@/store/actions");
+    const { getAppState } = await import("@/store/store");
+    const { storage } = await import("@/state/storage");
+
+    resetState();
+    expect(getAppState().serviceProviderId).toBeNull();
+    await expect(
+      signIn("cuiman", {
+        apiUrl: "https://processing.test/",
+        authType: "none",
+      }),
+    ).rejects.toThrow("must use its local API proxy");
+    expect(storage.getActiveServiceProviderSelection()).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 
   it("shows a startup error for a Cuiman authentication failure", async () => {
     window.history.replaceState(
