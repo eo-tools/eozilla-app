@@ -1,5 +1,13 @@
 ## Changes in version 0.3.1 (in development)
 
+### Fixes
+
+- Cuiman-launched apps now reject changes to the authenticated proxy URL or
+  browser authentication settings, including during connection-error recovery.
+  Actionable errors explain how to restore the proxy connection instead of
+  allowing direct service requests that could cause CORS or authentication errors.
+  Related to [eozilla #258](https://github.com/eo-tools/eozilla/issues/258).
+
 
 ## Changes in version 0.3.0
 
