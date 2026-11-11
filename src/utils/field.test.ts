@@ -6,10 +6,89 @@ import {
   getVisibleInputFields,
 } from "./field";
 import type { JsonSchema } from "@/utils/json";
+import { createJsonValueForSchema, validateJsonValue } from "@/utils/json";
 import type { ProcessDescription } from "@/service";
 import type { ObjectField } from "./field";
 
 describe("field helpers", () => {
+  describe.each([0, 1])(
+    "single-occurrence inputs with minOccurs %i",
+    (minOccurs) => {
+      it.each([
+        {
+          name: "scalar",
+          inputSchema: { type: "string", default: "Hello World" },
+          value: "Hello World",
+        },
+        {
+          name: "array-valued",
+          inputSchema: {
+            type: "array",
+            items: { type: "string" },
+            minItems: 2,
+            default: ["red", "nir"],
+          },
+          value: ["red", "nir"],
+        },
+      ])(
+        "preserves the $name schema without an extra array",
+        ({ inputSchema, value }) => {
+          const schema = getSchemaFromProcessDescriptionInputs({
+            id: "single-occurrence",
+            version: "1.0.0",
+            inputs: {
+              value: {
+                minOccurs,
+                maxOccurs: 1,
+                schema: inputSchema as JsonSchema,
+              },
+            },
+            outputs: {},
+          });
+
+          expect(schema.properties?.value).toEqual(inputSchema);
+          expect(schema.required).toEqual(minOccurs === 1 ? ["value"] : []);
+          expect(createJsonValueForSchema(schema)).toEqual({ value });
+          expect(() =>
+            validateJsonValue("inputs", { value }, schema),
+          ).not.toThrow();
+          expect(() =>
+            validateJsonValue("inputs", { value: [value] }, schema),
+          ).toThrow();
+        },
+      );
+    },
+  );
+
+  it.each([4, "unbounded", undefined] as const)(
+    "requires repeated inputs with minOccurs 2 and maxOccurs %s",
+    (maxOccurs) => {
+      const schema = getSchemaFromProcessDescriptionInputs({
+        id: "repeated-input",
+        version: "1.0.0",
+        inputs: {
+          values: {
+            minOccurs: 2,
+            maxOccurs,
+            schema: { type: "string" },
+          },
+        },
+        outputs: {},
+      });
+
+      expect(schema.required).toEqual(["values"]);
+      expect(() => validateJsonValue("inputs", {}, schema)).toThrow(
+        "missing required property 'values'",
+      );
+      expect(() =>
+        validateJsonValue("inputs", { values: ["first"] }, schema),
+      ).toThrow("must not have less than 2 items");
+      expect(() =>
+        validateJsonValue("inputs", { values: ["first", "second"] }, schema),
+      ).not.toThrow();
+    },
+  );
+
   it("converts process inputs into a schema object", () => {
     const processDescription = {
       inputs: {
@@ -48,7 +127,7 @@ describe("field helpers", () => {
         },
       },
       additionalProperties: false,
-      required: ["title"],
+      required: ["title", "tags"],
       nullable: false,
     });
   });

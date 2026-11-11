@@ -1,5 +1,13 @@
 ## Changes in version 0.3.1 (in development)
 
+### Fixes
+
+- Process inputs with `maxOccurs: 1` now retain their declared schema instead
+  of being wrapped in an extra array. This preserves scalar values and
+  array-valued inputs when submitting process requests. (#110)
+- Process inputs with `minOccurs > 1` are now marked as required, so requests
+  that omit mandatory repeated inputs are rejected locally.
+
 
 ## Changes in version 0.3.0
 
