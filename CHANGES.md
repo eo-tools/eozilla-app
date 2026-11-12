@@ -8,6 +8,10 @@
 - Process inputs with `minOccurs > 1` are now marked as required, so requests
   that omit mandatory repeated inputs are rejected locally.
 
+### Other Changes
+
+- Added `./github/CODEOWNERS` file.
+
 
 ## Changes in version 0.3.0
 
