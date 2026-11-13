@@ -2,11 +2,16 @@
 
 ### Fixes
 
+- Cuiman-launched apps now reject changes to the authenticated proxy URL or
+  browser authentication settings, including during connection-error recovery.
+  Actionable errors explain how to restore the proxy connection instead of
+  allowing direct service requests that could cause CORS or authentication errors.
+  Related to [eozilla #258](https://github.com/eo-tools/eozilla/issues/258).
 - Process inputs with `maxOccurs: 1` now retain their declared schema instead
   of being wrapped in an extra array. This preserves scalar values and
   array-valued inputs when submitting process requests. (#110)
 - Process inputs with `minOccurs > 1` are now marked as required, so requests
-  that omit mandatory repeated inputs are rejected locally.
+  that omit mandatory repeated inputs are rejected locally. (#111)
 
 ### Other Changes
 
