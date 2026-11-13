@@ -317,9 +317,9 @@ function getInputDescriptionSchema(
     metadata: _md,
     ...meta
   } = inputDescription;
-  const required = typeof minOccurs === "number" && minOccurs === 1;
+  const required = typeof minOccurs === "number" && minOccurs > 0;
   let newSchema: JsonSchema;
-  if (typeof maxOccurs === "number" && maxOccurs >= 1) {
+  if (typeof maxOccurs === "number" && maxOccurs > 1) {
     newSchema = {
       type: "array",
       minItems: minOccurs,
