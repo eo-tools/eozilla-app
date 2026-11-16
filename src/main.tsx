@@ -24,6 +24,7 @@ import {
 import { exchangeCuimanLaunch } from "@/config/cuimanLaunch";
 import { configureLocalUrlProxy } from "@/config/localUrlProxy";
 import { CustomServiceProvider } from "@/service/providers/custom";
+import { CuimanServiceProvider } from "@/service/providers/cuiman";
 import { DevServiceProvider } from "@/service/providers/dev";
 import { TestingServiceProvider } from "@/service/providers/testing";
 import { storage } from "@/state/storage";
@@ -77,14 +78,9 @@ async function startApp(): Promise<void> {
       : null;
     const providers: ServiceProvider<ServiceOptions>[] = isCuimanMode
       ? [
-          new CustomServiceProvider({
-            id: "cuiman",
-            meta: {
-              type: "dedicated",
-              title: "Processing Service",
-              description: "Service configured by the Python client.",
-            },
-          }),
+          new CuimanServiceProvider(
+            new URL("./_cuiman/service/", window.location.href).toString(),
+          ),
         ]
       : [
           ...(configuredProvider ? [configuredProvider] : []),
