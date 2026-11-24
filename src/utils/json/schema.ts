@@ -52,6 +52,7 @@ export interface StringSchema extends SchemaBase<number> {
 
 export interface ArraySchema extends SchemaBase<number> {
   type: "array";
+  format?: string;
   items?: JsonSchema;
   minItems?: number;
   maxItems?: number;

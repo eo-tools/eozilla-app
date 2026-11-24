@@ -64,7 +64,8 @@ function isSupportedArrayField(field: Parameters<FieldFactory["getScore"]>[0]) {
 function isMapArrayField(field: Parameters<FieldFactory["getScore"]>[0]) {
   return (
     isArrayField(field) &&
-    field.widget === "map" &&
+    (field.widget === "map" ||
+      (field.widget === undefined && field.schema.format === "bbox")) &&
     isPrimitiveField(field.items) &&
     field.items.schema.type === "number" &&
     field.schema.minItems === 4 &&

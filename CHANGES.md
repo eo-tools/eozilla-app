@@ -15,6 +15,8 @@
   array-valued inputs when submitting process requests. (#110)
 - Process inputs with `minOccurs > 1` are now marked as required, so requests
   that omit mandatory repeated inputs are rejected locally. (#111)
+- Process inputs declared as four-number arrays with `format: bbox` now use
+  the bounding-box map editor when no widget is specified. (#114)
 
 ### Other Changes
 
