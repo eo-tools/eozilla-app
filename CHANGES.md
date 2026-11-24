@@ -2,6 +2,9 @@
 
 ### Fixes
 
+- Deselected process outputs are now omitted from Cuiman-launched execution
+  requests instead of being sent as `null`, avoiding HTTP 422 responses.
+  (#115, [eozilla #264](https://github.com/eo-tools/eozilla/issues/264))
 - Cuiman-launched apps now reject changes to the authenticated proxy URL or
   browser authentication settings, including during connection-error recovery.
   Actionable errors explain how to restore the proxy connection instead of

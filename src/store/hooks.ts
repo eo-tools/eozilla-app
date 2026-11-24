@@ -23,6 +23,7 @@ import {
 import { storage } from "@/state/storage";
 import { useRemoteStateClient, useRemoteStateValue } from "remotestate";
 import type { ProcessRequestsService } from "@/store/remotestate";
+import { createProcessOutputSetter } from "@/store/processOutputs";
 import {
   createInitialProcessInputs,
   createInitialProcessOutputs,
@@ -119,6 +120,10 @@ export function useSetProcessRequest() {
 export function useActiveProcessRequestsActions() {
   const client = useRemoteStateClient<ProcessRequestsService>();
   const processId = useActiveProcessId();
+  const setOutput = useMemo(
+    () => createProcessOutputSetter(client.store),
+    [client.store],
+  );
   const setProcessRequestInput = useCallback(
     (name: string, value: Input) => {
       if (processId) {
@@ -130,13 +135,10 @@ export function useActiveProcessRequestsActions() {
   const setProcessRequestOutput = useCallback(
     (name: string, value: Output | undefined) => {
       if (processId) {
-        client.store.set(
-          ["processRequests", processId, "outputs", name],
-          value,
-        );
+        return setOutput(processId, name, value);
       }
     },
-    [client, processId],
+    [setOutput, processId],
   );
   return {
     setProcessRequestInput,
