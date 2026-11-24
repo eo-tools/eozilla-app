@@ -122,7 +122,7 @@ export function useActiveProcessRequestsActions() {
   const processId = useActiveProcessId();
   const setOutput = useMemo(
     () => createProcessOutputSetter(client.store),
-    [client],
+    [client.store],
   );
   const setProcessRequestInput = useCallback(
     (name: string, value: Input) => {
