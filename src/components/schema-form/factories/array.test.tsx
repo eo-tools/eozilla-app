@@ -3,13 +3,26 @@ import { describe, expect, it, vi } from "vitest";
 
 import { ArrayField } from "../ArrayField";
 import { MapField } from "../MapField";
-import { getFieldFromSchema } from "@/utils/field";
-import type { JsonSchema } from "@/utils/json";
+import {
+  getFieldFromProcessDescriptionInputs,
+  getFieldFromSchema,
+} from "@/utils/field";
+import type { ArraySchema, JsonSchema } from "@/utils/json";
+import { DefaultSchemaFormGenerator } from "../generator";
 import { arrayFieldFactory } from "./array";
+import { createDefaultFieldFactoryRegistry } from "./defaultRegistry";
 import type { FieldRenderContext } from "../types";
 
 type ArrayFieldElement = ReactElement<ComponentProps<typeof ArrayField>>;
 type MapFieldElement = ReactElement<ComponentProps<typeof MapField>>;
+
+const bboxSchema = {
+  type: "array",
+  items: { type: "number" },
+  minItems: 4,
+  maxItems: 4,
+} satisfies ArraySchema;
+const bboxHints = [{ "x-ui-widget": "map" }, { format: "bbox" }];
 
 describe("arrayFieldFactory", () => {
   it("scores non-nullable array fields", () => {
@@ -21,38 +34,67 @@ describe("arrayFieldFactory", () => {
     expect(arrayFieldFactory.getScore(field)).toBe(10);
   });
 
-  it("scores bbox map arrays", () => {
+  it.each(bboxHints)("scores bbox map arrays with %j", (hint) => {
     const field = getFieldFromSchema("bbox", {
-      type: "array",
-      items: { type: "number" },
-      minItems: 4,
-      maxItems: 4,
-      "x-ui-widget": "map",
-    } as JsonSchema);
+      ...bboxSchema,
+      ...hint,
+    });
 
     expect(arrayFieldFactory.getScore(field)).toBe(20);
   });
 
-  it("renders bbox map arrays as bbox map fields", () => {
-    const field = getFieldFromSchema("bbox", {
-      type: "array",
-      items: { type: "number" },
-      minItems: 4,
-      maxItems: 4,
-      "x-ui-widget": "map",
-    } as JsonSchema);
-
-    const element = arrayFieldFactory.render(
-      createContext({
-        field,
-        value: [7, 48, 8, 49],
-        onChange: vi.fn(),
-      }),
+  it.each(bboxHints)("renders bbox process inputs as maps with %j", (hint) => {
+    const inputs = getFieldFromProcessDescriptionInputs({
+      id: "show_bbox",
+      version: "1.0.0",
+      inputs: { bbox: { schema: { ...bboxSchema, ...hint } } },
+      outputs: {},
+    });
+    const generator = new DefaultSchemaFormGenerator(
+      createDefaultFieldFactoryRegistry(),
+    );
+    const element = generator.renderField(
+      inputs.properties.bbox,
+      [7, 48, 8, 49],
+      vi.fn(),
     ) as MapFieldElement;
 
     expect(element.type).toBe(MapField);
     expect(element.props.valueType).toBe("bbox");
     expect(element.props.value).toEqual([7, 48, 8, 49]);
+  });
+
+  it.each([
+    { items: { type: "string" } },
+    { minItems: 3 },
+    { maxItems: 5 },
+  ] satisfies Partial<ArraySchema>[])(
+    "scores bbox formats with %j as regular arrays",
+    (schema) => {
+      const field = getFieldFromSchema("bbox", {
+        ...bboxSchema,
+        format: "bbox",
+        ...schema,
+      });
+
+      expect(arrayFieldFactory.getScore(field)).toBe(10);
+    },
+  );
+
+  it("uses an explicit array editor with format bbox", () => {
+    const field = getFieldFromSchema("bbox", {
+      ...bboxSchema,
+      format: "bbox",
+      "x-ui-widget": "editor",
+    });
+
+    const element = arrayFieldFactory.render(
+      createContext({ field, onChange: vi.fn() }),
+    ) as ArrayFieldElement;
+
+    expect(arrayFieldFactory.getScore(field)).toBe(10);
+    expect(element.type).toBe(ArrayField);
+    expect(element.props.mode).toBe("editor");
   });
 
   it("renders simple primitive arrays as separator-based input fields", () => {
