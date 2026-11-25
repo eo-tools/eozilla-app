@@ -88,6 +88,13 @@ export async function signIn(
   });
   try {
     await provider.signIn(options);
+    if (
+      serviceProviderId === "configured" &&
+      !getAppState().serviceProviderId
+    ) {
+      // Clear the previous session's data and request markers before subscribing.
+      await invalidateSWRKeys({ serviceProviderId }, true);
+    }
     setAppState({ serviceProviderId });
   } catch (e) {
     storage.deleteServiceProviderSelection();
@@ -104,10 +111,9 @@ export async function signOut() {
   if (!service) {
     return;
   }
-  // invalidate all keys for ServiceProvider
-  // BEFORE changing the app store
   const serviceProviderId = service.providerId;
-  await invalidateSWRKeys({ serviceProviderId });
+  const configured = serviceProviderId === "configured";
+  if (!configured) await invalidateSWRKeys({ serviceProviderId });
   try {
     const provider = getServiceProvider(serviceProviderId);
     await provider.signOut();
@@ -117,6 +123,7 @@ export async function signOut() {
   // Note, depending on the provider.signOut() action
   // we might never arrive here (e.g. due to a redirection).
   resetState();
+  if (configured) closeDialog();
 }
 
 export function setService(service: Service | null) {

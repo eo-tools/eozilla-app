@@ -76,8 +76,7 @@ export function matchSWRKey(key: SWRKey, options: SWRKeyOptions): boolean {
   );
 }
 
-export function invalidateSWRKeys(options: SWRKeyOptions) {
-  // invalidate all keys for FileSystemProvider
-  // BEFORE changing the app store
-  return mutate((key: SWRKey) => matchSWRKey(key, options));
+export function invalidateSWRKeys(options: SWRKeyOptions, clearCache = false) {
+  const matches = (key: SWRKey) => matchSWRKey(key, options);
+  return clearCache ? mutate(matches, undefined) : mutate(matches);
 }

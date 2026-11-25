@@ -8,19 +8,29 @@ import ProcessesPanel from "@/components/panels/process-list/ProcessListPanel";
 import ProcessPanel from "@/components/panels/process/ProcessPanel";
 import JobListPanel from "@/components/panels/job-list/JobListPanel";
 import { ServiceDialog } from "@/components/dialogs/service/ServiceDialog";
+import { ConfiguredLoginDialog } from "@/components/dialogs/service/ConfiguredLoginDialog";
 import { TracebackDialog } from "@/components/dialogs/traceback/TracebackDialog";
 import { JobResultDialog } from "@/components/dialogs/job-result/JobResultDialog";
 import JobPanel from "@/components/panels/job/JobPanel";
 import PrivacyDialog from "@/components/dialogs/privacy/PrivacyDialog";
+import type { AppServiceConfig } from "@/config/bootstrap";
 
-export default function Main() {
+export default function Main({
+  configuredService,
+}: {
+  configuredService?: AppServiceConfig;
+}) {
   return (
     <RGroup
       orientation="horizontal"
       style={{ width: "100%", height: "100%" }}
       className="horizontal-group"
     >
-      <ServiceDialog />
+      {configuredService ? (
+        <ConfiguredLoginDialog config={configuredService} />
+      ) : (
+        <ServiceDialog />
+      )}
       <TracebackDialog />
       <JobResultDialog />
       <PrivacyDialog />

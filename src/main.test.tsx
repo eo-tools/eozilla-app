@@ -51,7 +51,7 @@ describe.skipIf(typeof document !== "undefined")("app startup", () => {
     await vi.waitFor(() => expect(render).toHaveBeenCalledOnce());
   }
 
-  it("selects a runtime service ahead of saved choices using the existing provider", async () => {
+  it("opens configured login ahead of a saved service choice", async () => {
     const { storage } = await import("@/state/storage");
     storage.saveServiceProviderSelection({ id: "testing", options: {} });
     storage.saveTransientServiceProviderSelection({
@@ -72,7 +72,10 @@ describe.skipIf(typeof document !== "undefined")("app startup", () => {
     await start();
     const { getAppState } = await import("@/store/store");
     const { getServiceProvider } = await import("@/service");
-    expect(getAppState().serviceProviderId).toBe("configured");
+    expect(getAppState()).toMatchObject({
+      serviceProviderId: null,
+      dialogId: "service",
+    });
     expect(storage.getServiceProviderOptions("configured")).toEqual({
       apiUrl: "https://api.test/",
       authType: "token",

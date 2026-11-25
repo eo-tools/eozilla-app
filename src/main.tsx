@@ -131,6 +131,7 @@ async function startApp(): Promise<void> {
             <App
               compact={bootstrapConfig.compact}
               branding={runtimeConfig.branding}
+              configuredService={runtimeConfig.service}
             />
           </CodeHighlightProvider>
         </MantineProvider>

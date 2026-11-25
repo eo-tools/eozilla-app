@@ -152,9 +152,10 @@ before or after the header title in reading order. Omitted or null uses
 `"after"`; the browser-tab title and favicon are unaffected.
 
 The `service` section selects **Configured Service** ahead of a previously saved
-service and prefills the connection form. Users authenticate through the service
-dialog when needed. Without this section, the app restores the saved selection
-or opens the usual service dialog. Only public connection settings belong in
+service. When authentication is needed, the app opens a login dialog that uses
+the configured connection settings and closes once connected. The header provides
+**Log in** and **Log out** for that service. Without this section, the app restores
+the saved selection or opens the usual service dialog. Only public settings belong in
 `config.json`; keep passwords, tokens, API keys, and client secrets out of it.
 
 If `config.json` is absent, the app uses its defaults. Invalid configuration or
