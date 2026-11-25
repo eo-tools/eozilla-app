@@ -46,6 +46,18 @@ interface ServiceProviderSecrets {
   options: ServiceOptionsInput<ServiceOptions>;
 }
 
+function matchesConnection(
+  saved: ServiceProviderSelection | null,
+  configured: ServiceProviderSelection,
+): saved is ServiceProviderSelection {
+  return (
+    saved?.id === configured.id &&
+    Object.entries(configured.options).every(
+      ([name, value]) => saved.options[name] === value,
+    )
+  );
+}
+
 const secretOptionNames = new Set([
   "password",
   "clientSecret",
@@ -110,11 +122,7 @@ export const storage = {
     if (transientSelection?.id === id) {
       const selection = serviceProviderSelection.get();
       const secrets = serviceProviderSecrets.get();
-      const sameConnection =
-        selection?.id === id &&
-        Object.entries(transientSelection.options).every(
-          ([name, value]) => selection.options[name] === value,
-        );
+      const sameConnection = matchesConnection(selection, transientSelection);
       return {
         ...(sameConnection ? selection.options : {}),
         ...transientSelection.options,
@@ -133,11 +141,18 @@ export const storage = {
   },
   hasServiceProviderSelection(): boolean {
     const transientSelection = transientServiceProviderSelection.get();
-    if (transientSelection) {
+    if (
+      transientSelection &&
+      (transientSelection.id !== "configured" ||
+        transientSelection.options.authType === "none")
+    ) {
       return true;
     }
     const selection = serviceProviderSelection.get();
-    if (!selection) {
+    if (
+      !selection ||
+      (transientSelection && !matchesConnection(selection, transientSelection))
+    ) {
       return false;
     }
     return (

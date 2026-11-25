@@ -1,5 +1,9 @@
 ## Changes in version 0.3.1 (in development)
 
+### Enhancements
+
+- Standalone apps with a configured service use a dedicated login dialog. (#118)
+
 ### Fixes
 
 - Deselected process outputs are now omitted from Cuiman-launched execution

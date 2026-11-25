@@ -208,6 +208,7 @@ describe("storage", () => {
       id: "configured",
       options,
     });
+    expect(storage.hasServiceProviderSelection()).toBe(true);
     expect(storage.getServiceProviderOptions("configured")).toEqual({
       ...options,
       username: "user",
@@ -220,6 +221,7 @@ describe("storage", () => {
         loginUrl: "https://other.test/login",
       },
     });
+    expect(storage.hasServiceProviderSelection()).toBe(false);
     expect(storage.getServiceProviderOptions("configured")).toEqual({
       ...options,
       loginUrl: "https://other.test/login",
