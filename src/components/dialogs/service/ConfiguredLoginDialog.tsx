@@ -1,12 +1,14 @@
 import { useEffect, useState, type SubmitEvent } from "react";
 import {
   Button,
+  Group,
   Modal,
   PasswordInput,
   Stack,
   Text,
   TextInput,
 } from "@mantine/core";
+import { IconNetwork } from "@tabler/icons-react";
 
 import type { AppServiceConfig } from "@/config/bootstrap";
 import { closeDialog, signIn } from "@/store/actions";
@@ -63,7 +65,12 @@ export function ConfiguredLoginDialog({
 
   return (
     <Modal
-      title={action}
+      title={
+        <Group>
+          <IconNetwork size={20} stroke={1} aria-hidden />
+          <Text fw={600}>{action}</Text>
+        </Group>
+      }
       opened={opened && !connected}
       centered
       onClose={() => {
@@ -102,9 +109,11 @@ export function ConfiguredLoginDialog({
               {message}
             </Text>
           )}
-          <Button type="submit" loading={isSubmitting || isLoading}>
-            {action}
-          </Button>
+          <Group justify="flex-end">
+            <Button type="submit" loading={isSubmitting || isLoading}>
+              {action}
+            </Button>
+          </Group>
         </Stack>
       </form>
     </Modal>
