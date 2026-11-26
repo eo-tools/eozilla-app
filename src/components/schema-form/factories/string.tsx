@@ -57,6 +57,11 @@ function renderStringField(ctx: FieldRenderContext) {
     return renderDateTimeField(ctx, value);
   }
 
+  const error =
+    ctx.showInlineErrors === false
+      ? undefined
+      : getMinLengthError(schema, value);
+
   if (schema.format === "password" || ctx.field.password) {
     return (
       <PasswordInput
@@ -65,7 +70,7 @@ function renderStringField(ctx: FieldRenderContext) {
         placeholder={ctx.field.placeholder}
         value={value}
         minLength={schema.minLength}
-        error={getMinLengthError(schema, value)}
+        error={error}
         disabled={ctx.disabled}
         onChange={(event) => ctx.onChange(event.currentTarget.value)}
       />
@@ -83,7 +88,7 @@ function renderStringField(ctx: FieldRenderContext) {
         maxRows={8}
         value={value}
         minLength={schema.minLength}
-        error={getMinLengthError(schema, value)}
+        error={error}
         disabled={ctx.disabled}
         onChange={(event) => ctx.onChange(event.currentTarget.value)}
       />
@@ -97,7 +102,7 @@ function renderStringField(ctx: FieldRenderContext) {
       placeholder={ctx.field.placeholder}
       value={value}
       minLength={schema.minLength}
-      error={getMinLengthError(schema, value)}
+      error={error}
       disabled={ctx.disabled}
       onChange={(event) => ctx.onChange(event.currentTarget.value)}
     />

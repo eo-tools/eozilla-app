@@ -45,7 +45,10 @@ export class FieldFactoryRegistry {
 }
 
 export class DefaultSchemaFormGenerator implements SchemaFormGenerator {
-  constructor(private readonly registry: FieldFactoryRegistry) {}
+  constructor(
+    private readonly registry: FieldFactoryRegistry,
+    private readonly showInlineErrors = true,
+  ) {}
 
   renderField(
     field: Field,
@@ -75,6 +78,7 @@ export class DefaultSchemaFormGenerator implements SchemaFormGenerator {
         parentDisabled || field.disabled === true || field.enabled === false,
       hideLabel: options.hideLabel,
       hideAdvanced: options.hideAdvanced,
+      showInlineErrors: this.showInlineErrors,
     };
     if (field.dynamicExpressions) {
       return createElement(DynamicFieldRenderer, {

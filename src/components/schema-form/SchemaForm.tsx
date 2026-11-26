@@ -18,6 +18,7 @@ interface SchemaFormProps {
   hideLabel?: boolean;
   hideAdvanced?: boolean;
   disabled?: boolean;
+  showInlineErrors?: boolean;
 }
 
 export function SchemaForm({
@@ -28,13 +29,15 @@ export function SchemaForm({
   hideLabel,
   hideAdvanced,
   disabled,
+  showInlineErrors,
 }: SchemaFormProps) {
   const generator = useMemo(
     () =>
       new DefaultSchemaFormGenerator(
         registry ?? createDefaultFieldFactoryRegistry(),
+        showInlineErrors,
       ),
-    [registry],
+    [registry, showInlineErrors],
   );
 
   const renderedForm = generator.renderField(field, value, onChange, {

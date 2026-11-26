@@ -2,6 +2,8 @@
 
 ### Fixes
 
+- Process forms show inline validation errors after the first Run attempt and
+  update them as inputs are edited. (#120)
 - Deselected process outputs are now omitted from Cuiman-launched execution
   requests instead of being sent as `null`, avoiding HTTP 422 responses.
   (#115, [eozilla #264](https://github.com/eo-tools/eozilla/issues/264))
