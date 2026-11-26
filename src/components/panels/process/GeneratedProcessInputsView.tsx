@@ -12,6 +12,7 @@ interface GeneratedProcessInputsViewProps {
   inputsField: ObjectField;
   setProcessInput: (name: string, value: Input) => void;
   hideAdvanced?: boolean;
+  showInlineErrors: boolean;
 }
 
 export default function GeneratedProcessInputsView({
@@ -19,6 +20,7 @@ export default function GeneratedProcessInputsView({
   inputsField,
   setProcessInput,
   hideAdvanced,
+  showInlineErrors,
 }: GeneratedProcessInputsViewProps) {
   const visibleFields = getVisibleInputFields(inputsField, { hideAdvanced });
 
@@ -42,6 +44,7 @@ export default function GeneratedProcessInputsView({
         onChange={handleChange}
         hideLabel
         hideAdvanced={hideAdvanced}
+        showInlineErrors={showInlineErrors}
       />
     </Stack>
   );

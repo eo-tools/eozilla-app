@@ -10,6 +10,7 @@ interface ProcessInputsSubPanelProps {
   setProcessInput: (name: string, value: Input) => void;
   processEditorMode: "form" | "json";
   hideAdvancedInputs: boolean;
+  showInlineErrors: boolean;
   inputsField: ObjectField;
 }
 
@@ -19,6 +20,7 @@ export default function ProcessInputsSubPanel({
   setProcessInput,
   processEditorMode,
   hideAdvancedInputs,
+  showInlineErrors,
   inputsField,
 }: ProcessInputsSubPanelProps) {
   return (
@@ -26,6 +28,7 @@ export default function ProcessInputsSubPanel({
       {processEditorMode === "form" ? (
         <GeneratedProcessInputsView
           processInputs={processInputs || {}}
+          showInlineErrors={showInlineErrors}
           setProcessInput={setProcessInput}
           hideAdvanced={hideAdvancedInputs}
           inputsField={inputsField}

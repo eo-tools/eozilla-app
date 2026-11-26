@@ -26,6 +26,7 @@ export interface FieldRenderContext extends FieldRenderOptions {
   disabled: boolean;
   onChange: (value: JsonValue) => void;
   generator: SchemaFormGenerator;
+  showInlineErrors?: boolean;
 }
 
 export interface FieldFactory {

@@ -57,6 +57,17 @@ describe("stringFieldFactory", () => {
       createContext({ field, value: "valid", onChange: vi.fn() }),
     ) as TextInputElement;
 
+    const pendingElement = stringFieldFactory.render(
+      createContext({
+        field,
+        value: "",
+        onChange: vi.fn(),
+        showInlineErrors: false,
+      }),
+    ) as TextInputElement;
+
+    expect(pendingElement.props.minLength).toBe(5);
+    expect(pendingElement.props.error).toBeUndefined();
     expect(invalidElement.type).toBe(TextInput);
     expect(invalidElement.props.minLength).toBe(5);
     expect(invalidElement.props.error).toBe("Must be at least 5 characters.");
@@ -76,6 +87,7 @@ function createContext(
     valuePath: ["test"],
     disabled: false,
     hideLabel: overrides.hideLabel,
+    showInlineErrors: overrides.showInlineErrors,
     generator: {
       renderField: () => {
         throw new Error("not used");

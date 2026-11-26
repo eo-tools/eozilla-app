@@ -33,7 +33,7 @@ import { validateJsonValue } from "@/utils/json";
 
 export default function ProcessPanel() {
   const processesState = useActiveProcessDescription();
-  const { processDescription } = processesState;
+  const { processDescription, service } = processesState;
   const processRequests = useProcessRequests();
   const setProcessRequest = useSetProcessRequest();
   const activeProcessInputs = useActiveProcessInputs();
@@ -45,6 +45,20 @@ export default function ProcessPanel() {
   const processEditorMode = useProcessEditorMode();
   const [openedSubPanels, setOpenedSubPanels] = useState(["inputs", "outputs"]);
   const [showAdvancedInputs, setShowAdvancedInputs] = useState(false);
+  const [inlineValidation, setInlineValidation] = useState({
+    processId,
+    service,
+    showErrors: false,
+  });
+  const setShowInlineErrors = (showErrors: boolean) => {
+    setInlineValidation({ processId, service, showErrors });
+  };
+  if (
+    inlineValidation.processId !== processId ||
+    inlineValidation.service !== service
+  ) {
+    setShowInlineErrors(false);
+  }
   const inputsField = useMemo(
     () =>
       processDescription
@@ -85,6 +99,7 @@ export default function ProcessPanel() {
       return;
     }
 
+    setShowInlineErrors(true);
     try {
       validateJsonValue(
         inputsField.name,
@@ -115,7 +130,14 @@ export default function ProcessPanel() {
           isSubmitting={isSubmitting}
           canExecute={canExecute}
           onExecute={handleExecuteProcess}
-          setProcessRequest={setProcessRequest}
+          setProcessRequest={(nextProcessId, request) => {
+            setInlineValidation((current) =>
+              current.processId === nextProcessId && current.service === service
+                ? { ...current, showErrors: false }
+                : current,
+            );
+            setProcessRequest(nextProcessId, request);
+          }}
           processEditorMode={processEditorMode}
           onSetProcessEditorMode={setProcessEditorMode}
           hasAdvancedInputs={hasAdvancedInputs}
@@ -142,6 +164,7 @@ export default function ProcessPanel() {
                     processInputs={activeProcessInputs || {}}
                     setProcessInput={setProcessRequestInput}
                     processEditorMode={processEditorMode}
+                    showInlineErrors={inlineValidation.showErrors}
                     hideAdvancedInputs={
                       hasAdvancedInputs && !showAdvancedInputs
                     }

@@ -223,6 +223,7 @@ export default function ProcessRequestActions({
           <ActionIcon
             {...styles.actionIcon.sm}
             variant="filled"
+            aria-label="Execute process"
             onClick={onExecute}
             loading={isSubmitting}
             disabled={!canExecute}
